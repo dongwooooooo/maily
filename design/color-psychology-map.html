@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>색 심리 전체 지도 — AI 메일 비서 관점</title>
+<style>
+  :root {
+    --ink: #1f2328;
+    --muted: rgba(31,35,40,.64);
+    --line: rgba(31,35,40,.12);
+    --soft: rgba(31,35,40,.05);
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#fff; color:var(--ink);
+    font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+    line-height:1.6; }
+  .wrap { max-width:1020px; margin:0 auto; padding:48px 32px 96px; }
+  h1 { font-size:23px; margin:0 0 6px; }
+  .lede { color:var(--muted); font-size:14px; margin:0 0 12px; }
+  .spectrum { display:flex; height:14px; border-radius:7px; overflow:hidden; margin:20px 0 40px; border:1px solid var(--line); }
+  .spectrum div { flex:1; }
+  h2 { font-size:16px; margin:40px 0 12px; }
+  .hue {
+    border:1px solid var(--line); border-radius:12px; overflow:hidden; margin-bottom:18px;
+  }
+  .hue-head { display:flex; align-items:center; gap:12px; padding:13px 18px; border-bottom:1px solid var(--line); }
+  .hue-head h3 { margin:0; font-size:15px; }
+  .hue-head .deg { font-size:11px; color:var(--muted); font-family:ui-monospace,Menlo,monospace; }
+  .sw { display:flex; gap:4px; margin-left:auto; }
+  .sw span { width:26px; height:26px; border-radius:6px; border:1px solid rgba(0,0,0,.08); }
+  .hue-body { display:grid; grid-template-columns:1fr 1fr; }
+  .hue-cell { padding:13px 18px; font-size:13px; }
+  .hue-cell:first-child { border-right:1px solid var(--line); }
+  .k { font-size:11px; font-weight:700; color:var(--muted); display:block; margin-bottom:3px; letter-spacing:.02em; }
+  .pos { color:#1f2328; }
+  .neg { color:var(--muted); }
+  .hue-foot { border-top:1px solid var(--line); padding:11px 18px; font-size:12.5px; background:var(--soft); }
+  .hue-foot b { font-size:12.5px; }
+  .tag { display:inline-block; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:8px; vertical-align:1px; }
+  .tag.fit-hi  { background:rgba(20,128,122,.12); color:#0e5e59; }
+  .tag.fit-mid { background:rgba(31,35,40,.08); color:rgba(31,35,40,.7); }
+  .tag.fit-lo  { background:rgba(206,44,49,.10); color:#a02428; }
+  table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  th { text-align:left; font-size:11px; color:var(--muted); padding:8px 10px; border-bottom:1px solid rgba(31,35,40,.3); }
+  td { padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:last-child td { border-bottom:0; }
+  .chip { display:inline-block; width:13px; height:13px; border-radius:4px; border:1px solid rgba(0,0,0,.08); vertical-align:-2px; margin-right:7px; }
+  .card { border:1px solid var(--line); border-radius:12px; padding:18px 20px; }
+  .sources { font-size:12px; color:var(--muted); padding-left:18px; }
+  .sources li { margin-bottom:4px; }
+  a { color:#14807A; text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .note { color:var(--muted); font-size:12px; }
+  @media (max-width:760px){ .hue-body{grid-template-columns:1fr;} .hue-cell:first-child{border-right:0;border-bottom:1px solid var(--line);} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>색 심리 전체 지도</h1>
+  <p class="lede">각 hue 대역이 전달하는 분위기·상징·심리를 문헌 기준으로 정리하고, 마지막 행에 “조용한 메일 스튜어드” 관점의 평가를 붙였다. 평가 태그: <span class="tag fit-hi">적합</span> <span class="tag fit-mid">조건부</span> <span class="tag fit-lo">부적합</span> — 근거는 각 행의 충돌·문헌 키워드.</p>
+  <div class="spectrum">
+    <div style="background:#C63C3C"></div><div style="background:#D0703A"></div><div style="background:#D8A93E"></div><div style="background:#8C6A2E"></div><div style="background:#7BA05B"></div><div style="background:#256D4F"></div><div style="background:#14807A"></div><div style="background:#3E7FBE"></div><div style="background:#3D5AA8"></div><div style="background:#6E4FA3"></div><div style="background:#B05A8E"></div><div style="background:#8A6A5A"></div><div style="background:#7D7D7D"></div><div style="background:#2A2A2A"></div>
+  </div>
+
+  <h2>따뜻한 대역 — 에너지를 발산하는 색</h2>
+
+  <div class="hue">
+    <div class="hue-head"><h3>빨강</h3><span class="deg">~0–15°</span>
+      <div class="sw"><span style="background:#E14848"></span><span style="background:#B02E2E"></span><span style="background:#7E3030"></span></div></div>
+    <div class="hue-body">
+      <div class="hue-cell"><span class="k">분위기 · 상징</span><span class="pos">대담함, 결단, 추진력, 열정. 딥 레드(마룬·마르살라)는 그라운디드하고 무게감 있는 인상.</span></div>
+      <div class="hue-cell"><span class="k">그림자</span><span class="neg">긴급·경고·공격성. 자연에서처럼 시선을 강제로 끌어당김 — 화면에 있으면 “지금 문제가 있다”로 읽힘.</span></div>
+    </div>
+    <div class="hue-foot"><b>서비스 관점</b><span class="tag fit-lo">부적합</span> — danger(358°) 시맨틱 예약 대역. calm 원칙(주변부 상태 신호)과 정면충돌. Gmail 아이덴티티 색이기도 함.</div>
+  </div>
+
+  <div class="hue">
+    <div class="hue-head"><h3>주황</h3><span class="deg">20–40°</span>
+      <div class="sw"><span style="background:#E8853D"></span><span style="background:#C2611F"></span><span style="background:#9A5B2E"></span></div></div>
+    <div class="hue-body">
+      <div class="hue-cell"><span class="k">분위기 · 상징</span><span class="pos">창의, 활력, 사교적 친근함. 번트 오렌지·시에나는 단단하고 자기주장적, 피치·메리골드는 느긋하고 명랑.</span></div>
+      <div class="hue-cell"><span class="k">그림자</span><span class="neg">소란스러움, 저가·프로모션 연상. 알림 배지 색으로 관습화되어 “처리 안 된 것이 쌓임”의 피로 신호.</span></div>
+    </div>
+    <div class="hue-foot"><b>서비스 관점</b><span class="tag fit-lo">부적합</span> — warning(35°) 인접 + “메일 피로를 줄여주는” 제품이 피로 신호 색을 상징으로 쓸 수 없음.</div>
+  </div>
+
+  <div class="hue">
+    <div class="hue-head"><h3>노랑 · 골드</h3><span class="deg">45–60°</span>
+      <div class="sw"><span style="background:#E8C74A"></span><span style="background:#C9A227"></span><span style="background:#8C6A2E"></span></div></div>
+    <div class="hue-body">
+      <div class="hue-cell"><span class="k">분위기 · 상징</span><span class="pos">낙관, 명랑, 주의 환기. 골드 톤으로 가면 지혜·부·관대함 — 환대 산업(호텔 황동)의 코드.</span></div>
+      <div class="hue-cell"><span class="k">그림자</span><span class="neg">밝은 노랑은 대비 부족으로 가독성 문제(문헌 명시). 과용 시 불안·경계 신호. warning 관습색.</span></div>
+    </div>
+    <div class="hue-foot"><b>서비스 관점</b><span class="tag fit-mid">조건부</span> — 밝은 노랑은 부적합. 딥 골드/브라스(38°)만 “집사의 황동” 은유로 예외 후보 — 단 warning 재선정 비용(§보드 후보 C).</div>
+  </div>
+
+  <div class="hue">
+    <div class="hue-head"><h3>핑크</h3><span class="deg">330–350°</span>
+      <div class="sw"><span style="background:#E58BB0"></span><span style="background:#C25580"></span><span style="background:#8E3A5C"></span></div></div>
+    <div class="hue-body">
+      <div class="hue-cell"><span class="k">분위기 · 상징</span><span class="pos">배려, 공감, 부드러움. 채도에 따라 로맨틱↔당당함 사이를 오감.</span></div>
+      <div class="hue-cell"><span class="k">그림자</span><span class="neg">문화적으로 가장 논쟁적인 색(문헌 명시). 업무·신뢰 코드가 약하고 유아·소비재 연상.</span></div>
+    </div>
+    <div class="hue-foot"><b>서비스 관점</b><span class="tag fit-lo">부적합</span> — 스튜어드 형용사(정확·사적·업무적)와 접점 없음. danger(358°)와도 인접.</div>
+  </div>
+
+  <h2>차가운 대역 — 질서와 안정의 색</h2>
+
+  <div class="hue">
+    <div class="hue-head"><h3>그린</h3><span class="deg">120–160°</span>
+      <div class="sw"><span style="background:#5FA878"></span><span style="background:#2E7D54"></span><span style="background:#1D5D43"></span></div></div>
+    <div class="hue-body">
+      <div class="hue-cell"><span class="k">분위기 · 상징</span><span class="pos">조화, 균형, 생명력, 회복. 블루 언더톤은 차분·회복적, 옐로 언더톤은 친근·활동적. 딥 그린은 서재·컨시어지·클래식 호텔의 quiet luxury 코드.</span></div>
+      <div class="hue-cell"><span class="k">그림자</span><span class="neg">에코·웰니스 클리셰. UI 관습에서 그린 = 성공/완료라 브랜드색과 상태색이 섞여 읽힐 위험.</span></div>
+    </div>
+    <div class="hue-foot"><b>서비스 관점</b><span class="tag fit-mid">조건부</span> — success(154°)와 동일 대역. 단 “비서가 완료한 것 = 브랜드색”으로 충돌을 통합하면 오히려 서사가 됨(보드 후보 B). 집사 은유 적합도는 높음.</div>
+  </div>
+
+  <div class="hue">
+    <div class="hue-head"><h3>틸 · 청록</h3><span class="deg">170–190°</span>
+      <div class="sw"><span style="background:#4FB3AC"></span><span style="background:#14807A"></span><span style="background:#0E5E59"></span></div></div>
+    <div class="hue-body">
+      <div class="hue-cell"><span class="k">분위기 · 상징</span><span class="pos">명료함, 차분함, 세련, 회복. 문헌 공통: “블루의 평온 + 그린의 재생”의 교집합 — 이완과 각성을 동시에. 다크 뮤트 틸은 바다의 깊이, 신뢰·안정 신호.</span></div>
+      <div class="hue-cell"><span class="k">그림자</span><span class="neg">2010년대 헬스케어·핀테크 SaaS에서 유행한 이력(완전한 무주공산은 아님). 밝은 터쿼이즈로 가면 리조트·소비재 톤.</span></div>
+    </div>
+    <div class="hue-foot"><b>서비스 관점</b><span class="tag fit-hi">적합</span> — 시맨틱 3색과 최소 21° 거리로 유일한 무충돌 대역. 메일 앱 밀집 대역(블루~퍼플) 밖. 페르소나 형용사(차분·정확·투명)와 문헌 키워드(명료·신뢰·차분) 직접 일치.</div>
+  </div>
+
+  <div class="hue">
+    <div class="hue-head"><h3>블루</h3><span class="deg">200–235°</span>
+      <div class="sw"><span style="background:#5B9BD5"></span><span style="background:#386D98"></span><span style="background:#1F3E5C"></span></div></div>
+    <div class="hue-body">
+      <div class="hue-cell"><span class="k">분위기 · 상징</span><span class="pos">신뢰, 논리, 전문성, 의존 가능함 — 회계사·컨설턴트처럼 “기대치가 전문성”인 업의 정석 색.</span></div>
+      <div class="hue-cell"><span class="k">그림자</span><span class="neg">차갑고 냉담해질 수 있음(문헌 명시). 브랜드 최다 사용색 = 차별화 최저. 메일·생산성 앱 밀집 대역(Shortwave·Superhuman 딥블루).</span></div>
+    </div>
+    <div class="hue-foot"><b>서비스 관점</b><span class="tag fit-lo">기각됨</span> — 심리 적합도는 높으나 인간 결정으로 기각(경직·보수 인상 + 차별화 부재). 결정 로그 §7 참조.</div>
+  </div>
+
+  <div class="hue">
+    <div class="hue-head"><h3>인디고 · 퍼플</h3><span class="deg">240–290°</span>
+      <div class="sw"><span style="background:#8B7BD8"></span><span style="background:#6E4FA3"></span><span style="background:#463366"></span></div></div>
+    <div class="hue-body">
+      <div class="hue-cell"><span class="k">분위기 · 상징</span><span class="pos">신비, 럭셔리, 영성, 왕족. 라벤더는 고요·에테리얼, 딥 에그플랜트는 강렬·극적.</span></div>
+      <div class="hue-cell"><span class="k">그림자</span><span class="neg">AI 동질화의 대표 신호(“AI slop” 문서화). HEY 등 메일 경쟁 사용. “마법 같은” — 우리 금지 형용사와 정확히 일치.</span></div>
+    </div>
+    <div class="hue-foot"><b>서비스 관점</b><span class="tag fit-lo">부적합</span> — 금지 대역. 페르소나 문서의 피해야 할 인상(마법 같은·미래적인)과 문헌 키워드(신비·영성)가 일치.</div>
+  </div>
+
+  <h2>뉴트럴 대역 — 바탕과 무게의 색</h2>
+
+  <div class="hue">
+    <div class="hue-head"><h3>브라운</h3><span class="deg">20–40° 저채도</span>
+      <div class="sw"><span style="background:#A98B6C"></span><span style="background:#7C5F42"></span><span style="background:#4A3826"></span></div></div>
+    <div class="hue-body">
+      <div class="hue-cell"><span class="k">분위기 · 상징</span><span class="pos">겸손, 안정, 헤리티지, 장인정신 — 가죽·목재·서재의 물성. 다크 초콜릿은 확신, 카라멜·테라코타는 외향적 온기.</span></div>
+      <div class="hue-cell"><span class="k">그림자</span><span class="neg">낡음·둔중함. 디지털 제품 프라이머리로는 희소해서 “테크 도구” 신호가 약함.</span></div>
+    </div>
+    <div class="hue-foot"><b>서비스 관점</b><span class="tag fit-mid">조건부</span> — 집사·서재 은유는 강하나 상징색보다는 보조 뉴트럴(배지·서페이스 온도)로 쓰는 것이 문헌 용례에 부합.</div>
+  </div>
+
+  <div class="hue">
+    <div class="hue-head"><h3>그레이 · 실버</h3><span class="deg">무채색</span>
+      <div class="sw"><span style="background:#C9CCD1"></span><span style="background:#8B8F94"></span><span style="background:#4A4E54"></span></div></div>
+    <div class="hue-body">
+      <div class="hue-cell"><span class="k">분위기 · 상징</span><span class="pos">세련, 절제, 미니멀. 차콜은 순검정보다 부드러운 본문색. 블랙의 위엄을 낮은 긴장으로 전달.</span></div>
+      <div class="hue-cell"><span class="k">그림자</span><span class="neg">에너지 부재(문헌 명시 — “사교적 브랜드에는 주의”). 상징이 되기 어려운 색.</span></div>
+    </div>
+    <div class="hue-foot"><b>서비스 관점</b><span class="tag fit-mid">조건부</span> — 이미 UI의 90%(뉴트럴 패밀리). “상징색 없이 그레이+시맨틱만” 노선(Notion식)도 가능하나, 상징색을 원한다는 전제와 상충.</div>
+  </div>
+
+  <div class="hue">
+    <div class="hue-head"><h3>블랙</h3><span class="deg">무채색</span>
+      <div class="sw"><span style="background:#3A3A3A"></span><span style="background:#242424"></span><span style="background:#111111"></span></div></div>
+    <div class="hue-body">
+      <div class="hue-cell"><span class="k">분위기 · 상징</span><span class="pos">위엄, 프리미엄, 극적임. 임팩트와 드라마를 원하는 브랜드의 색.</span></div>
+      <div class="hue-cell"><span class="k">그림자</span><span class="neg">위압적 — 부드러운 팔레트를 쉽게 압도(문헌 명시). “방해하지 않는” 원칙과 긴장.</span></div>
+    </div>
+    <div class="hue-foot"><b>서비스 관점</b><span class="tag fit-mid">조건부</span> — 잉크(#1F2328)로 이미 존재. 상징으로 격상하면 프리미엄은 얻지만 온기를 잃음 — “딱딱함” 우려와 역행.</div>
+  </div>
+
+  <div class="hue">
+    <div class="hue-head"><h3>화이트 · 크림</h3><span class="deg">무채색~웜</span>
+      <div class="sw"><span style="background:#FFFFFF"></span><span style="background:#F7F3EA"></span><span style="background:#EFE6D5"></span></div></div>
+    <div class="hue-body">
+      <div class="hue-cell"><span class="k">분위기 · 상징</span><span class="pos">청결, 단순, 여백, 격상됨. 크림·오프화이트는 “가볍고 공기 같고 인간적인” 인상.</span></div>
+      <div class="hue-cell"><span class="k">그림자</span><span class="neg">순백은 harsh glare — 차갑고 임상적일 수 있음(문헌 명시). 이미 배경으로 확정했으므로 온기는 다른 요소에서 보충 필요.</span></div>
+    </div>
+    <div class="hue-foot"><b>서비스 관점</b><span class="tag fit-hi">확정</span> — 배경 앵커(인간 결정). 상징색이 아니라 무대.</div>
+  </div>
+
+  <h2>종합 — 스튜어드 형용사와의 정렬표</h2>
+  <div class="card">
+    <table>
+      <tr><th style="width:150px">대역</th><th>차분한</th><th>정확한</th><th>정갈한</th><th>사적인</th><th>방해 않는</th><th style="width:220px">비고</th></tr>
+      <tr><td><span class="chip" style="background:#14807A"></span>틸 170–190°</td><td>●</td><td>●</td><td>●</td><td>◐</td><td>●</td><td class="note">무충돌 · 문헌 키워드 직접 일치</td></tr>
+      <tr><td><span class="chip" style="background:#256D4F"></span>딥 그린 150–160°</td><td>●</td><td>◐</td><td>●</td><td>●</td><td>●</td><td class="note">success 통합 필요 · 은유 최강급</td></tr>
+      <tr><td><span class="chip" style="background:#6E572E"></span>브라스 38°</td><td>◐</td><td>◐</td><td>●</td><td>●</td><td>◐</td><td class="note">warning 재선정 필요 · 테크 신호 약함</td></tr>
+      <tr><td><span class="chip" style="background:#386D98"></span>블루 200–235°</td><td>●</td><td>●</td><td>◐</td><td>◐</td><td>●</td><td class="note">기각됨(경직·차별화 부재)</td></tr>
+      <tr><td><span class="chip" style="background:#7C5F42"></span>브라운 저채도</td><td>●</td><td>○</td><td>◐</td><td>●</td><td>●</td><td class="note">보조 뉴트럴 권장</td></tr>
+      <tr><td><span class="chip" style="background:#8B8F94"></span>그레이</td><td>●</td><td>◐</td><td>●</td><td>●</td><td>●</td><td class="note">상징 불가 — 이미 바탕</td></tr>
+      <tr><td><span class="chip" style="background:#C63C3C"></span>레드~오렌지~옐로</td><td>○</td><td>○</td><td>○</td><td>○</td><td>○</td><td class="note">시맨틱 예약 + calm 충돌</td></tr>
+      <tr><td><span class="chip" style="background:#6E4FA3"></span>인디고~퍼플</td><td>◐</td><td>○</td><td>◐</td><td>◐</td><td>◐</td><td class="note">AI 금지대 + “마법 같은”</td></tr>
+    </table>
+    <p class="note" style="margin:10px 0 0">● 문헌 키워드가 형용사와 직접 일치 · ◐ 부분 일치 또는 톤 조건부 · ○ 불일치/상충. 정렬 판정 근거는 각 대역 행의 문헌 키워드이며, 최종 선택은 전략 축(인간 결정).</p>
+  </div>
+
+  <h2>근거 자료</h2>
+  <ul class="sources">
+    <li><a href="https://thecreativeaccent.com/brand-colors-psychology-and-the-meaning-behind-each-color/">The Creative Accent — Brand colors psychology (전 색상 브랜드 심리, 웜/쿨/뉴트럴 구분)</a></li>
+    <li><a href="https://www.figma.com/colors/teal/">Figma — Teal</a> · <a href="https://www.figma.com/colors/sage/">Sage</a> · <a href="https://www.figma.com/colors/olive-green/">Olive</a> · <a href="https://www.figma.com/colors/cream/">Cream</a> · <a href="https://www.figma.com/ko-kr/resource-library/color-combinations/">100가지 색상 조합</a></li>
+    <li><a href="https://www.colorpsychology.org/teal/">ColorPsychology.org — Teal</a> · <a href="https://octet.design/journal/teal-color-meaning/">Octet — Teal meaning</a></li>
+    <li><a href="https://www.smashingmagazine.com/2025/08/psychology-color-ux-design-digital-products/">Smashing Magazine — Psychology of Color in UX</a></li>
+    <li><a href="https://www.jackpearce.co.uk/notes/purple-gradient-ai-aesthetics/">AI 퍼플 금지대 근거</a> · <a href="https://www.baytechconsulting.com/blog/shortwave-vs-superhuman-the-2025-executives-guide-to-ai-email-clients">Shortwave·Superhuman 딥블루</a></li>
+    <li>내부 — persona-brand-tone.md (형용사·금지 인상) · brand-tone-color-board.html (시맨틱 hue·결정 로그)</li>
+  </ul>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 메일 비서 — 컬러 시스템: 가드레일 주도 도출</title>
+<style>
+  :root {
+    --surface: #ffffff;
+    --bg: #ffffff;            /* 배경 앵커: 화이트 확정(인간 결정) — 구 #F6F5F2 웜 기각 */
+    --ink: #1f2328;           /* 앵커: persona-brand-tone.md */
+    --primary: #386d98;       /* 앵커: persona-brand-tone.md */
+    --warning: #a16207;       /* 앵커: persona-brand-tone.md, 계산 PASS 4.92 */
+    --danger: #ce2c31;        /* 교체: 내부 #B85B5B 4.48 FAIL → Radix red11 */
+    --success: #218358;       /* 차용: 내부 정의 없음 → Radix green11 */
+
+    /* 파생: 전부 잉크/프라이머리 알파 — 새 hex 발명 없음 */
+    --a-ink-4:  rgba(31,35,40,.04);
+    --a-ink-7:  rgba(31,35,40,.07);
+    --a-ink-8:  rgba(31,35,40,.08);   /* M3 hover */
+    --a-ink-12: rgba(31,35,40,.12);   /* M3 pressed·장식 보더 */
+    --a-ink-38: rgba(31,35,40,.38);   /* M3 disabled */
+    --a-ink-48: rgba(31,35,40,.48);   /* 컨트롤 보더 — 3:1 통과 최소값(계산) */
+    --a-ink-64: rgba(31,35,40,.64);   /* 보조 텍스트 — 4.82/4.64 PASS(계산) */
+    --a-ink-45-scrim: rgba(31,35,40,.45);
+    --a-pri-8:  rgba(56,109,152,.08);
+    --a-pri-10: rgba(56,109,152,.10);
+    --a-pri-12: rgba(56,109,152,.12);
+    --a-warn-10: rgba(161,98,7,.10);
+    --a-succ-10: rgba(33,131,88,.10);
+    --a-dang-10: rgba(206,44,49,.10);
+  }
+  * { box-sizing: border-box; }
+  body {
+    /* 보드 배경은 판정 중립성을 위해 흰색 — 주변색이 후보 인상에 영향을 주지 않도록 */
+    margin: 0; background: #ffffff; color: var(--ink);
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 32px 96px; }
+  h1 { font-size: 24px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .lede { color: var(--a-ink-64); font-size: 14px; margin: 0 0 44px; }
+  h2 { font-size: 17px; margin: 54px 0 4px; }
+  .sub { color: var(--a-ink-64); font-size: 13px; margin: 0 0 16px; }
+  .card { background: var(--surface); border: 1px solid var(--a-ink-12); border-radius: 10px; padding: 20px 22px; }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { background: var(--a-ink-7); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+  p { font-size: 14px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-size: 11.5px; color: var(--a-ink-64); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--a-ink-48); }
+  td { padding: 10px; border-bottom: 1px solid var(--a-ink-12); vertical-align: top; font-size: 12.5px; }
+  tr:last-child td { border-bottom: 0; }
+  .chip { display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--a-ink-12); vertical-align: -2px; margin-right: 7px; }
+  .hex { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11.5px; color: var(--a-ink-64); }
+  .pass { color: var(--success); font-weight: 700; font-size: 11.5px; }
+  .fail { color: var(--danger); font-weight: 700; font-size: 11.5px; }
+  .note { color: var(--a-ink-64); font-size: 12px; }
+  .gid { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--a-ink-64); }
+
+  .proto { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .proto .card { padding: 15px 17px; }
+  .proto b { font-size: 13px; }
+  .proto p { margin: 6px 0 0; font-size: 12.5px; color: var(--a-ink-64); }
+
+  /* mockup */
+  .mock { background: var(--bg); border: 1px solid var(--a-ink-12); border-radius: 12px; overflow: hidden; font-size: 12px; margin-top: 4px; }
+  .m-top { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: var(--surface); border-bottom: 1px solid var(--a-ink-12); }
+  .m-title { font-weight: 700; font-size: 13.5px; }
+  .m-selector { display: inline-flex; gap: 6px; border: 1px solid var(--a-ink-12); background: var(--bg); border-radius: 7px; padding: 3px 10px; color: var(--a-ink-64); font-size: 11px; }
+  .m-right { margin-left: auto; display: flex; gap: 6px; }
+  .m-pill { font-size: 10.5px; padding: 3px 9px; border-radius: 999px; background: var(--a-pri-10); color: var(--primary); font-weight: 600; }
+  .m-pill.warn { background: var(--a-warn-10); color: var(--ink); }
+  .m-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--warning); margin-right: 4px; vertical-align: 1px; }
+  .m-body { display: grid; grid-template-columns: 150px 1fr 230px; min-height: 340px; }
+  .m-side { background: var(--surface); border-right: 1px solid var(--a-ink-12); padding: 12px 9px; }
+  .m-nav { list-style: none; margin: 0; padding: 0; }
+  .m-nav li { padding: 6.5px 10px; border-radius: 7px; color: var(--a-ink-64); margin-bottom: 1px; font-size: 11.5px; }
+  .m-nav li.on { background: var(--a-pri-10); color: var(--primary); font-weight: 700; }
+  .m-main { padding: 14px 16px; }
+  .m-sec { margin-bottom: 14px; }
+  .m-sec-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 7px; }
+  .m-sec-head b { font-size: 12.5px; }
+  .m-count { font-size: 10.5px; color: var(--a-ink-64); }
+  .m-card { background: var(--surface); border: 1px solid var(--a-ink-12); border-radius: 9px; padding: 10px 12px; margin-bottom: 7px; }
+  .m-card.new { border-left: 3px solid var(--pri-solid, var(--primary)); }
+  /* 확인함 카드: 읽어야 할 콘텐츠이므로 전 텍스트 AA 유지(ink64). 38%는 비활성 컨트롤 전용 */
+  .m-card.seen { border-color: var(--a-ink-7); }
+  .m-card.seen .m-subj { color: var(--a-ink-64); font-weight: 600; }
+  .m-card.seen .m-badge { background: var(--a-ink-4); color: var(--a-ink-64); }
+  .m-card.seen .m-meta { color: var(--a-ink-64); }
+  .m-line1 { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+  .m-badge { font-size: 9.5px; font-weight: 600; padding: 2px 8px; border-radius: 5px; background: var(--a-ink-7); color: var(--a-ink-64); }
+  .m-subj { font-weight: 700; font-size: 12px; }
+  .m-meta { color: var(--a-ink-64); font-size: 10.5px; margin-bottom: 5px; }
+  .m-meta .act { color: var(--primary); font-weight: 700; }
+  .m-sum { font-size: 11px; margin-bottom: 8px; }
+  .m-actions { display: flex; gap: 5px; }
+  /* 버튼: 텍스트 라벨이 식별자이므로 보더는 장식(12%). 48%는 인풋·체크박스 전용 */
+  .m-btn { font-size: 10.5px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--a-ink-12); background: var(--surface); color: var(--ink); }
+  .m-btn.pri { background: var(--pri-solid, var(--primary)); border-color: var(--pri-solid, var(--primary)); color: #fff; font-weight: 700; }
+  /* 정리됨 노트: ink7 틴트가 bg 위에 놓이면 ink64 텍스트 4.41 FAIL → solid 서페이스로 (G6·G9) */
+  .m-note { font-size: 10.5px; color: var(--a-ink-64); background: var(--surface); border: 1px solid var(--a-ink-12); border-radius: 6px; padding: 6px 10px; display: inline-block; }
+  .m-note .ok { color: var(--success); font-weight: 700; }
+  .m-undo { text-decoration: underline; }
+  .m-detail { background: var(--surface); border-left: 1px solid var(--a-ink-12); padding: 14px; }
+  .m-detail h4 { margin: 7px 0 3px; font-size: 12.5px; }
+  .m-hr { border: 0; border-top: 1px solid var(--a-ink-12); margin: 10px 0; }
+  .m-kv { font-size: 10.5px; color: var(--a-ink-64); margin: 0 0 3px; }
+  .m-kv b { color: var(--ink); font-weight: 600; }
+  .mock-caption { font-size: 12px; color: var(--a-ink-64); margin-top: 10px; }
+  .mock-caption b { color: var(--ink); }
+
+  /* 배경 앵커 후보 — 검증된 스케일의 배경 전용 단계만 */
+  .mock.v-slate { --bg: #F9F9FB; }
+  .mock.v-white { --bg: #FFFFFF; }
+  .mock.v-gray  { --bg: #F9F9F9; }
+  /* 투톤 프라이머리 후보: solid(버튼·새 항목 마커)만 밝게, 텍스트 블루는 유지 */
+  .mock.v-tone2 { --pri-solid: #4585C0; }
+  /* 브랜드 상징색 후보 — primary·틴트 전체 교체 */
+  .mock.v-teal  { --primary:#14807A; --pri-solid:#14807A; --a-pri-10: rgba(20,128,122,.10); }
+  .mock.v-green { --primary:#256D4F; --pri-solid:#256D4F; --a-pri-10: rgba(37,109,79,.10); }
+  .mock.v-brass { --primary:#6E572E; --pri-solid:#6E572E; --a-pri-10: rgba(110,87,46,.10); }
+  /* 후보 D(탁함 보정) — 잉크는 중성으로 복귀(갈색기 제거), 크림은 노란기 뺀 클린 아이보리 #F6F4EF */
+  .mock.v-cream {
+    --bg:#FFFFFF; --ink:#43464A;
+    --primary:#26282B; --pri-solid:#26282B;
+    --a-pri-10: #F6F4EF;
+    --a-ink-4: rgba(38,40,43,.04); --a-ink-7: rgba(38,40,43,.07);
+    --a-ink-12: rgba(38,40,43,.13); --a-ink-38: rgba(38,40,43,.38);
+    --a-ink-48: rgba(38,40,43,.48); --a-ink-64: rgba(38,40,43,.66);
+  }
+  .mock.v-cream .m-btn.pri { background:#F6F4EF; border:1px solid rgba(38,40,43,.22); color:#26282B; font-weight:700; }
+  .mock.v-cream .m-pill { background:#F6F4EF; color:#26282B; }
+  .mock.v-cream .m-nav li.on { background:#F6F4EF; color:#26282B; }
+  .mock.v-cream .m-subj, .mock.v-cream .m-title, .mock.v-cream .m-sec-head b, .mock.v-cream h4 { color:#26282B; }
+  .variant-label { font-size: 13px; font-weight: 700; margin: 26px 0 6px; }
+  .variant-label .hex { font-weight: 400; margin-left: 6px; }
+
+  /* CTA·선택 상태 위계 비교 스트립 */
+  .trio { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .trio-cell { border:1px solid rgba(38,40,43,.13); border-radius:12px; overflow:hidden; background:#fff; }
+  .trio-head { padding:10px 14px; font-size:12px; font-weight:700; border-bottom:1px solid rgba(38,40,43,.13); }
+  .trio-head span { display:block; font-weight:400; font-size:11px; color:rgba(38,40,43,.62); margin-top:2px; }
+  .trio-body { padding:14px; }
+  .t-nav { list-style:none; margin:0 0 14px; padding:0; width:150px; }
+  .t-nav li { padding:7px 11px; border-radius:8px; font-size:12px; color:rgba(38,40,43,.62); margin-bottom:2px; }
+  .t-btns { display:flex; gap:6px; align-items:center; }
+  .t-btn { font-size:11.5px; padding:6px 13px; border-radius:8px; border:1px solid rgba(38,40,43,.15); background:#fff; color:#26282B; }
+  /* T1: 잉크 미니 솔리드 — 무게는 명도가 아니라 크기·빈도로 제어 */
+  .t1 .t-nav li.on { background:#F6F4EF; color:#26282B; font-weight:700; box-shadow: inset 2.5px 0 0 #26282B; border-radius:4px 8px 8px 4px; }
+  .t1 .t-btn.pri { background:#26282B; border-color:#26282B; color:#FFFFFF; font-weight:700; }
+  /* T2: 크림 필 강화 — 진한 보더 + 볼드로 크림 유지 */
+  .t2 .t-nav li.on { background:#F6F4EF; color:#26282B; font-weight:700; }
+  .t2 .t-btn.pri { background:#F6F4EF; border:1.5px solid #26282B; color:#26282B; font-weight:700; }
+  /* T3: 고스트 + 언더라인 — 면 없이 타이포 위계 */
+  .t3 .t-nav li.on { color:#26282B; font-weight:700; background:none; box-shadow: inset 2.5px 0 0 #26282B; border-radius:0; }
+  .t3 .t-btn.pri { background:#fff; border:1px solid rgba(38,40,43,.4); color:#26282B; font-weight:700; text-decoration:underline; text-underline-offset:3px; }
+
+  .sources { font-size: 12.5px; color: var(--a-ink-64); padding-left: 18px; }
+  .sources li { margin-bottom: 5px; }
+
+  @media (max-width: 900px) {
+    .m-body { grid-template-columns: 120px 1fr; }
+    .m-detail { display: none; }
+    .proto { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>컬러 시스템 — 가드레일 주도 도출</h1>
+  <p class="lede">각 결정을 아티클 기반 가드레일과 측정 가능한 목표로 먼저 고정하고, 색 값은 규칙과 계산이 결정한다. AI의 취향 판단이 개입할 수 있는 지점은 아래 프로토콜로 차단했다.</p>
+
+  <h2>0. 판단 배제 프로토콜</h2>
+  <p class="sub">색이 “선택”되는 3가지 경로를 모두 규칙으로 대체한다.</p>
+  <div class="proto">
+    <div class="card">
+      <b>앵커 색 — 발명 금지</b>
+      <p>기준 유채색·잉크·배경은 새로 만들지 않는다. 출처는 이미 확정된 내부 브랜드 문서(<code>persona-brand-tone.md</code>)의 값만. 내부에 없는 색(success)은 검증된 오픈소스 스케일(Radix)에서 용도 일치 단계를 차용.</p>
+    </div>
+    <div class="card">
+      <b>파생 색 — 수식으로만</b>
+      <p>hover·pressed·disabled·보더·배지·보조텍스트는 전부 “앵커 × 고정 알파”로 도출(M3 상태 레이어 수치, Radix 알파 변형 방식). 중간 톤 hex를 손으로 고르지 않는다.</p>
+    </div>
+    <div class="card">
+      <b>채택/탈락 — 계산이 판정</b>
+      <p>모든 텍스트·UI 조합은 WCAG 대비 계산 스크립트로 검증. 4.5:1(텍스트)/3:1(UI) 미달이면 취향과 무관하게 탈락·교체. 아래 표의 PASS/FAIL은 전부 계산 결과다.</p>
+    </div>
+  </div>
+
+  <h2>1. 가드레일 — 증거 등급제로 재선정</h2>
+  <p class="sub">이전 버전은 국제 표준·벤더 스펙·개인 의견·트렌드 논평을 전부 “하드 제약”으로 동급 처리한 방법론 오류가 있었다. 출처의 성격에 따라 등급을 나누고, 등급이 구속력을 결정한다.</p>
+  <div class="card">
+    <table>
+      <tr><th style="width:120px">등급</th><th style="width:150px">구속력</th><th>항목과 출처</th></tr>
+      <tr>
+        <td class="gid">전략 축</td>
+        <td class="note">인간 결정 — 언제든 변경 가능, 변경 시 하위 절차 재적용</td>
+        <td class="note">브랜드 형용사(차분·정확·투명·정갈) · 앵커 hue 207° · <b>배경 화이트(확정)</b> · <b>WCAG AA는 목표로만 채택(확정)</b> — 출처: persona-brand-tone.md + 이 대화의 결정 로그</td>
+      </tr>
+      <tr>
+        <td class="gid">Tier 1<br>규범 표준</td>
+        <td class="note">목표로 채택(전략 축 결정에 따름) — 위반은 차단이 아니라 <b>측정·보고</b></td>
+        <td class="note">WCAG 1.4.3/1.4.11 — 단 실제 조항 범위 그대로: 본문 4.5:1 / 대형·볼드 텍스트 3:1 / UI 경계 3:1 / 비활성·부수 텍스트 예외. 이전 버전의 “모든 텍스트 4.5” 일괄 적용은 임의 강화였음</td>
+      </tr>
+      <tr>
+        <td class="gid">Tier 2<br>채택 스펙</td>
+        <td class="note">채택 선언 후 내부 일관성만 강제 — 채택 자체는 결정사항, 타 시스템과 혼용 금지</td>
+        <td class="note">M3 상태 레이어(hover 8 · pressed 10~12 · disabled 38) · Radix 알파 변형/스텝 의미론 · “서페이스 solid, 상태 alpha” · 요소 opacity 금지 · 서페이스 문맥 문서화(Improta)</td>
+      </tr>
+      <tr>
+        <td class="gid">Tier 3<br>실증 연구</td>
+        <td class="note">방향 제시 — 반증 가능, 상반 결과 병기</td>
+        <td class="note">NN/g 톤 4축·신뢰-추천 상관 · 채도-감정 지각 연구. <b>주의:</b> 채도↑=제품 성능 지각↑ 연구(ScienceDirect)도 존재 — muted 일변도의 근거는 단정적이지 않음</td>
+      </tr>
+      <tr>
+        <td class="gid">Tier 4<br>실무 휴리스틱</td>
+        <td class="note">기본값 — 이유를 기록하면 이탈 허용</td>
+        <td class="note">뉴트럴 1패밀리 · 프라이머리 1~2 · 시맨틱 3~4(Refactoring UI) · 60-30-10 배분 · 계정 배지=뉴트럴</td>
+      </tr>
+      <tr>
+        <td class="gid">Tier 5<br>트렌드 논평</td>
+        <td class="note">참고자료 — 규칙 아님</td>
+        <td class="note">AI 퍼플 문제(인디고 240–280° 회피) · warm minimalism · Calm Technology 에세이. 방향 감각으로만 사용</td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>2. 목표 대시보드 — AA는 목표, 차단이 아니라 측정</h2>
+  <p class="sub">전략 축 결정(“AA는 목표로만”)에 따라 대비는 통과/미달을 측정해 보고한다. 미달 = 알고 쓰는 선택이 가능하되, 기록이 남는다.</p>
+  <div class="card">
+    <table>
+      <tr><th style="width:46px">ID</th><th style="width:320px">목표</th><th style="width:110px">현재 상태</th><th>측정</th></tr>
+      <tr><td class="gid">M1</td><td>평상시 화면 유채색 hue = 1개 (Tier 4 기본값)</td><td class="pass">달성</td><td class="note">블루만. 그린·앰버·레드는 상태 발생 시에만</td></tr>
+      <tr><td class="gid">M2</td><td>본문·보조 텍스트 AA(4.5:1) — 조항 범위 그대로</td><td class="pass">달성</td><td class="note">ink 15.8 · ink@64 4.82/4.73 · 링크 블루 5.51 · 시맨틱 텍스트 4.6~5.2</td></tr>
+      <tr><td class="gid">M3</td><td>버튼 등 대형/볼드 라벨 3:1 이상</td><td class="pass">달성</td><td class="note">현행 solid 5.51 · 투톤 후보 #4585C0 = 3.91 (둘 다 통과)</td></tr>
+      <tr><td class="gid">M4</td><td>액센트 사용처 5곳 이하 (Tier 4)</td><td class="pass">달성</td><td class="note">CTA · 선택 내비 · 새 항목 보더 · 행동 라벨 · 링크</td></tr>
+      <tr><td class="gid">M5</td><td>손으로 고른 중간 톤 hex = 0개</td><td class="pass">달성</td><td class="note">파생색 전부 앵커×알파 또는 경계값 탐색으로 산출</td></tr>
+      <tr><td class="gid">M6</td><td>시맨틱 틴트 위 시맨틱 텍스트 회피 (측정 4.16~4.47)</td><td class="pass">기본값 유지</td><td class="note">AA-목표 체제에서 금지는 아니나, 기본값은 “틴트 위 텍스트=잉크” 유지</td></tr>
+    </table>
+  </div>
+
+  <h2>3. 도출 결과 — 각 값이 어디서 왔고, 계산이 어떻게 판정했나</h2>
+  <p class="sub">대비 수치는 WCAG 상대휘도 공식으로 계산한 실측값. 판정 근거가 취향이 아님을 값으로 남긴다.</p>
+  <div class="card">
+    <table>
+      <tr><th style="width:170px">토큰</th><th style="width:150px">값 · 출처</th><th style="width:250px">계산 결과</th><th>판정</th></tr>
+      <tr>
+        <td><span class="chip" style="background:#1f2328"></span>Ink (본문)</td>
+        <td class="hex">#1F2328<br>내부 문서 앵커</td>
+        <td class="note">on white 15.80 · on bg 14.49</td>
+        <td><span class="pass">PASS</span> <span class="note">유지</span></td>
+      </tr>
+      <tr>
+        <td><span class="chip" style="background:#f6f5f2"></span>Background</td>
+        <td class="hex">#F6F5F2<br>내부 문서 앵커</td>
+        <td class="note">잉크·프라이머리 텍스트 모두 AA 유지 확인</td>
+        <td><span class="pass">PASS</span> <span class="note">유지</span></td>
+      </tr>
+      <tr>
+        <td><span class="chip" style="background:#386d98"></span>Primary</td>
+        <td class="hex">#386D98<br>내부 문서 앵커 · hue≈208°(G3 금지대역 밖, G4 파랑=신뢰)</td>
+        <td class="note">텍스트 on white 5.51 · on bg 5.06 · 버튼(흰 글자) 5.51</td>
+        <td><span class="pass">PASS</span> <span class="note">텍스트·버튼 겸용 가능</span></td>
+      </tr>
+      <tr>
+        <td><span class="chip" style="background:#a16207"></span>Warning</td>
+        <td class="hex">#A16207<br>내부 문서 앵커</td>
+        <td class="note">텍스트 on white 4.92</td>
+        <td><span class="pass">PASS</span> <span class="note">유지</span></td>
+      </tr>
+      <tr>
+        <td><span class="chip" style="background:#b85b5b"></span>Danger(내부값)</td>
+        <td class="hex">#B85B5B<br>내부 문서</td>
+        <td class="note">텍스트 on white <b>4.48</b> — AA 목표에 0.02 미달</td>
+        <td><span class="note">AA-목표 체제 재분류: 강제 탈락 아님 — 사용 가능하되 미달로 기록</span></td>
+      </tr>
+      <tr>
+        <td><span class="chip" style="background:#ce2c31"></span>Danger(기본값)</td>
+        <td class="hex">#CE2C31<br>Radix red 11</td>
+        <td class="note">텍스트 on white 5.21</td>
+        <td><span class="pass">목표 충족</span> <span class="note">기본값으로 유지, 내부값 원복은 선택</span></td>
+      </tr>
+      <tr>
+        <td><span class="chip" style="background:#4585C0"></span>Primary solid 후보 (투톤)</td>
+        <td class="hex">#4585C0<br>앵커 hue 207° 유지, 밝기만 상향 — 흰 라벨 3:1 이상 범위 내</td>
+        <td class="note">흰 라벨 3.91 (볼드 버튼 라벨 3:1 목표 통과) · 소형 일반 텍스트로는 미달이므로 텍스트 블루는 #386D98 유지</td>
+        <td><span class="note">AA-목표 체제에서 열린 후보 — §5 목업 비교</span></td>
+      </tr>
+      <tr>
+        <td><span class="chip" style="background:#218358"></span>Success</td>
+        <td class="hex">#218358<br>내부 정의 없음 → Radix green 11 차용</td>
+        <td class="note">텍스트 on white 4.72</td>
+        <td><span class="pass">PASS</span> <span class="note">차용 채택</span></td>
+      </tr>
+      <tr>
+        <td>보조 텍스트</td>
+        <td class="hex">ink @ 64%<br>알파 파생</td>
+        <td class="note">합성 #707275 → on white 4.82 · on bg 4.64</td>
+        <td><span class="pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td>비활성 텍스트</td>
+        <td class="hex">ink @ 38%<br>M3 disabled 수치 그대로</td>
+        <td class="note">2.30 — 의도적 미달(M3 스펙). <b>비활성 컨트롤 전용</b> — “확인함”처럼 읽어야 할 콘텐츠에는 사용 금지(셀프 감사에서 위반 발견 후 수정)</td>
+        <td><span class="note">스펙 준수</span></td>
+      </tr>
+      <tr>
+        <td>장식 보더 (카드·디바이더)</td>
+        <td class="hex">ink @ 12%</td>
+        <td class="note">1.26 — 3:1 미달이지만 경계가 유일한 식별자가 아니므로 WCAG 1.4.11 예외</td>
+        <td><span class="pass">허용</span></td>
+      </tr>
+      <tr>
+        <td>컨트롤 보더 (인풋·체크박스)</td>
+        <td class="hex">ink @ 48%<br>3:1 통과 최소 알파를 탐색으로 산출</td>
+        <td class="note">합성 #939598 → 3.00. <b>경계가 유일한 식별자인 컨트롤 전용</b> — 텍스트 라벨이 있는 버튼은 해당 없음(1.4.11 예외), 버튼 보더는 장식 12%</td>
+        <td><span class="pass">PASS</span> <span class="note">48% 미만 금지</span></td>
+      </tr>
+      <tr>
+        <td>hover / pressed / 선택</td>
+        <td class="hex">콘텐츠색 @ 8% / 12% / 10%</td>
+        <td class="note">M3 수치 고정 — 상태별 신규 hex 없음</td>
+        <td><span class="note">스펙 준수</span></td>
+      </tr>
+      <tr>
+        <td>시맨틱 틴트 배경</td>
+        <td class="hex">시맨틱색 @ 10%</td>
+        <td class="note">틴트 위 시맨틱 텍스트: green 4.16 · warn 4.32 · red 4.47 — 전부 FAIL</td>
+        <td><span class="fail">조합 금지</span> <span class="note">틴트 위 텍스트는 잉크, 색은 도트·아이콘으로</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>4. 서페이스 문맥 (G9)</h2>
+  <div class="card">
+    <table>
+      <tr><th style="width:200px">토큰</th><th>허용 서페이스</th><th>금지</th></tr>
+      <tr><td><code>ink@64</code> 보조 텍스트</td><td class="note">white surface(4.82) · #F6F5F2 bg(4.64) · white 위 ink7 틴트(4.56) — 전부 계산 PASS</td><td class="note">bg 위 ink7 틴트(4.41 FAIL) · 시맨틱 틴트 (재검증 전 금지)</td></tr>
+      <tr><td><code>ink@7</code> 틴트 배경</td><td class="note">white surface 위에서만 (내부 ink64 텍스트 PASS)</td><td class="note">bg(#F6F5F2) 위 직접 사용 — 내부 텍스트 FAIL. bg 위에서는 solid 서페이스 + 보더로 대체</td></tr>
+      <tr><td><code>primary@10</code> 선택 배경</td><td class="note">white surface 위 — primary 텍스트와 조합 4.81 PASS</td><td class="note">bg(#F6F5F2) 위 — 동일 조합 4.43 FAIL</td></tr>
+      <tr><td>시맨틱 @10 틴트</td><td class="note">white surface. 내부 텍스트는 ink 계열만</td><td class="note">시맨틱 텍스트 직접 사용 (§3 FAIL)</td></tr>
+      <tr><td><code>scrim@45</code></td><td class="note">모달·패널 딤 전용</td><td class="note">서페이스 대용</td></tr>
+    </table>
+  </div>
+
+  <h2>5. 적용 확인 — 셀프 감사 반영</h2>
+  <p class="sub">1차 목업을 합성 대비로 재감사한 결과 3건의 자체 위반이 발견되어 수정했다. 위반과 수정도 전부 계산 기준.</p>
+  <div class="card" style="margin-bottom:14px">
+    <table>
+      <tr><th style="width:250px">감사에서 발견된 위반</th><th style="width:200px">계산 결과</th><th>수정</th></tr>
+      <tr><td>“확인함” 카드 텍스트에 ink@38 사용 — 38%는 비활성 컨트롤 전용인데 읽어야 할 콘텐츠에 적용</td><td class="note">2.30 <span class="fail">FAIL</span></td><td class="note">전 텍스트 ink@64로 (4.82 PASS). 낮춤 효과는 보더·굵기·색으로만</td></tr>
+      <tr><td>일반 버튼 보더에 48% 적용 — 48%는 “경계가 유일한 식별자”인 인풋 전용 규칙</td><td class="note">규칙 오적용 (1.4.11 예외 대상)</td><td class="note">버튼 보더 12%로 환원. 48%는 인풋·체크박스에만</td></tr>
+      <tr><td>“정리됨” 노트: ink7 틴트를 bg 위에 직접 사용</td><td class="note">내부 ink64 텍스트 4.41 <span class="fail">FAIL</span></td><td class="note">solid 서페이스 + 12% 보더로 교체 (텍스트 4.82 PASS). ink7 틴트는 white 위에서만(§4)</td></tr>
+    </table>
+  </div>
+  <div class="mock">
+    <div class="m-top">
+      <span class="m-title">오늘 브리핑</span>
+      <span class="m-selector">All accounts ▾</span>
+      <div class="m-right">
+        <span class="m-pill">새 브리핑 2</span>
+        <span class="m-pill warn"><span class="m-dot"></span>권한 필요 1</span>
+      </div>
+    </div>
+    <div class="m-body">
+      <aside class="m-side">
+        <ul class="m-nav">
+          <li>My</li><li class="on">오늘 브리핑</li><li>우선순위</li><li>정리 제안</li><li>활동 로그</li><li>연결 계정</li>
+        </ul>
+      </aside>
+      <div class="m-main">
+        <div class="m-sec">
+          <div class="m-sec-head"><b>중요</b><span class="m-count">2건</span></div>
+          <div class="m-card new">
+            <div class="m-line1"><span class="m-badge">회사 업무</span><span class="m-subj">PR 리뷰 요청</span></div>
+            <div class="m-meta"><span class="act">답장 필요</span> · Inbox · Label: PR Review</div>
+            <div class="m-sum">금요일까지 결제 플로우 PR 리뷰를 요청합니다.</div>
+            <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span><span class="m-btn">나중에</span><span class="m-btn">이동</span></div>
+          </div>
+          <div class="m-card seen">
+            <div class="m-line1"><span class="m-badge">개인</span><span class="m-subj">카드 결제 확인</span></div>
+            <div class="m-meta">확인함 · Inbox</div>
+          </div>
+        </div>
+        <div class="m-sec">
+          <div class="m-sec-head"><b>정리됨</b><span class="m-count">18건</span></div>
+          <span class="m-note"><span class="ok">✓</span> 8분 전 Newsletter 라벨을 적용하고 아카이브했습니다. <span class="m-undo">Undo</span></span>
+        </div>
+      </div>
+      <aside class="m-detail">
+        <span class="m-badge">회사 업무</span>
+        <h4>PR 리뷰 요청</h4>
+        <div class="m-meta"><span class="act">답장 필요</span> · dev-team@company.com</div>
+        <hr class="m-hr">
+        <p class="m-kv"><b>Gmail handling</b></p>
+        <p class="m-kv">현재 상태: Inbox · Label: PR Review</p>
+        <p class="m-kv">비서 처리: 브리핑만 생성. <b>Gmail 변경 없음</b></p>
+        <hr class="m-hr">
+        <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span></div>
+      </aside>
+    </div>
+  </div>
+  <p class="mock-caption"><b>확인 포인트:</b> 유채색은 블루 1(M1) · 경고 pill = 잉크 텍스트 + 앰버 도트(M6) · “확인함” 카드 = ink@64 유지 + 보더·굵기로만 낮춤(Tier 2, AA 유지) · 정리됨 노트 = solid 서페이스 · 버튼 보더 12%, 인풋만 48% · 상태 pill은 상단 주변부에만.</p>
+
+  <p class="variant-label">투톤 프라이머리 후보 — solid만 #4585C0로 상향 <span class="hex">버튼·새 항목 마커만 밝게, 텍스트 블루(#386D98)와 링크는 유지 · 흰 라벨 3.91</span></p>
+  <div class="mock v-tone2">
+    <div class="m-top">
+      <span class="m-title">오늘 브리핑</span>
+      <span class="m-selector">All accounts ▾</span>
+      <div class="m-right"><span class="m-pill">새 브리핑 2</span><span class="m-pill warn"><span class="m-dot"></span>권한 필요 1</span></div>
+    </div>
+    <div class="m-body">
+      <aside class="m-side">
+        <ul class="m-nav"><li>My</li><li class="on">오늘 브리핑</li><li>우선순위</li><li>정리 제안</li><li>활동 로그</li><li>연결 계정</li></ul>
+      </aside>
+      <div class="m-main">
+        <div class="m-sec">
+          <div class="m-sec-head"><b>중요</b><span class="m-count">2건</span></div>
+          <div class="m-card new">
+            <div class="m-line1"><span class="m-badge">회사 업무</span><span class="m-subj">PR 리뷰 요청</span></div>
+            <div class="m-meta"><span class="act">답장 필요</span> · Inbox · Label: PR Review</div>
+            <div class="m-sum">금요일까지 결제 플로우 PR 리뷰를 요청합니다.</div>
+            <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span><span class="m-btn">나중에</span><span class="m-btn">이동</span></div>
+          </div>
+          <div class="m-card seen">
+            <div class="m-line1"><span class="m-badge">개인</span><span class="m-subj">카드 결제 확인</span></div>
+            <div class="m-meta">확인함 · Inbox</div>
+          </div>
+        </div>
+        <div class="m-sec">
+          <div class="m-sec-head"><b>정리됨</b><span class="m-count">18건</span></div>
+          <span class="m-note"><span class="ok">✓</span> 8분 전 Newsletter 라벨을 적용하고 아카이브했습니다. <span class="m-undo">Undo</span></span>
+        </div>
+      </div>
+      <aside class="m-detail">
+        <span class="m-badge">회사 업무</span>
+        <h4>PR 리뷰 요청</h4>
+        <div class="m-meta"><span class="act">답장 필요</span> · dev-team@company.com</div>
+        <hr class="m-hr">
+        <p class="m-kv"><b>Gmail handling</b></p>
+        <p class="m-kv">현재 상태: Inbox · Label: PR Review</p>
+        <p class="m-kv">비서 처리: 브리핑만 생성. <b>Gmail 변경 없음</b></p>
+        <hr class="m-hr">
+        <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span></div>
+      </aside>
+    </div>
+  </div>
+  <p class="mock-caption"><b>투톤 근거:</b> 어두운 스틸 블루의 “경직·보수” 인상은 채도가 아니라 명도에서 온다는 진단(대화 로그). Radix의 문서화된 구조(solid 9단계 ↔ 텍스트 11단계 분리)를 따라, 브랜드 순간(solid)만 밝게 하고 소형 텍스트는 진한 톤을 유지 — AA-목표 체제에서 버튼 라벨 3:1(3.91) 충족.</p>
+
+  <h2>6. 배경 앵커 — 화이트 확정 (결정 로그)</h2>
+  <p class="sub">웜(#F6F5F2) 기각 → 세 후보 비교 → <b>순수 화이트 #FFFFFF 선택(인간 결정)</b>. 구분은 12% 보더로만. 비교 기록은 아래에 보존.</p>
+
+  <div class="card" style="margin-bottom:8px">
+    <table>
+      <tr><th>배경</th><th>ink 본문</th><th>ink@64 보조</th><th>primary 텍스트</th><th>primary 텍스트 on 선택틴트</th><th>카드(white) 구분비</th></tr>
+      <tr><td><span class="chip" style="background:#F9F9FB"></span>Slate 2 #F9F9FB</td><td>15.02</td><td>4.73</td><td>5.24</td><td>4.60 <span class="pass">PASS</span></td><td class="note">1.052 — 은은한 구분</td></tr>
+      <tr><td><span class="chip" style="background:#FFFFFF"></span><b>White #FFFFFF — 선택됨</b></td><td>15.80</td><td>4.82</td><td>5.51</td><td>4.81 <span class="pass">PASS</span></td><td class="note">1.000 — 보더로만 구분</td></tr>
+      <tr><td><span class="chip" style="background:#F9F9F9"></span>Gray 2 #F9F9F9</td><td>15.00</td><td>4.73</td><td>5.24</td><td>4.59 <span class="pass">PASS</span></td><td class="note">1.053 — 은은한 구분</td></tr>
+      <tr><td><span class="chip" style="background:#F6F5F2"></span><s>기존 F6F5F2</s></td><td>14.49</td><td>4.64</td><td>5.06</td><td>4.43 <span class="fail">FAIL</span></td><td class="note">1.090 — 기각(인간 결정)</td></tr>
+    </table>
+  </div>
+  <p class="sub">참고: 기존 웜 배경에서 금지됐던 “선택 틴트 위 프라이머리 텍스트” 조합이 세 후보 모두에서 통과로 바뀐다. ink7 틴트의 white-전용 규칙은 Slate2/Gray2에서도 유지(4.46).</p>
+
+  <p class="variant-label">후보 1 — Radix Slate 2 <span class="hex">#F9F9FB · 쿨</span></p>
+  <div class="mock v-slate">
+    <div class="m-top">
+      <span class="m-title">오늘 브리핑</span>
+      <span class="m-selector">All accounts ▾</span>
+      <div class="m-right"><span class="m-pill">새 브리핑 2</span><span class="m-pill warn"><span class="m-dot"></span>권한 필요 1</span></div>
+    </div>
+    <div class="m-body">
+      <aside class="m-side">
+        <ul class="m-nav"><li>My</li><li class="on">오늘 브리핑</li><li>우선순위</li><li>정리 제안</li><li>활동 로그</li><li>연결 계정</li></ul>
+      </aside>
+      <div class="m-main">
+        <div class="m-sec">
+          <div class="m-sec-head"><b>중요</b><span class="m-count">2건</span></div>
+          <div class="m-card new">
+            <div class="m-line1"><span class="m-badge">회사 업무</span><span class="m-subj">PR 리뷰 요청</span></div>
+            <div class="m-meta"><span class="act">답장 필요</span> · Inbox · Label: PR Review</div>
+            <div class="m-sum">금요일까지 결제 플로우 PR 리뷰를 요청합니다.</div>
+            <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span><span class="m-btn">나중에</span><span class="m-btn">이동</span></div>
+          </div>
+          <div class="m-card seen">
+            <div class="m-line1"><span class="m-badge">개인</span><span class="m-subj">카드 결제 확인</span></div>
+            <div class="m-meta">확인함 · Inbox</div>
+          </div>
+        </div>
+        <div class="m-sec">
+          <div class="m-sec-head"><b>정리됨</b><span class="m-count">18건</span></div>
+          <span class="m-note"><span class="ok">✓</span> 8분 전 Newsletter 라벨을 적용하고 아카이브했습니다. <span class="m-undo">Undo</span></span>
+        </div>
+      </div>
+      <aside class="m-detail">
+        <span class="m-badge">회사 업무</span>
+        <h4>PR 리뷰 요청</h4>
+        <div class="m-meta"><span class="act">답장 필요</span> · dev-team@company.com</div>
+        <hr class="m-hr">
+        <p class="m-kv"><b>Gmail handling</b></p>
+        <p class="m-kv">현재 상태: Inbox · Label: PR Review</p>
+        <p class="m-kv">비서 처리: 브리핑만 생성. <b>Gmail 변경 없음</b></p>
+        <hr class="m-hr">
+        <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span></div>
+      </aside>
+    </div>
+  </div>
+
+  <p class="variant-label">후보 2 — 순수 화이트 <span class="hex">#FFFFFF · 보더로만 구분</span></p>
+  <div class="mock v-white">
+    <div class="m-top">
+      <span class="m-title">오늘 브리핑</span>
+      <span class="m-selector">All accounts ▾</span>
+      <div class="m-right"><span class="m-pill">새 브리핑 2</span><span class="m-pill warn"><span class="m-dot"></span>권한 필요 1</span></div>
+    </div>
+    <div class="m-body">
+      <aside class="m-side">
+        <ul class="m-nav"><li>My</li><li class="on">오늘 브리핑</li><li>우선순위</li><li>정리 제안</li><li>활동 로그</li><li>연결 계정</li></ul>
+      </aside>
+      <div class="m-main">
+        <div class="m-sec">
+          <div class="m-sec-head"><b>중요</b><span class="m-count">2건</span></div>
+          <div class="m-card new">
+            <div class="m-line1"><span class="m-badge">회사 업무</span><span class="m-subj">PR 리뷰 요청</span></div>
+            <div class="m-meta"><span class="act">답장 필요</span> · Inbox · Label: PR Review</div>
+            <div class="m-sum">금요일까지 결제 플로우 PR 리뷰를 요청합니다.</div>
+            <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span><span class="m-btn">나중에</span><span class="m-btn">이동</span></div>
+          </div>
+          <div class="m-card seen">
+            <div class="m-line1"><span class="m-badge">개인</span><span class="m-subj">카드 결제 확인</span></div>
+            <div class="m-meta">확인함 · Inbox</div>
+          </div>
+        </div>
+        <div class="m-sec">
+          <div class="m-sec-head"><b>정리됨</b><span class="m-count">18건</span></div>
+          <span class="m-note"><span class="ok">✓</span> 8분 전 Newsletter 라벨을 적용하고 아카이브했습니다. <span class="m-undo">Undo</span></span>
+        </div>
+      </div>
+      <aside class="m-detail">
+        <span class="m-badge">회사 업무</span>
+        <h4>PR 리뷰 요청</h4>
+        <div class="m-meta"><span class="act">답장 필요</span> · dev-team@company.com</div>
+        <hr class="m-hr">
+        <p class="m-kv"><b>Gmail handling</b></p>
+        <p class="m-kv">현재 상태: Inbox · Label: PR Review</p>
+        <p class="m-kv">비서 처리: 브리핑만 생성. <b>Gmail 변경 없음</b></p>
+        <hr class="m-hr">
+        <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span></div>
+      </aside>
+    </div>
+  </div>
+
+  <p class="variant-label">후보 3 — Radix Gray 2 <span class="hex">#F9F9F9 · 중립</span></p>
+  <div class="mock v-gray">
+    <div class="m-top">
+      <span class="m-title">오늘 브리핑</span>
+      <span class="m-selector">All accounts ▾</span>
+      <div class="m-right"><span class="m-pill">새 브리핑 2</span><span class="m-pill warn"><span class="m-dot"></span>권한 필요 1</span></div>
+    </div>
+    <div class="m-body">
+      <aside class="m-side">
+        <ul class="m-nav"><li>My</li><li class="on">오늘 브리핑</li><li>우선순위</li><li>정리 제안</li><li>활동 로그</li><li>연결 계정</li></ul>
+      </aside>
+      <div class="m-main">
+        <div class="m-sec">
+          <div class="m-sec-head"><b>중요</b><span class="m-count">2건</span></div>
+          <div class="m-card new">
+            <div class="m-line1"><span class="m-badge">회사 업무</span><span class="m-subj">PR 리뷰 요청</span></div>
+            <div class="m-meta"><span class="act">답장 필요</span> · Inbox · Label: PR Review</div>
+            <div class="m-sum">금요일까지 결제 플로우 PR 리뷰를 요청합니다.</div>
+            <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span><span class="m-btn">나중에</span><span class="m-btn">이동</span></div>
+          </div>
+          <div class="m-card seen">
+            <div class="m-line1"><span class="m-badge">개인</span><span class="m-subj">카드 결제 확인</span></div>
+            <div class="m-meta">확인함 · Inbox</div>
+          </div>
+        </div>
+        <div class="m-sec">
+          <div class="m-sec-head"><b>정리됨</b><span class="m-count">18건</span></div>
+          <span class="m-note"><span class="ok">✓</span> 8분 전 Newsletter 라벨을 적용하고 아카이브했습니다. <span class="m-undo">Undo</span></span>
+        </div>
+      </div>
+      <aside class="m-detail">
+        <span class="m-badge">회사 업무</span>
+        <h4>PR 리뷰 요청</h4>
+        <div class="m-meta"><span class="act">답장 필요</span> · dev-team@company.com</div>
+        <hr class="m-hr">
+        <p class="m-kv"><b>Gmail handling</b></p>
+        <p class="m-kv">현재 상태: Inbox · Label: PR Review</p>
+        <p class="m-kv">비서 처리: 브리핑만 생성. <b>Gmail 변경 없음</b></p>
+        <hr class="m-hr">
+        <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span></div>
+      </aside>
+    </div>
+  </div>
+
+  <h2>7. 결정 로그와 열린 결정</h2>
+  <div class="card">
+    <p style="margin:0 0 8px"><b>확정된 전략 축 결정:</b> 접근성 = WCAG AA를 목표로만 · 블루·그린 버튼안 기각 · 아이덴티티 = 화이트 + 라이트 크림 투피스(진한 크림 금지) · <b>탁함 보정: 잉크는 중성(#43464A/#26282B)으로 — 웜 잉크(갈색기)가 탁함의 원인이었음 · 크림은 노란기 뺀 #F6F4EF</b> · 순흑·대면적 다크 금지 유지.</p>
+    <ul class="sources" style="padding-left:18px">
+      <li><b>프라이머리 투톤 여부</b> — §5의 두 목업 비교로 결정: 현행 단일톤(#386D98, 5.51) vs 투톤(solid #4585C0 + 텍스트 #386D98). “덜 경직” 방향이면 투톤이 아티클(Radix 구조·명도 진단) 근거가 있는 경로. 더 밝은 경계값(#609ACA, 3.01)도 가능하나 AA 목표선에 걸침.</li>
+      <li><b>딱딱함의 비색상 변수</b> — warm minimalism 문헌이 지목하는 radius·여백·타이포·트랜지션 토큰은 아직 미착수. 색 확정 후 다음 단계.</li>
+      <li><b>다크 모드 진행 여부</b> — 알파 구조상 잉크→화이트 알파 스왑으로 골격은 자동 전환, 시맨틱 3색만 재계산 필요.</li>
+    </ul>
+  </div>
+
+  <h2>8. 브랜드 상징색 선정 — hue 대역 제거법</h2>
+  <p class="sub">블루 계열 전체 기각(인간 결정) 후, 상징색은 취향 나열이 아니라 대역 제거로 좁힌다. 기준: ① 시맨틱 3색(success 154° · warning 35° · danger 358°)과의 hue 충돌 ② 경쟁 밀집 대역 이탈(Shortwave·Superhuman = 딥 블루, HEY = 퍼플, Gmail = 4원색 + AI 퍼플 금지대 240–280°) ③ AA 목표 내 텍스트 겸용 명도 존재 ④ 페르소나 형용사(차분·정갈·사적) 부합.</p>
+  <div class="card" style="margin-bottom:8px">
+    <table>
+      <tr><th style="width:130px">hue 대역</th><th>판정</th></tr>
+      <tr><td>빨강 (~0°)</td><td class="note">제외 — danger(358°)와 충돌, 긴급 연상</td></tr>
+      <tr><td>주황~노랑 (30~60°)</td><td class="note">원칙 제외 — warning(35°)과 충돌. 단 “집사의 황동” 은유가 강해 warning 재선정을 감수하는 예외 후보로만 유지</td></tr>
+      <tr><td>그린 (140~160°)</td><td class="note">원칙 제외 — success(154°)와 사실상 동일. 단 “완료=브랜드색” 통합안을 감수하는 예외 후보로만 유지</td></tr>
+      <tr><td>청록 (170~185°)</td><td class="note"><b>잔존 대역</b> — 시맨틱과 최소 21° 거리, 경쟁 밀집 대역 밖, Figma·색채심리 문헌에서 “블루의 신뢰 + 그린의 안정, 차분·세련” 계열로 분류</td></tr>
+      <tr><td>블루 (200~230°)</td><td class="note">기각됨(인간 결정) + 메일 앱 밀집 대역</td></tr>
+      <tr><td>인디고~퍼플 (240~280°)</td><td class="note">제외 — AI 동질화 금지대(Tier 5 참고) + HEY 등 경쟁 사용</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <table>
+      <tr><th style="width:190px">후보</th><th style="width:170px">계산</th><th>의미 · 대가</th></tr>
+      <tr>
+        <td><span class="chip" style="background:#14807A"></span><b>A. 스튜어드 틸</b> <span class="hex">#14807A · 177°</span></td>
+        <td class="note">텍스트 4.77 · 흰 라벨 4.77 — 단일톤으로 겸용 가능</td>
+        <td class="note">유일한 무충돌 대역 생존자. 문헌 분류: 신뢰+회복, 차분·세련, 기술·금융·헬스케어에서 신뢰 신호. 대가 없음(시맨틱 유지). success(154°)와 21° — 명도 차로 구분 가능</td>
+      </tr>
+      <tr>
+        <td><span class="chip" style="background:#256D4F"></span><b>B. 서재 그린</b> <span class="hex">#256D4F · 155°</span></td>
+        <td class="note">텍스트 6.21 · 흰 라벨 6.21</td>
+        <td class="note">서재·컨시어지·클래식 호텔의 딥 그린 — 집사 은유 부합, 메일 앱 중 부재(차별화 최대급). 대가: success와 동일 hue → “완료·정리됨 = 브랜드색” 통합 재설계 필수</td>
+      </tr>
+      <tr>
+        <td><span class="chip" style="background:#6E572E"></span><b>C. 황동 브라스</b> <span class="hex">#6E572E · 38°</span></td>
+        <td class="note">텍스트 6.85 · 흰 라벨 6.85</td>
+        <td class="note">황동 트레이·서재 문구 — 집사 은유 직결, 테크 제품 중 희소. 대가: warning(35°)과 동일 대역 → warning 색 재선정 필수, 웜 메탈이 “업무 도구” 연상과 거리</td>
+      </tr>
+      <tr>
+        <td><span class="chip" style="background:#FFFFFF;border-color:rgba(0,0,0,.15)"></span><span class="chip" style="background:#F7F3EA"></span><b>D. 화이트 + 라이트 크림 투피스 (최종안)</b> <span class="hex">#FFFFFF + #F7F3EA · 잉크 #4A4740/#33312C</span></td>
+        <td class="note">잉크 on 크림 버튼 11.73 · 소프트 잉크 9.27 · 크림면 경계 1.11 → 보더 필수(22% 알파 적용)</td>
+        <td class="note">화이트·크림 행 스와치 1·2만 사용, 진한 크림(#EFE6D5) 금지(인간 결정). 유채 액센트 없음 — 아이덴티티는 크림 선택면·라이트 CTA·소프트 잉크의 명도 리듬. 시맨틱 충돌 전무(유채색은 상태 3색뿐). 위험: 무유채 아이덴티티는 브랜드 인지가 형태·타이포에 더 의존</td>
+      </tr>
+    </table>
+  </div>
+
+  <p class="variant-label">후보 A — 스튜어드 틸 <span class="hex">#14807A</span></p>
+  <div class="mock v-teal">
+    <div class="m-top">
+      <span class="m-title">오늘 브리핑</span>
+      <span class="m-selector">All accounts ▾</span>
+      <div class="m-right"><span class="m-pill">새 브리핑 2</span><span class="m-pill warn"><span class="m-dot"></span>권한 필요 1</span></div>
+    </div>
+    <div class="m-body">
+      <aside class="m-side">
+        <ul class="m-nav"><li>My</li><li class="on">오늘 브리핑</li><li>우선순위</li><li>정리 제안</li><li>활동 로그</li><li>연결 계정</li></ul>
+      </aside>
+      <div class="m-main">
+        <div class="m-sec">
+          <div class="m-sec-head"><b>중요</b><span class="m-count">2건</span></div>
+          <div class="m-card new">
+            <div class="m-line1"><span class="m-badge">회사 업무</span><span class="m-subj">PR 리뷰 요청</span></div>
+            <div class="m-meta"><span class="act">답장 필요</span> · Inbox · Label: PR Review</div>
+            <div class="m-sum">금요일까지 결제 플로우 PR 리뷰를 요청합니다.</div>
+            <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span><span class="m-btn">나중에</span><span class="m-btn">이동</span></div>
+          </div>
+          <div class="m-card seen">
+            <div class="m-line1"><span class="m-badge">개인</span><span class="m-subj">카드 결제 확인</span></div>
+            <div class="m-meta">확인함 · Inbox</div>
+          </div>
+        </div>
+        <div class="m-sec">
+          <div class="m-sec-head"><b>정리됨</b><span class="m-count">18건</span></div>
+          <span class="m-note"><span class="ok">✓</span> 8분 전 Newsletter 라벨을 적용하고 아카이브했습니다. <span class="m-undo">Undo</span></span>
+        </div>
+      </div>
+      <aside class="m-detail">
+        <span class="m-badge">회사 업무</span>
+        <h4>PR 리뷰 요청</h4>
+        <div class="m-meta"><span class="act">답장 필요</span> · dev-team@company.com</div>
+        <hr class="m-hr">
+        <p class="m-kv"><b>Gmail handling</b></p>
+        <p class="m-kv">현재 상태: Inbox · Label: PR Review</p>
+        <p class="m-kv">비서 처리: 브리핑만 생성. <b>Gmail 변경 없음</b></p>
+        <hr class="m-hr">
+        <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span></div>
+      </aside>
+    </div>
+  </div>
+
+  <p class="variant-label">후보 B — 서재 그린 <span class="hex">#256D4F · success 통합 전제</span></p>
+  <div class="mock v-green">
+    <div class="m-top">
+      <span class="m-title">오늘 브리핑</span>
+      <span class="m-selector">All accounts ▾</span>
+      <div class="m-right"><span class="m-pill">새 브리핑 2</span><span class="m-pill warn"><span class="m-dot"></span>권한 필요 1</span></div>
+    </div>
+    <div class="m-body">
+      <aside class="m-side">
+        <ul class="m-nav"><li>My</li><li class="on">오늘 브리핑</li><li>우선순위</li><li>정리 제안</li><li>활동 로그</li><li>연결 계정</li></ul>
+      </aside>
+      <div class="m-main">
+        <div class="m-sec">
+          <div class="m-sec-head"><b>중요</b><span class="m-count">2건</span></div>
+          <div class="m-card new">
+            <div class="m-line1"><span class="m-badge">회사 업무</span><span class="m-subj">PR 리뷰 요청</span></div>
+            <div class="m-meta"><span class="act">답장 필요</span> · Inbox · Label: PR Review</div>
+            <div class="m-sum">금요일까지 결제 플로우 PR 리뷰를 요청합니다.</div>
+            <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span><span class="m-btn">나중에</span><span class="m-btn">이동</span></div>
+          </div>
+          <div class="m-card seen">
+            <div class="m-line1"><span class="m-badge">개인</span><span class="m-subj">카드 결제 확인</span></div>
+            <div class="m-meta">확인함 · Inbox</div>
+          </div>
+        </div>
+        <div class="m-sec">
+          <div class="m-sec-head"><b>정리됨</b><span class="m-count">18건</span></div>
+          <span class="m-note"><span class="ok" style="color:#256D4F">✓</span> 8분 전 Newsletter 라벨을 적용하고 아카이브했습니다. <span class="m-undo">Undo</span></span>
+        </div>
+      </div>
+      <aside class="m-detail">
+        <span class="m-badge">회사 업무</span>
+        <h4>PR 리뷰 요청</h4>
+        <div class="m-meta"><span class="act">답장 필요</span> · dev-team@company.com</div>
+        <hr class="m-hr">
+        <p class="m-kv"><b>Gmail handling</b></p>
+        <p class="m-kv">현재 상태: Inbox · Label: PR Review</p>
+        <p class="m-kv">비서 처리: 브리핑만 생성. <b>Gmail 변경 없음</b></p>
+        <hr class="m-hr">
+        <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span></div>
+      </aside>
+    </div>
+  </div>
+
+  <p class="variant-label">후보 C — 황동 브라스 <span class="hex">#6E572E · warning 재선정 전제</span></p>
+  <div class="mock v-brass">
+    <div class="m-top">
+      <span class="m-title">오늘 브리핑</span>
+      <span class="m-selector">All accounts ▾</span>
+      <div class="m-right"><span class="m-pill">새 브리핑 2</span><span class="m-pill warn"><span class="m-dot"></span>권한 필요 1</span></div>
+    </div>
+    <div class="m-body">
+      <aside class="m-side">
+        <ul class="m-nav"><li>My</li><li class="on">오늘 브리핑</li><li>우선순위</li><li>정리 제안</li><li>활동 로그</li><li>연결 계정</li></ul>
+      </aside>
+      <div class="m-main">
+        <div class="m-sec">
+          <div class="m-sec-head"><b>중요</b><span class="m-count">2건</span></div>
+          <div class="m-card new">
+            <div class="m-line1"><span class="m-badge">회사 업무</span><span class="m-subj">PR 리뷰 요청</span></div>
+            <div class="m-meta"><span class="act">답장 필요</span> · Inbox · Label: PR Review</div>
+            <div class="m-sum">금요일까지 결제 플로우 PR 리뷰를 요청합니다.</div>
+            <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span><span class="m-btn">나중에</span><span class="m-btn">이동</span></div>
+          </div>
+          <div class="m-card seen">
+            <div class="m-line1"><span class="m-badge">개인</span><span class="m-subj">카드 결제 확인</span></div>
+            <div class="m-meta">확인함 · Inbox</div>
+          </div>
+        </div>
+        <div class="m-sec">
+          <div class="m-sec-head"><b>정리됨</b><span class="m-count">18건</span></div>
+          <span class="m-note"><span class="ok">✓</span> 8분 전 Newsletter 라벨을 적용하고 아카이브했습니다. <span class="m-undo">Undo</span></span>
+        </div>
+      </div>
+      <aside class="m-detail">
+        <span class="m-badge">회사 업무</span>
+        <h4>PR 리뷰 요청</h4>
+        <div class="m-meta"><span class="act">답장 필요</span> · dev-team@company.com</div>
+        <hr class="m-hr">
+        <p class="m-kv"><b>Gmail handling</b></p>
+        <p class="m-kv">현재 상태: Inbox · Label: PR Review</p>
+        <p class="m-kv">비서 처리: 브리핑만 생성. <b>Gmail 변경 없음</b></p>
+        <hr class="m-hr">
+        <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span></div>
+      </aside>
+    </div>
+  </div>
+  <p class="variant-label">후보 D(탁함 보정) — 화이트 + 클린 아이보리 <span class="hex">bg #FFFFFF · 선택면/버튼 #F6F4EF(노란기 감소) · 잉크 중성 복귀 #43464A/#26282B · 진한 크림 금지</span></p>
+  <div class="mock v-cream">
+    <div class="m-top">
+      <span class="m-title">오늘 브리핑</span>
+      <span class="m-selector">All accounts ▾</span>
+      <div class="m-right"><span class="m-pill">새 브리핑 2</span><span class="m-pill warn"><span class="m-dot"></span>권한 필요 1</span></div>
+    </div>
+    <div class="m-body">
+      <aside class="m-side">
+        <ul class="m-nav"><li>My</li><li class="on">오늘 브리핑</li><li>우선순위</li><li>정리 제안</li><li>활동 로그</li><li>연결 계정</li></ul>
+      </aside>
+      <div class="m-main">
+        <div class="m-sec">
+          <div class="m-sec-head"><b>중요</b><span class="m-count">2건</span></div>
+          <div class="m-card new">
+            <div class="m-line1"><span class="m-badge">회사 업무</span><span class="m-subj">PR 리뷰 요청</span></div>
+            <div class="m-meta"><span class="act">답장 필요</span> · Inbox · Label: PR Review</div>
+            <div class="m-sum">금요일까지 결제 플로우 PR 리뷰를 요청합니다.</div>
+            <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span><span class="m-btn">나중에</span><span class="m-btn">이동</span></div>
+          </div>
+          <div class="m-card seen">
+            <div class="m-line1"><span class="m-badge">개인</span><span class="m-subj">카드 결제 확인</span></div>
+            <div class="m-meta">확인함 · Inbox</div>
+          </div>
+        </div>
+        <div class="m-sec">
+          <div class="m-sec-head"><b>정리됨</b><span class="m-count">18건</span></div>
+          <span class="m-note"><span class="ok">✓</span> 8분 전 Newsletter 라벨을 적용하고 아카이브했습니다. <span class="m-undo">Undo</span></span>
+        </div>
+      </div>
+      <aside class="m-detail">
+        <span class="m-badge">회사 업무</span>
+        <h4>PR 리뷰 요청</h4>
+        <div class="m-meta"><span class="act">답장 필요</span> · dev-team@company.com</div>
+        <hr class="m-hr">
+        <p class="m-kv"><b>Gmail handling</b></p>
+        <p class="m-kv">현재 상태: Inbox · Label: PR Review</p>
+        <p class="m-kv">비서 처리: 브리핑만 생성. <b>Gmail 변경 없음</b></p>
+        <hr class="m-hr">
+        <div class="m-actions"><span class="m-btn pri">Gmail 열기</span><span class="m-btn">완료</span></div>
+      </aside>
+    </div>
+  </div>
+  <p class="mock-caption"><b>비고:</b> D 최종안 = 화이트 배경 + 라이트 크림(#F7F3EA)이 버튼·선택 내비·상태 pill의 면 색, 잉크는 소프트(#4A4740)/헤딩(#33312C) 2단. 진한 크림·유채 액센트·다크 CTA 전부 배제. 크림면은 경계비 1.11이라 22% 알파 보더가 필수(계산). 시맨틱 3색(그린 체크·앰버 도트·레드)은 상태 순간에만 등장 — 유채색 충돌이 구조적으로 사라진 대신, 브랜드 인지는 향후 radius·타이포·모션 토큰의 몫이 커진다.</p>
+
+  <h2>9. D 위계 보정 — CTA·선택 상태 처리 비교</h2>
+  <p class="sub">크림 CTA의 문제(계산): 보조 버튼과의 명도 차 1.11로 주요 액션 위계 실종. 크림 아이덴티티를 유지하며 위계를 회복하는 3가지 처리 — 공통으로 새 항목 마커는 3px 잉크 → 2.5px 인셋으로 감량.</p>
+  <div class="trio">
+    <div class="trio-cell t1">
+      <div class="trio-head">T1 · 잉크 미니 솔리드<span>무게는 명도가 아니라 “크기와 빈도”로 제어 — 화면당 잉크 솔리드 1개만</span></div>
+      <div class="trio-body">
+        <ul class="t-nav"><li class="on">오늘 브리핑</li><li>우선순위</li><li>정리 제안</li></ul>
+        <div class="t-btns"><span class="t-btn pri">Gmail 열기</span><span class="t-btn">완료</span><span class="t-btn">나중에</span></div>
+      </div>
+    </div>
+    <div class="trio-cell t2">
+      <div class="trio-head">T2 · 크림 필 + 강보더<span>크림면 유지, 1.5px 잉크 보더와 볼드가 위계를 만듦</span></div>
+      <div class="trio-body">
+        <ul class="t-nav"><li class="on">오늘 브리핑</li><li>우선순위</li><li>정리 제안</li></ul>
+        <div class="t-btns"><span class="t-btn pri">Gmail 열기</span><span class="t-btn">완료</span><span class="t-btn">나중에</span></div>
+      </div>
+    </div>
+    <div class="trio-cell t3">
+      <div class="trio-head">T3 · 고스트 + 타이포 위계<span>면 자체를 줄이고 굵기·언더라인·인셋 바로만 구분</span></div>
+      <div class="trio-body">
+        <ul class="t-nav"><li class="on">오늘 브리핑</li><li>우선순위</li><li>정리 제안</li></ul>
+        <div class="t-btns"><span class="t-btn pri">Gmail 열기</span><span class="t-btn">완료</span><span class="t-btn">나중에</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="mock-caption" style="margin-bottom:34px"><b>근거:</b> 주요 액션은 시각 위계가 명확해야 한다(Refactoring UI — 위계는 색만이 아니라 대비·굵기·크기로). T1은 “다크 CTA 금지”와 긴장이 있지만 소형·단일 사용으로 무게를 통제하는 절충안, T2는 결정 준수형, T3은 무면(無面) 극단형. 어느 쪽이든 선택 내비의 크림은 유지 가능.</p>
+
+  <h2>10. 근거 자료</h2>
+  <ul class="sources">
+    <li><a href="https://refactoringui.com/previews/building-your-color-palette">Refactoring UI — Building Your Color Palette</a> (G1)</li>
+    <li><a href="https://m3.material.io/foundations/interaction/states/state-layers">Material 3 — State layers</a> (G5) · <a href="https://m3.material.io/styles/color/roles">Color roles</a> · <a href="https://atlassian.design/foundations/color">Atlassian Color</a> (G1)</li>
+    <li><a href="https://blog.logrocket.com/ux-design/60-30-10-rule/">LogRocket — 60-30-10</a> · <a href="https://hype4.academy/articles/design/60-30-10-rule-in-ui">SquarePlanet</a> (G2)</li>
+    <li><a href="https://www.jackpearce.co.uk/notes/purple-gradient-ai-aesthetics/">Purple gradient AI aesthetics</a> · <a href="https://medium.com/@ai.in.motion.blog/the-purple-problem-why-ai-cant-stop-generating-purple-websites-4381fb066883">The Purple Problem</a> (G3)</li>
+    <li><a href="https://webaim.org/articles/contrast/">WebAIM — Contrast</a> (G4, WCAG 1.4.3/1.4.11)</li>
+    <li><a href="https://www.radix-ui.com/colors">Radix Colors</a> (G6 · 11단계=텍스트용 스케일 차용 근거)</li>
+    <li><a href="https://designtokens.substack.com/p/transparency-in-color-tokens">Improta — Transparency in color tokens</a> (G7·G9) · <a href="https://evilmartians.com/chronicles/woah-opacity-a-full-guide-to-this-badass-hero-of-efficient-ui-design">Evil Martians — Opacity guide</a></li>
+    <li><a href="https://www.calmtech.institute/calm-tech-principles">Calm Tech Institute</a> (G8)</li>
+    <li>내부 — <code>docs/current/mail-assistant-persona-brand-tone.md</code> (앵커 색·브랜드 형용사, G10)</li>
+  </ul>
+
+</div>
+</body>
+</html>
