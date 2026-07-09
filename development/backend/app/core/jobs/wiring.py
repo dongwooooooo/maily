@@ -23,4 +23,12 @@ time, per _build-schedule.md's sequential IC ordering.
 ACTIVE_EVENT_CONSUMERS: dict[str, list[str]] = {
     # IC1 (연결→sync) — tests/integration/test_ic1_connect_to_sync.py
     "gmail_source_connected": ["register_watch", "sync_full"],
+    # IC2+IC3 (sync→briefing, sync→assistant→briefing 부분재생성) —
+    # tests/integration/test_ic2_ic3_sync_to_briefing_and_assistant.py.
+    # gmail_snapshot_changed fans out to per-message generate_summary/
+    # classify_importance jobs (outbox_dispatcher._fan_out_per_message_id)
+    # and one build_briefing job carrying the whole message_ids list.
+    "gmail_snapshot_changed": ["build_briefing", "generate_summary", "classify_importance"],
+    "summary_completed": ["build_briefing"],
+    "importance_classified": ["build_briefing"],
 }

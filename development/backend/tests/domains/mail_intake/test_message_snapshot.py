@@ -8,7 +8,7 @@ from app.domains.mail_intake import service
 from app.domains.mail_intake.fake_reader import FakeGmailReader, FakeMessage
 from app.domains.mail_intake.gmail_reader import set_reader
 from app.domains.mail_intake.models import gmail_message_labels, gmail_messages, message_excerpts
-from tests.domains.mail_intake.conftest import seed_connected_account
+from tests.domains.mail_intake.conftest import seed_connected_account, seed_workspace
 
 
 async def test_gmail_messages_has_no_body_column() -> None:
@@ -117,7 +117,8 @@ async def test_excerpt_rejects_raw_body() -> None:
 
 
 async def test_snapshot_changed_event_payload() -> None:
-    account_id = await seed_connected_account()
+    workspace_id = await seed_workspace()
+    account_id = await seed_connected_account(workspace_id=workspace_id)
     reader = FakeGmailReader()
     reader.seed_mailbox(
         account_id,
@@ -143,6 +144,7 @@ async def test_snapshot_changed_event_payload() -> None:
     assert row["event_type"] == "gmail_snapshot_changed"
     assert row["producer_domain"] == "mail_intake"
     assert row["payload"]["source_id"] == str(account_id)
+    assert row["payload"]["workspace_id"] == str(workspace_id)
     assert row["payload"]["sync_run_id"] == str(result["sync_run_id"])
     assert row["payload"]["message_ids"] == [str(m) for m in result["message_ids"]]
 

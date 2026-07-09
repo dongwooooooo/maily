@@ -68,6 +68,7 @@ async def run_generate_summary(connection: AsyncConnection, *, message_id: uuid.
         producer_domain="assistant_decisions",
         payload={
             "message_id": str(message_id),
+            "workspace_id": str(scope["workspace_id"]),
             "summary_version": summary_row["summary_version"],
             "is_metadata_only": summary_row["is_metadata_only"],
         },

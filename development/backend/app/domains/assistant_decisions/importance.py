@@ -25,6 +25,7 @@ async def run_classify_importance(
     connection: AsyncConnection, *, message_id: uuid.UUID
 ) -> dict | None:
     message = await service.get_message_or_404(connection, message_id=message_id)
+    scope = await service.resolve_message_scope_or_404(connection, message_id=message_id)
     # snapshot existence is the only precondition — unlike summary, this
     # runs regardless of summary_enabled (importance drives briefing sort,
     # not a privacy-sensitive summary surface).
@@ -62,6 +63,7 @@ async def run_classify_importance(
         producer_domain="assistant_decisions",
         payload={
             "message_id": str(message_id),
+            "workspace_id": str(scope["workspace_id"]),
             "importance_band": classification_row["importance_band"],
             "reason": classification_row["reason"],
             "classification_version": classification_row["classification_version"],

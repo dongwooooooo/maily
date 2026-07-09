@@ -148,6 +148,7 @@ async def sync_full(
     await events.publish_snapshot_changed(
         connection,
         connected_account_id=connected_account_id,
+        workspace_id=account["workspace_id"],
         sync_run_id=sync_run_id,
         message_ids=changed_message_ids,
     )
@@ -361,6 +362,7 @@ async def sync_delta(
     await events.publish_snapshot_changed(
         connection,
         connected_account_id=connected_account_id,
+        workspace_id=account["workspace_id"],
         sync_run_id=sync_run_id,
         message_ids=changed_message_ids,
     )
