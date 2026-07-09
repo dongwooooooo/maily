@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     jwt_secret: str = ""
     google_oauth_client_id: str = ""
     google_oauth_client_secret: str = ""
+    token_encryption_key: str = ""
 
 
 settings = Settings()
