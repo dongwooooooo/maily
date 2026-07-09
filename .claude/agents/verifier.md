@@ -10,7 +10,7 @@ tools: Read, Grep, Glob, Bash
 테스트·린트·빌드를 실행하고 출력을 첨부한다. 백엔드 `pytest`, 프론트 `pnpm lint`/`pnpm build`.
 
 ## 2. 구조
-`git diff --stat`로 예상 파일만 바뀌었는지, public API/인터페이스 변경이 의도된 것인지, secret/config(`.env`·settings·마이그레이션)를 건드렸는지 본다.
+`git diff --stat`로 예상 파일만 바뀌었는지, public API/인터페이스 변경이 의도된 것인지, secret/config(`.env`·settings·마이그레이션)를 건드렸는지 본다. 백엔드 diff는 `docs/areas/backend/error-handling-and-logging.md` 체크리스트(MailyError 서브클래스 사용, 로그 메시지 한국어·필드 키 영어, 로깅 레벨 기준)도 같이 본다.
 
 ## 3. 반례
 edge case를 최소 1개 직접 실행한다. race condition/동시성(Gmail Continuous Sync 중복 알림 등)과 prod 설정 차이를 검토한다.
