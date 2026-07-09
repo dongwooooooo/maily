@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://maily:maily@localhost:5432/maily"
     redis_url: str = "redis://localhost:6379/0"
     jwt_issuer: str = "maily"
+    jwt_secret: str = ""
     google_oauth_client_id: str = ""
     google_oauth_client_secret: str = ""
 
