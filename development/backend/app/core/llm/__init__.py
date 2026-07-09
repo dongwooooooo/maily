@@ -15,8 +15,10 @@ from app.core.llm.port import (
     LLMResult,
     TokenUsage,
 )
+from app.core.llm.registry import PROVIDER_BY_MODEL, build_llm, resolve_provider
 
 __all__ = [
+    "PROVIDER_BY_MODEL",
     "FakeLLM",
     "FinishReason",
     "LLMAuthError",
@@ -30,4 +32,6 @@ __all__ = [
     "LLMResult",
     "LLMTransientError",
     "TokenUsage",
+    "build_llm",
+    "resolve_provider",
 ]
