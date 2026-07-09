@@ -2,6 +2,12 @@
 .idea/
 .playwright-mcp/
 
+# secrets — 로컬 전용, 절대 커밋 금지
+.env
+.env.*
+!.env.example
+!*.env.example
+
 # .claude: 개인 설정·스킬·워크트리는 무시, 팀 공유 harness(settings/agents/hooks + 프로젝트 스킬)만 커밋
 .claude/*
 !.claude/settings.json
