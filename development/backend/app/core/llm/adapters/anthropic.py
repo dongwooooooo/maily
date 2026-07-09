@@ -10,7 +10,7 @@ from app.core.llm.errors import (
     LLMTransientError,
 )
 from app.core.llm.observability import log_completion
-from app.core.llm.port import LLMRequest, LLMResult, TokenUsage
+from app.core.llm.port import FinishReason, LLMRequest, LLMResult, TokenUsage
 
 _TOOL_NAME = "emit"
 
@@ -82,7 +82,7 @@ class AnthropicAdapter:
         return result
 
 
-_STOP_REASON = {
+_STOP_REASON: dict[str, FinishReason] = {
     "end_turn": "stop",
     "max_tokens": "length",
     "tool_use": "tool",

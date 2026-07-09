@@ -24,8 +24,9 @@ def _text_response():
 
 
 def _tool_response():
+    tool_input = {"band": "urgent", "reason": "boss"}
     return SimpleNamespace(
-        content=[SimpleNamespace(type="tool_use", name="emit", input={"band": "urgent", "reason": "boss"})],
+        content=[SimpleNamespace(type="tool_use", name="emit", input=tool_input)],
         stop_reason="tool_use",
         model="claude-sonnet-5-2026",
         usage=SimpleNamespace(input_tokens=11, output_tokens=4),
@@ -33,12 +34,14 @@ def _tool_response():
 
 
 def _req(**kw):
-    return LLMRequest(model="claude-sonnet-5", messages=[LLMMessage(role="user", content="hi")], **kw)
+    messages = [LLMMessage(role="user", content="hi")]
+    return LLMRequest(model="claude-sonnet-5", messages=messages, **kw)
 
 
 @pytest.mark.asyncio
 async def test_text_completion_maps_result():
-    client = SimpleNamespace(messages=SimpleNamespace(create=AsyncMock(return_value=_text_response())))
+    create = AsyncMock(return_value=_text_response())
+    client = SimpleNamespace(messages=SimpleNamespace(create=create))
     adapter = AnthropicAdapter(client)
     result = await adapter.complete(_req())
     assert result.text == "a summary"
@@ -50,7 +53,8 @@ async def test_text_completion_maps_result():
 
 @pytest.mark.asyncio
 async def test_structured_completion_returns_parsed():
-    client = SimpleNamespace(messages=SimpleNamespace(create=AsyncMock(return_value=_tool_response())))
+    create = AsyncMock(return_value=_tool_response())
+    client = SimpleNamespace(messages=SimpleNamespace(create=create))
     adapter = AnthropicAdapter(client)
     result = await adapter.complete(_req(output_schema=_Band))
     assert result.parsed.band == "urgent"

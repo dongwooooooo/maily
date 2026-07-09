@@ -25,12 +25,16 @@ def _response(text=None, parsed=None, finish="STOP"):
 
 
 def _client(response=None, side_effect=None):
-    gen = AsyncMock(return_value=response) if side_effect is None else AsyncMock(side_effect=side_effect)
+    if side_effect is None:
+        gen = AsyncMock(return_value=response)
+    else:
+        gen = AsyncMock(side_effect=side_effect)
     return SimpleNamespace(aio=SimpleNamespace(models=SimpleNamespace(generate_content=gen)))
 
 
 def _req(**kw):
-    return LLMRequest(model="gemini-2.5-pro", messages=[LLMMessage(role="user", content="hi")], **kw)
+    messages = [LLMMessage(role="user", content="hi")]
+    return LLMRequest(model="gemini-2.5-pro", messages=messages, **kw)
 
 
 @pytest.mark.asyncio

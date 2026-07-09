@@ -2,6 +2,7 @@ import time
 
 from google import genai
 from google.genai import errors, types
+from pydantic import BaseModel
 
 from app.core.llm.errors import (
     LLMAuthError,
@@ -11,9 +12,9 @@ from app.core.llm.errors import (
     LLMTransientError,
 )
 from app.core.llm.observability import log_completion
-from app.core.llm.port import LLMRequest, LLMResult, TokenUsage
+from app.core.llm.port import FinishReason, LLMRequest, LLMResult, TokenUsage
 
-_FINISH = {
+_FINISH: dict[str, FinishReason] = {
     "STOP": "stop",
     "MAX_TOKENS": "length",
     "SAFETY": "refusal",
@@ -64,24 +65,35 @@ class GeminiAdapter:
         except errors.APIError as exc:
             raise _map_error(exc) from exc
 
-        usage = TokenUsage(
-            input_tokens=resp.usage_metadata.prompt_token_count,
-            output_tokens=resp.usage_metadata.candidates_token_count,
+        usage_metadata = resp.usage_metadata
+        input_tokens = usage_metadata.prompt_token_count if usage_metadata else None
+        output_tokens = usage_metadata.candidates_token_count if usage_metadata else None
+        usage = TokenUsage(input_tokens=input_tokens or 0, output_tokens=output_tokens or 0)
+
+        candidates = resp.candidates or []
+        finish_reason_obj = candidates[0].finish_reason if candidates else None
+        finish_name = finish_reason_obj.name if finish_reason_obj else None
+        finish_reason: FinishReason = (
+            _FINISH.get(finish_name, "stop") if finish_name is not None else "stop"
         )
-        finish_name = resp.candidates[0].finish_reason.name
+        model_name = resp.model_version or request.model
+
         if request.output_schema is not None:
+            parsed = resp.parsed
+            if parsed is not None and not isinstance(parsed, BaseModel):
+                raise LLMError(f"unexpected non-BaseModel parsed result: {type(parsed)!r}")
             result = LLMResult(
-                parsed=resp.parsed,
-                model_name=resp.model_version,
+                parsed=parsed,
+                model_name=model_name,
                 usage=usage,
                 finish_reason="stop",
             )
         else:
             result = LLMResult(
                 text=resp.text or "",
-                model_name=resp.model_version,
+                model_name=model_name,
                 usage=usage,
-                finish_reason=_FINISH.get(finish_name, "stop"),
+                finish_reason=finish_reason,
             )
         log_completion(request, result, (time.perf_counter() - started) * 1000)
         return result
