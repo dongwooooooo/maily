@@ -18,8 +18,6 @@ async def rebuild_briefing(
     workspace_id: uuid.UUID,
     source_id: uuid.UUID | None = None,
     message_ids: list[uuid.UUID] | None = None,
-    summary_overrides: dict[uuid.UUID, str | None] | None = None,
-    importance_overrides: dict[uuid.UUID, str | None] | None = None,
 ) -> list[uuid.UUID]:
     """Command `rebuild_briefing` — docs/goals/backend-plans/briefing.md.
 
@@ -28,23 +26,21 @@ async def rebuild_briefing(
     describes the *table*, not this function's mechanics — see
     test_projection_regenerable.py for a literal drop-and-rebuild proof).
 
-    `summary_overrides` / `importance_overrides` let build_briefing's
-    per-trigger wrapper (jobs/build_briefing.py) simulate what a real
-    `summary_completed`/`importance_classified` event payload would carry.
-    These two maps are NOT part of the official `build_briefing` job
-    payload contract (_integration-contract.md §2 lists only
-    `{workspace_id, source_id?, message_ids?}`) — message_summaries /
-    message_importance_classifications (migration 0010) don't exist in
-    this worktree yet, so there is no source table to join for real. A
-    message_id absent from the relevant override map keeps whatever
-    value the existing projection row already has (or null for a
-    brand-new row) instead of being reset — this is what makes
-    `summary_completed` and `importance_classified` each touch only
-    their own column (briefing.md Job §동시).
+    summary_text/importance_band are re-read fresh from
+    assistant_decisions' message_summaries/message_importance_classifications
+    on every call (repository.get_message_summary/get_message_importance) —
+    null if that domain hasn't produced a result yet. This is what makes
+    a rebuild triggered by ANY of the 6 documented trigger types
+    (gmail_snapshot_changed, summary_completed, importance_classified,
+    gmail_action_applied/undone, reminder_reactivated) converge on the
+    same real state regardless of which event fired it (briefing.md Job
+    §동시 — "rebuild가 원본 전체를 재조회"). IC2/IC3 coordinator note: an
+    earlier version of this function took summary_overrides/
+    importance_overrides params to simulate this lookup, from when
+    message_summaries/message_importance_classifications (migration 0010)
+    didn't exist yet in briefing's isolated worktree — removed now that
+    the real tables are merged.
     """
-    summary_overrides = summary_overrides or {}
-    importance_overrides = importance_overrides or {}
-
     if message_ids is not None:
         candidate_message_ids = list(message_ids)
     else:
@@ -84,16 +80,10 @@ async def rebuild_briefing(
         existing = await repository.get_briefing_item_by_account_message(
             connection, connected_account_id=account["id"], message_id=message_id
         )
-        importance_band = (
-            importance_overrides[message_id]
-            if message_id in importance_overrides
-            else (existing["importance_band"] if existing is not None else None)
-        )
-        summary_text = (
-            summary_overrides[message_id]
-            if message_id in summary_overrides
-            else (existing["summary_text"] if existing is not None else None)
-        )
+        summary_row = await repository.get_message_summary(connection, message_id=message_id)
+        importance_row = await repository.get_message_importance(connection, message_id=message_id)
+        summary_text = summary_row["summary_text"] if summary_row is not None else None
+        importance_band = importance_row["importance_band"] if importance_row is not None else None
         item_id = existing["id"] if existing is not None else uuid.uuid4()
 
         await repository.upsert_briefing_item(

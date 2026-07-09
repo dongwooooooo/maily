@@ -19,6 +19,7 @@ through at all).
 """
 
 import uuid
+from collections.abc import Callable
 from datetime import datetime, timezone
 
 from sqlalchemy import select, update
@@ -46,6 +47,9 @@ class MissingJobPayloadKeyError(Exception):
 _REQUIRED_PAYLOAD_KEYS: dict[str, set[str]] = {
     "register_watch": {"source_id"},
     "sync_full": {"source_id"},
+    "build_briefing": {"workspace_id"},
+    "generate_summary": {"message_id"},
+    "classify_importance": {"message_id"},
 }
 
 # _integration-contract.md §2 lock_key rules: source-targeted jobs lock per
@@ -73,20 +77,48 @@ def _resolve_lock_key(job_type: str, payload: dict) -> str | None:
     return None
 
 
-# Default behavior: pass the event payload through unchanged — every job
-# handler reads only the keys it needs (dict access on a fixed key set), so
-# extra keys from the event are harmless. Only add an entry here when a job
-# needs a key the event genuinely doesn't carry.
-_PAYLOAD_OVERRIDES: dict[tuple[str, str], dict] = {
-    ("gmail_source_connected", "sync_full"): {"reason": "initial_connect"},
+# Default behavior: pass the event payload through unchanged, as a single
+# job — every job handler reads only the keys it needs (dict access on a
+# fixed key set), so extra keys from the event are harmless. Only add an
+# entry here when a (event_type, job_type) pair needs something the
+# default 1-event-to-1-job pass-through can't produce: a static key
+# override, or a real fan-out (1 event -> N jobs, e.g. one job per
+# message_id in an event's message_ids list).
+def _override_reason_initial_connect(event_payload: dict) -> list[dict]:
+    return [{**event_payload, "reason": "initial_connect"}]
+
+
+def _fan_out_per_message_id(event_payload: dict) -> list[dict]:
+    return [{"message_id": message_id} for message_id in event_payload["message_ids"]]
+
+
+def _single_message_id_to_build_briefing_payload(event_payload: dict) -> list[dict]:
+    # summary_completed/importance_classified carry a single `message_id`
+    # (assistant_decisions evaluates one message per job); build_briefing's
+    # payload contract wants the plural `message_ids` list — even a
+    # 1-element one — since that's the key its handler reads.
+    return [
+        {
+            "workspace_id": event_payload["workspace_id"],
+            "message_ids": [event_payload["message_id"]],
+        }
+    ]
+
+
+_PAYLOAD_BUILDERS: dict[tuple[str, str], Callable[[dict], list[dict]]] = {
+    ("gmail_source_connected", "sync_full"): _override_reason_initial_connect,
+    ("gmail_snapshot_changed", "generate_summary"): _fan_out_per_message_id,
+    ("gmail_snapshot_changed", "classify_importance"): _fan_out_per_message_id,
+    ("summary_completed", "build_briefing"): _single_message_id_to_build_briefing_payload,
+    ("importance_classified", "build_briefing"): _single_message_id_to_build_briefing_payload,
 }
 
 
-def _build_job_payload(event_type: str, job_type: str, event_payload: dict) -> dict:
-    override = _PAYLOAD_OVERRIDES.get((event_type, job_type))
-    if override is None:
-        return dict(event_payload)
-    return {**event_payload, **override}
+def _build_job_payloads(event_type: str, job_type: str, event_payload: dict) -> list[dict]:
+    builder = _PAYLOAD_BUILDERS.get((event_type, job_type))
+    if builder is None:
+        return [dict(event_payload)]
+    return builder(event_payload)
 
 
 async def _enqueue_job(
@@ -148,22 +180,48 @@ async def dispatch_pending_events(
     enqueued_job_ids: list[uuid.UUID] = []
     for event in rows:
         for job_type in consumers.get(event["event_type"], []):
-            job_payload = _build_job_payload(event["event_type"], job_type, dict(event["payload"]))
-            missing = _REQUIRED_PAYLOAD_KEYS.get(job_type, set()) - job_payload.keys()
-            if missing:
-                raise MissingJobPayloadKeyError(
-                    f"{event['event_type']} -> {job_type} payload missing {sorted(missing)} "
-                    f"(event_id={event['id']})"
+            try:
+                job_payloads = _build_job_payloads(
+                    event["event_type"], job_type, dict(event["payload"])
                 )
-            job_id = await _enqueue_job(
-                connection,
-                job_type=job_type,
-                payload=job_payload,
-                idempotency_key=f"event:{event['id']}:job:{job_type}",
-                lock_key=_resolve_lock_key(job_type, job_payload),
-            )
-            if job_id is not None:
-                enqueued_job_ids.append(job_id)
+            except KeyError as exc:
+                # A builder (_fan_out_per_message_id etc.) did a direct
+                # payload[key] read the event's actual payload didn't
+                # satisfy — same "wiring bug, fail loud at dispatch time"
+                # intent as the required-key check below, just raised from
+                # inside a builder instead of the generic post-check.
+                raise MissingJobPayloadKeyError(
+                    f"{event['event_type']} -> {job_type} builder needs key {exc} "
+                    f"(event_id={event['id']})"
+                ) from exc
+            for index, job_payload in enumerate(job_payloads):
+                missing = _REQUIRED_PAYLOAD_KEYS.get(job_type, set()) - job_payload.keys()
+                if missing:
+                    raise MissingJobPayloadKeyError(
+                        f"{event['event_type']} -> {job_type} payload missing {sorted(missing)} "
+                        f"(event_id={event['id']})"
+                    )
+                # A fan-out event (job_payloads has >1 entry) needs a
+                # distinct idempotency_key per payload, or the UNIQUE
+                # constraint on (job_type, idempotency_key) would let only
+                # the first of N through — silently dropping the rest, no
+                # error. Gate this on the actual fan-out condition
+                # (len(job_payloads) > 1), not on a specific key name like
+                # "message_id" happening to be present — a future fan-out
+                # builder keyed on something else (action_id, etc.) must
+                # not silently fall through to the single-payload branch.
+                idempotency_key = f"event:{event['id']}:job:{job_type}"
+                if len(job_payloads) > 1:
+                    idempotency_key += f":{index}"
+                job_id = await _enqueue_job(
+                    connection,
+                    job_type=job_type,
+                    payload=job_payload,
+                    idempotency_key=idempotency_key,
+                    lock_key=_resolve_lock_key(job_type, job_payload),
+                )
+                if job_id is not None:
+                    enqueued_job_ids.append(job_id)
 
         await connection.execute(
             update(outbox_events)

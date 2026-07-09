@@ -5,11 +5,35 @@ from sqlalchemy import and_, insert, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from app.domains.assistant_decisions.models import (
+    message_importance_classifications,
+    message_summaries,
+)
 from app.domains.briefing.models import briefing_item_states, briefing_items, reminders
 from app.domains.mail_intake.models import gmail_messages, message_excerpts
 from app.domains.mail_sources.models import connected_gmail_accounts, gmail_source_settings
 
 # ---- source/message lookups (read-only joins into upstream domains) -------
+
+
+async def get_message_summary(connection: AsyncConnection, *, message_id: uuid.UUID) -> dict | None:
+    row = (
+        await connection.execute(
+            select(message_summaries).where(message_summaries.c.message_id == message_id)
+        )
+    ).mappings().first()
+    return dict(row) if row is not None else None
+
+
+async def get_message_importance(connection: AsyncConnection, *, message_id: uuid.UUID) -> dict | None:
+    row = (
+        await connection.execute(
+            select(message_importance_classifications).where(
+                message_importance_classifications.c.message_id == message_id
+            )
+        )
+    ).mappings().first()
+    return dict(row) if row is not None else None
 
 
 async def get_message(connection: AsyncConnection, *, message_id: uuid.UUID) -> dict | None:

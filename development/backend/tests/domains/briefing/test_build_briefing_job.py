@@ -1,6 +1,7 @@
 from sqlalchemy import update
 
 from app.core.database import engine
+from app.domains.assistant_decisions import repository as assistant_repository
 from app.domains.briefing import repository
 from app.domains.briefing.jobs.build_briefing import handle_build_briefing_trigger
 from app.domains.mail_intake.models import gmail_messages
@@ -8,16 +9,24 @@ from tests.domains.briefing.conftest import seed_message, seed_scope
 
 
 async def test_summary_completed_rebuilds_single_message() -> None:
+    """[IC3] summary_completed 트리거 -> rebuild가 message_summaries를
+    실제로 재조회해 summary_text에 반영한다(더 이상 payload override 아님)."""
     workspace_id, _user_id, account_id = await seed_scope()
     m1 = await seed_message(account_id)
 
     async with engine.begin() as connection:
+        await assistant_repository.upsert_message_summary(
+            connection,
+            message_id=m1,
+            summary_text="이번 분기 정산 요약입니다.",
+            is_metadata_only=False,
+            model_name="fake-model",
+        )
         await handle_build_briefing_trigger(
             connection,
             trigger_type="summary_completed",
             workspace_id=workspace_id,
             message_ids=[m1],
-            summary_text="이번 분기 정산 요약입니다.",
         )
         after_summary = await repository.get_briefing_item_by_account_message(
             connection, connected_account_id=account_id, message_id=m1
@@ -27,19 +36,23 @@ async def test_summary_completed_rebuilds_single_message() -> None:
     assert after_summary["importance_band"] is None
 
     async with engine.begin() as connection:
+        await assistant_repository.upsert_message_importance_classification(
+            connection, message_id=m1, importance_band="fake_high", reason="fake reason"
+        )
         await handle_build_briefing_trigger(
             connection,
             trigger_type="importance_classified",
             workspace_id=workspace_id,
             message_ids=[m1],
-            importance_band="fake_high",
         )
         after_importance = await repository.get_briefing_item_by_account_message(
             connection, connected_account_id=account_id, message_id=m1
         )
 
-    # importance_classified touched only its own column — summary_text from
-    # the earlier trigger is preserved (briefing.md Job §동시).
+    # importance_classified re-reads both real tables — summary_text set
+    # by the earlier trigger is still there because message_summaries
+    # itself hasn't changed, not because of any override bookkeeping
+    # (briefing.md Job §동시).
     assert after_importance["summary_text"] == "이번 분기 정산 요약입니다."
     assert after_importance["importance_band"] == "fake_high"
 
@@ -135,12 +148,14 @@ async def test_job_idempotent() -> None:
     m1 = await seed_message(account_id)
 
     async with engine.begin() as connection:
+        await assistant_repository.upsert_message_summary(
+            connection, message_id=m1, summary_text="요약", is_metadata_only=False, model_name="fake-model"
+        )
         await handle_build_briefing_trigger(
             connection,
             trigger_type="summary_completed",
             workspace_id=workspace_id,
             message_ids=[m1],
-            summary_text="요약",
         )
         first = await repository.get_briefing_item_by_account_message(
             connection, connected_account_id=account_id, message_id=m1
@@ -152,7 +167,6 @@ async def test_job_idempotent() -> None:
             trigger_type="summary_completed",
             workspace_id=workspace_id,
             message_ids=[m1],
-            summary_text="요약",
         )
         second = await repository.get_briefing_item_by_account_message(
             connection, connected_account_id=account_id, message_id=m1

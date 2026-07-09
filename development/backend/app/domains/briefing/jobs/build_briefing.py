@@ -4,11 +4,9 @@ build_briefing".
 Official trigger events (_integration-contract.md §3):
 `gmail_snapshot_changed`, `summary_completed`, `importance_classified`,
 `gmail_action_applied`, `gmail_action_undone`, `reminder_reactivated`.
-Wiring those events through the outbox dispatcher to this job (IC2/IC3) is
-a later coordinator integration step — mail_intake/assistant_decisions/
-gmail_actions aren't merged in this worktree. `handle_build_briefing_trigger`
-below is what tests call directly to exercise each trigger's rebuild scope,
-per the task's SCOPE instructions.
+Wired through the outbox dispatcher to this job at IC2/IC3
+(app.core.jobs.wiring.ACTIVE_EVENT_CONSUMERS). `handle_build_briefing_trigger`
+below is what tests call directly to exercise each trigger's rebuild scope.
 """
 
 import uuid
@@ -39,38 +37,25 @@ async def handle_build_briefing_trigger(
     workspace_id: uuid.UUID,
     message_ids: list[uuid.UUID],
     source_id: uuid.UUID | None = None,
-    summary_text: str | None = None,
-    importance_band: str | None = None,
 ) -> list[uuid.UUID]:
     """Per-trigger rebuild scope (briefing.md "트리거별 재생성 범위").
 
-    `summary_text`/`importance_band` are only consulted for the
-    `summary_completed`/`importance_classified` triggers respectively —
-    see service.rebuild_briefing's docstring for why they aren't part of
-    the official job payload. Every other trigger just re-joins current
-    gmail_messages/existing-projection state for the given message_ids.
+    Every trigger type converges on the same rebuild — service.
+    rebuild_briefing re-reads current summary_text/importance_band from
+    assistant_decisions' tables fresh on every call, so there's no
+    per-trigger override to thread through here. `trigger_type` stays an
+    explicit, validated parameter: it documents which of the 6
+    contract-listed event types is calling this, and rejects anything
+    else.
     """
     if trigger_type not in TRIGGER_TYPES:
         raise ValidationError(f"unknown build_briefing trigger_type: {trigger_type}")
-
-    summary_overrides = (
-        {message_id: summary_text for message_id in message_ids}
-        if trigger_type == "summary_completed"
-        else None
-    )
-    importance_overrides = (
-        {message_id: importance_band for message_id in message_ids}
-        if trigger_type == "importance_classified"
-        else None
-    )
 
     rebuilt = await service.rebuild_briefing(
         connection,
         workspace_id=workspace_id,
         source_id=source_id,
         message_ids=message_ids,
-        summary_overrides=summary_overrides,
-        importance_overrides=importance_overrides,
     )
     logger.info(
         "build_briefing 트리거 처리 완료",

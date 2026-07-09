@@ -18,12 +18,18 @@ async def publish_snapshot_changed(
     connection: AsyncConnection,
     *,
     connected_account_id: uuid.UUID,
+    workspace_id: uuid.UUID,
     sync_run_id: uuid.UUID,
     message_ids: list[uuid.UUID],
 ) -> None:
     """A sync_run with an empty message_ids set does not publish — an empty
     event would just wake every consumer for nothing (mail_intake.md
-    "메시지_ids가 빈 sync_run은 event를 발행하지 않는다")."""
+    "메시지_ids가 빈 sync_run은 event를 발행하지 않는다").
+
+    `workspace_id` is included so consumers (build_briefing, IC2/IC3) can
+    scope their write without a cross-domain lookup of their own — the
+    caller already has this on the account row it loaded to run the sync,
+    so there's no extra query here."""
     if not message_ids:
         return
     await append_event(
@@ -32,6 +38,7 @@ async def publish_snapshot_changed(
         producer_domain="mail_intake",
         payload={
             "source_id": str(connected_account_id),
+            "workspace_id": str(workspace_id),
             "sync_run_id": str(sync_run_id),
             "message_ids": [str(message_id) for message_id in message_ids],
         },
