@@ -18,9 +18,21 @@ JOB_HANDLERS: dict = {
 }
 
 EVENT_CONSUMERS: dict = {
-    # producer: mail_sources — consumer job lives in this domain
-    "gmail_source_connected": ["register_watch"],
-    "gmail_notification_received": ["sync_delta"],
+    # producer: mail_sources — consumer job lives in this domain.
+    # _integration-contract.md §3: gmail_source_connected queues both
+    # register_watch AND an initial sync_full ("+ 초기 sync_full").
+    "gmail_source_connected": ["register_watch", "sync_full"],
+    # NOTE: gmail_notification_received is NOT listed here even though
+    # §3 names sync_delta as its consumer. service.process_notification
+    # already fans this out itself — one Pub/Sub notification can touch
+    # several active sources, each needing its own sync_delta job with a
+    # real {source_id, start_history_id} payload the generic dispatcher
+    # can't derive from the event's {email_address, history_id} shape
+    # (1 event -> N jobs, not expressible by the generic pass-through
+    # dispatcher — see app/core/jobs/outbox_dispatcher.py's docstring and
+    # app/core/jobs/wiring.py). Listing it here would make
+    # dispatch_pending_events double-enqueue a second, malformed
+    # sync_delta job alongside process_notification's own correct one.
 }
 
 PURGE_HANDLER = None
