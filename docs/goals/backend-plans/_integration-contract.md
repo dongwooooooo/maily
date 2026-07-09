@@ -125,7 +125,7 @@ dispatcher는 outbox event를 읽어 아래 consumer job을 `job_runs`에 큐잉
 | `gmail_action_undone` | gmail_actions | `build_briefing`(briefing), `emit_notification`(notifications) | |
 | `summary_completed` | assistant_decisions | `build_briefing`(briefing, message_id 단위) | |
 | `importance_classified` | assistant_decisions | `build_briefing`(briefing, message_id 단위) | |
-| `cleanup_proposal_created` | assistant_decisions | `emit_notification`(notifications) | |
+| `cleanup_proposal_created` | assistant_decisions | `build_briefing`(briefing), `emit_notification`(notifications) | |
 | `rule_suggestion_created` | assistant_decisions | (briefing 구독) | |
 | `notification_event_created` | notifications | browser push worker | |
 
