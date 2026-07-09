@@ -1,6 +1,7 @@
 from app.domains.mail_intake.jobs import (
     poll_history,
     process_notification,
+    reconcile_action,
     register_watch,
     renew_watch,
     sync_delta,
@@ -15,6 +16,7 @@ JOB_HANDLERS: dict = {
     "poll_history": poll_history.handle,
     "sync_delta": sync_delta.handle,
     "sync_full": sync_full.handle,
+    "reconcile_action": reconcile_action.handle,
 }
 
 EVENT_CONSUMERS: dict = {
@@ -22,6 +24,8 @@ EVENT_CONSUMERS: dict = {
     # _integration-contract.md §3: gmail_source_connected queues both
     # register_watch AND an initial sync_full ("+ 초기 sync_full").
     "gmail_source_connected": ["register_watch", "sync_full"],
+    # producer: gmail_actions — IC4 "mail_intake snapshot reconcile".
+    "gmail_action_applied": ["reconcile_action"],
     # NOTE: gmail_notification_received is NOT listed here even though
     # §3 names sync_delta as its consumer. service.process_notification
     # already fans this out itself — one Pub/Sub notification can touch

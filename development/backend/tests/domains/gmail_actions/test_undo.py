@@ -1,9 +1,11 @@
 import uuid
 
 import pytest
+from sqlalchemy import select
 
 from app.core.database import engine
 from app.core.errors import ConflictError, ValidationError
+from app.core.outbox import outbox_events
 from app.domains.gmail_actions import repository
 from app.domains.gmail_actions.fake_mutator import FakeGmailMutationPort
 from app.domains.gmail_actions.jobs import execute_action
@@ -106,6 +108,81 @@ async def test_undo_reverses_via_ledger_not_direct_gmail(
     assert original["status"] == "undone"
     assert original["version"] == 3  # applied(1) -> compensating(2) -> undone(3)
     assert undo_row["undone_at"] is not None
+
+
+async def test_undo_finalize_emits_gmail_action_undone_with_workspace_and_message_id(
+    _fresh_fake_mutator: FakeGmailMutationPort,
+) -> None:
+    """IC4: gmail_action_undone carries workspace_id/message_id (added
+    alongside gmail_action_applied's enrichment) so build_briefing can
+    rebuild without a cross-domain lookup of its own."""
+    workspace_id, user_id, message_id, command, activity = await _create_and_apply(
+        action_type="mark_read"
+    )
+
+    async with engine.begin() as connection:
+        undo_result = await request_undo(
+            connection, activity_id=activity["id"], workspace_id=workspace_id, actor_id=user_id
+        )
+    async with engine.begin() as connection:
+        await run_execute_action(connection, command_id=undo_result.reverse_command_id)
+
+    async with engine.connect() as connection:
+        rows = (
+            await connection.execute(
+                select(outbox_events).where(outbox_events.c.event_type == "gmail_action_undone")
+            )
+        ).mappings().all()
+    row = next(r for r in rows if r["payload"]["command_id"] == str(command.id))
+
+    assert row["payload"]["workspace_id"] == str(workspace_id)
+    assert row["payload"]["message_id"] == str(message_id)
+
+
+async def test_undo_finalize_skips_event_when_account_scope_missing(
+    _fresh_fake_mutator: FakeGmailMutationPort, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """[선행조건] 계정이 사라진 뒤(미래 purge 이후) undo가 완료돼도
+    workspace_id: null 짜리 gmail_action_undone을 발행하지 않는다 —
+    ledger 전이(undone)는 그대로 유지, 이벤트만 생략(코드리뷰 반영)."""
+    workspace_id, user_id, message_id, command, activity = await _create_and_apply(
+        action_type="mark_read"
+    )
+    async with engine.begin() as connection:
+        undo_result = await request_undo(
+            connection, activity_id=activity["id"], workspace_id=workspace_id, actor_id=user_id
+        )
+
+    # run_execute_action calls get_connected_account_scope twice on its own
+    # (pending-branch precondition check, then activity/undo backfill) —
+    # both must succeed normally so the reverse command actually applies.
+    # Only _finalize_undo_if_reverse's later, independent lookup (3rd call)
+    # simulates the account having disappeared.
+    real_get_scope = repository.get_connected_account_scope
+    call_count = 0
+
+    async def _scope_missing_from_third_call(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        if call_count <= 2:
+            return await real_get_scope(*args, **kwargs)
+        return None
+
+    monkeypatch.setattr(repository, "get_connected_account_scope", _scope_missing_from_third_call)
+
+    async with engine.begin() as connection:
+        await run_execute_action(connection, command_id=undo_result.reverse_command_id)
+
+    async with engine.connect() as connection:
+        original = await repository.get_command(connection, command_id=command.id)
+        rows = (
+            await connection.execute(
+                select(outbox_events).where(outbox_events.c.event_type == "gmail_action_undone")
+            )
+        ).mappings().all()
+
+    assert original["status"] == "undone"  # ledger transition unaffected
+    assert not any(r["payload"]["command_id"] == str(command.id) for r in rows)
 
 
 async def test_undo_idempotent_via_undone_at() -> None:

@@ -63,11 +63,32 @@ async def _finalize_undo_if_reverse(connection, *, command_id: uuid.UUID) -> Non
     await repository.mark_undo_action_undone(
         connection, undo_id=reverse_link["id"], undone_at=now
     )
+    scope = await repository.get_connected_account_scope(
+        connection, connected_account_id=original["connected_account_id"]
+    )
+    if scope is None:
+        # Ledger transition above still stands regardless — only the
+        # derived event is skipped. No PURGE_HANDLER exists yet
+        # (mail_sources/__init__.py) so connected_gmail_accounts rows are
+        # never hard-deleted today; this guards the day one does, so a
+        # purged account's undo doesn't emit a workspace_id: null event
+        # that build_briefing would fail on (real bug, code review
+        # caught it: uuid.UUID("None") raises, exhausts retries, job
+        # lands `failed` with no visible error to the user).
+        logger.warning(
+            "undo 대상 계정이 사라져 gmail_action_undone 발행 생략",
+            command_id=str(original["id"]),
+        )
+        return
     await append_event(
         connection,
         event_type=events.GMAIL_ACTION_UNDONE,
         producer_domain="gmail_actions",
-        payload={"command_id": str(original["id"])},
+        payload={
+            "command_id": str(original["id"]),
+            "workspace_id": str(scope["workspace_id"]),
+            "message_id": str(original["message_id"]) if original["message_id"] else None,
+        },
         idempotency_key=events.undone_key(original["id"], new_version),
     )
 
@@ -133,7 +154,13 @@ async def run_execute_action(connection, *, command_id: uuid.UUID) -> None:
             connection,
             event_type=events.GMAIL_ACTION_APPLIED,
             producer_domain="gmail_actions",
-            payload={"command_id": str(command_id)},
+            payload={
+                "command_id": str(command_id),
+                "workspace_id": str(scope["workspace_id"]),
+                "message_id": str(command["message_id"]) if command["message_id"] else None,
+                "add_label_ids": command["payload"].get("add_label_ids") or [],
+                "remove_label_ids": command["payload"].get("remove_label_ids") or [],
+            },
             idempotency_key=events.applied_key(command_id, new_version),
         )
         logger.info("Gmail 액션 적용 완료", command_id=str(command_id), changed=result.changed)
