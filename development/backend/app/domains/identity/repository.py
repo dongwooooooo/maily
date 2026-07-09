@@ -100,3 +100,21 @@ async def revoke_session(
     await connection.execute(
         update(sessions).where(sessions.c.id == session_id).values(revoked_at=revoked_at)
     )
+
+
+async def get_session_summary(
+    connection: AsyncConnection, *, user_id: uuid.UUID, workspace_id: uuid.UUID
+) -> dict:
+    user_row = (
+        await connection.execute(select(users).where(users.c.id == user_id))
+    ).mappings().first()
+    workspace_row = (
+        await connection.execute(select(workspaces).where(workspaces.c.id == workspace_id))
+    ).mappings().first()
+    return {
+        "user_id": user_row["id"],
+        "email": user_row["email"],
+        "display_name": user_row["display_name"],
+        "workspace_id": workspace_row["id"],
+        "workspace_name": workspace_row["name"],
+    }
