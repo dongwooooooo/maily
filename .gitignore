@@ -1,0 +1,13 @@
+.DS_Store
+.idea/
+.playwright-mcp/
+node_modules/
+dist/
+.next/
+.turbo/
+.venv/
+__pycache__/
+*.py[cod]
+development/frontend/node_modules/
+development/frontend/dist/
+development/frontend/.next/
