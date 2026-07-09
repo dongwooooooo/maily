@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     google_oauth_client_id: str = ""
     google_oauth_client_secret: str = ""
     token_encryption_key: str = ""
+    pubsub_webhook_token: str = ""
 
 
 settings = Settings()
