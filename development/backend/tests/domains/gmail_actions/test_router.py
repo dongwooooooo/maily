@@ -9,6 +9,7 @@ from app.domains.gmail_actions.jobs.execute_action import run_execute_action
 from app.domains.identity.schemas import GoogleProfile
 from app.domains.identity.service import google_login, issue_session
 from app.main import app
+from tests.domains.gmail_actions.conftest import seed_message
 
 
 async def _auth_headers() -> dict:
@@ -87,7 +88,7 @@ async def test_activity_and_undo_round_trip_through_router() -> None:
     client = TestClient(app)
     connect_response = client.post("/sources", headers=headers, json=_connect_source_body())
     account_id = connect_response.json()["id"]
-    message_id = str(uuid.uuid4())
+    message_id = str(await seed_message(uuid.UUID(account_id)))
     mutator.seed_labels(uuid.UUID(message_id), {"UNREAD", "INBOX"})
 
     create_response = client.post(

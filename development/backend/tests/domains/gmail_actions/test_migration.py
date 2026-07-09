@@ -23,7 +23,11 @@ async def test_migration_head_creates_gmail_actions_tables_with_constraints() ->
 
     assert {"gmail_action_commands", "activity_logs", "undo_actions"} <= set(table_names)
 
-    assert {fk["referred_table"] for fk in command_fks} == {"connected_gmail_accounts", "users"}
+    assert {fk["referred_table"] for fk in command_fks} == {
+        "connected_gmail_accounts",
+        "users",
+        "gmail_messages",
+    }
     assert any(
         set(c["column_names"]) == {"idempotency_key"} for c in command_unique
     )

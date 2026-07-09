@@ -11,7 +11,7 @@ from app.domains.gmail_actions.jobs import execute_action
 from app.domains.gmail_actions.jobs.execute_action import run_execute_action
 from app.domains.gmail_actions.schemas import RequestGmailActionInput
 from app.domains.gmail_actions.service import request_gmail_action
-from tests.domains.gmail_actions.conftest import seed_scope
+from tests.domains.gmail_actions.conftest import seed_message, seed_scope
 
 
 @pytest.fixture(autouse=True)
@@ -26,7 +26,7 @@ async def _create_pending_command(
     *, action_type: str = "mark_read", message_id: uuid.UUID | None = None
 ):
     workspace_id, user_id, account_id = await seed_scope()
-    message_id = message_id or uuid.uuid4()
+    message_id = message_id or await seed_message(account_id)
     data = RequestGmailActionInput(
         workspace_id=workspace_id,
         connected_account_id=account_id,

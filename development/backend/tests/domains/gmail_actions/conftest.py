@@ -8,6 +8,7 @@ from sqlalchemy import insert
 from app.core.config import settings
 from app.core.database import engine
 from app.domains.identity.models import users, workspaces
+from app.domains.mail_intake.models import gmail_messages
 from app.domains.mail_sources.models import connected_gmail_accounts
 
 
@@ -59,3 +60,17 @@ async def seed_scope(*, status: str = "connected") -> tuple[uuid.UUID, uuid.UUID
     workspace_id, user_id = await seed_workspace_and_user()
     account_id = await seed_connected_account(workspace_id, status=status)
     return workspace_id, user_id, account_id
+
+
+async def seed_message(connected_account_id: uuid.UUID) -> uuid.UUID:
+    message_id = uuid.uuid4()
+    async with engine.begin() as connection:
+        await connection.execute(
+            insert(gmail_messages).values(
+                id=message_id,
+                connected_account_id=connected_account_id,
+                gmail_message_id=f"gmail-{uuid.uuid4()}",
+                gmail_thread_id=f"thread-{uuid.uuid4()}",
+            )
+        )
+    return message_id

@@ -10,15 +10,16 @@ from app.core.outbox import outbox_events
 from app.domains.gmail_actions.fake_mutator import FakeGmailMutationPort
 from app.domains.gmail_actions.schemas import RequestGmailActionInput
 from app.domains.gmail_actions.service import request_gmail_action
-from tests.domains.gmail_actions.conftest import seed_scope
+from tests.domains.gmail_actions.conftest import seed_message, seed_scope
 
 
 async def _make_input(**overrides) -> RequestGmailActionInput:
     workspace_id, user_id, account_id = await seed_scope()
+    message_id = await seed_message(account_id)
     defaults = {
         "workspace_id": workspace_id,
         "connected_account_id": account_id,
-        "message_id": uuid.uuid4(),
+        "message_id": message_id,
         "action_type": "mark_read",
         "gmail_label_id": None,
         "idempotency_key": str(uuid.uuid4()),
@@ -93,10 +94,11 @@ async def test_idempotency_key_dedupes_mutation() -> None:
     same command, no second row, no second event."""
     key = str(uuid.uuid4())
     workspace_id, user_id, account_id = await seed_scope()
+    message_id = await seed_message(account_id)
     data = RequestGmailActionInput(
         workspace_id=workspace_id,
         connected_account_id=account_id,
-        message_id=uuid.uuid4(),
+        message_id=message_id,
         action_type="mark_read",
         idempotency_key=key,
         requested_by=user_id,
@@ -126,10 +128,11 @@ async def test_concurrent_same_idempotency_key_creates_only_one_command() -> Non
     service falls back to returning the winner's row instead of erroring."""
     key = str(uuid.uuid4())
     workspace_id, user_id, account_id = await seed_scope()
+    message_id = await seed_message(account_id)
     data = RequestGmailActionInput(
         workspace_id=workspace_id,
         connected_account_id=account_id,
-        message_id=uuid.uuid4(),
+        message_id=message_id,
         action_type="mark_read",
         idempotency_key=key,
         requested_by=user_id,
@@ -164,10 +167,11 @@ async def test_label_apply_without_gmail_label_id_raises_validation_error() -> N
 async def test_other_workspace_account_raises_not_found() -> None:
     _, other_user_id, _ = await seed_scope()
     _, _, real_account_id = await seed_scope()
+    message_id = await seed_message(real_account_id)
     data = RequestGmailActionInput(
         workspace_id=uuid.uuid4(),  # not the workspace that owns real_account_id
         connected_account_id=real_account_id,
-        message_id=uuid.uuid4(),
+        message_id=message_id,
         action_type="mark_read",
         idempotency_key=str(uuid.uuid4()),
         requested_by=other_user_id,
@@ -180,10 +184,11 @@ async def test_other_workspace_account_raises_not_found() -> None:
 
 async def test_disconnecting_account_raises_conflict() -> None:
     workspace_id, user_id, account_id = await seed_scope(status="disconnecting")
+    message_id = await seed_message(account_id)
     data = RequestGmailActionInput(
         workspace_id=workspace_id,
         connected_account_id=account_id,
-        message_id=uuid.uuid4(),
+        message_id=message_id,
         action_type="mark_read",
         idempotency_key=str(uuid.uuid4()),
         requested_by=user_id,

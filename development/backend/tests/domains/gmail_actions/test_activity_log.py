@@ -11,7 +11,7 @@ from app.domains.gmail_actions.jobs import execute_action
 from app.domains.gmail_actions.jobs.execute_action import run_execute_action
 from app.domains.gmail_actions.schemas import RequestGmailActionInput
 from app.domains.gmail_actions.service import request_gmail_action
-from tests.domains.gmail_actions.conftest import seed_scope
+from tests.domains.gmail_actions.conftest import seed_message, seed_scope
 
 
 @pytest.fixture(autouse=True)
@@ -24,7 +24,7 @@ def _fresh_fake_mutator():
 
 async def _create_and_apply(*, action_type: str = "mark_read", initial_labels=None):
     workspace_id, user_id, account_id = await seed_scope()
-    message_id = uuid.uuid4()
+    message_id = await seed_message(account_id)
     execute_action.get_mutator().seed_labels(message_id, initial_labels or {"UNREAD", "INBOX"})
     data = RequestGmailActionInput(
         workspace_id=workspace_id,
@@ -78,7 +78,7 @@ async def test_activity_reconstructable_from_ledger() -> None:
     from app.domains.gmail_actions.activity import ensure_activity_and_undo
 
     workspace_id, user_id, account_id = await seed_scope()
-    message_id = uuid.uuid4()
+    message_id = await seed_message(account_id)
     data = RequestGmailActionInput(
         workspace_id=workspace_id,
         connected_account_id=account_id,
