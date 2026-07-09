@@ -18,16 +18,22 @@ def _test_jwt_secret(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_sign_and_verify_roundtrip_returns_claims() -> None:
+    session_id = uuid.uuid4()
     user_id = uuid.uuid4()
     workspace_id = uuid.uuid4()
     issued_at = _now()
     expires_at = issued_at + timedelta(hours=12)
 
     token = security.sign_session_token(
-        user_id=user_id, workspace_id=workspace_id, issued_at=issued_at, expires_at=expires_at
+        session_id=session_id,
+        user_id=user_id,
+        workspace_id=workspace_id,
+        issued_at=issued_at,
+        expires_at=expires_at,
     )
     claims = security.verify_session_token(token)
 
+    assert claims["session_id"] == str(session_id)
     assert claims["user_id"] == str(user_id)
     assert claims["workspace_id"] == str(workspace_id)
     assert claims["iss"] == settings.jwt_issuer
@@ -38,7 +44,11 @@ def test_verify_rejects_expired_token() -> None:
     expired_at = issued_at + timedelta(hours=1)
 
     token = security.sign_session_token(
-        user_id=uuid.uuid4(), workspace_id=uuid.uuid4(), issued_at=issued_at, expires_at=expired_at
+        session_id=uuid.uuid4(),
+        user_id=uuid.uuid4(),
+        workspace_id=uuid.uuid4(),
+        issued_at=issued_at,
+        expires_at=expired_at,
     )
 
     with pytest.raises(security.InvalidSessionTokenError):
@@ -47,6 +57,7 @@ def test_verify_rejects_expired_token() -> None:
 
 def test_verify_rejects_foreign_issuer() -> None:
     payload = {
+        "session_id": str(uuid.uuid4()),
         "user_id": str(uuid.uuid4()),
         "workspace_id": str(uuid.uuid4()),
         "iss": "not-maily",
@@ -64,5 +75,9 @@ def test_sign_raises_when_secret_missing(monkeypatch: pytest.MonkeyPatch) -> Non
 
     with pytest.raises(security.MissingJWTSecretError):
         security.sign_session_token(
-            user_id=uuid.uuid4(), workspace_id=uuid.uuid4(), issued_at=_now(), expires_at=_now()
+            session_id=uuid.uuid4(),
+            user_id=uuid.uuid4(),
+            workspace_id=uuid.uuid4(),
+            issued_at=_now(),
+            expires_at=_now(),
         )

@@ -16,6 +16,7 @@ class InvalidSessionTokenError(Exception):
 
 def sign_session_token(
     *,
+    session_id: uuid.UUID,
     user_id: uuid.UUID,
     workspace_id: uuid.UUID,
     issued_at: datetime,
@@ -25,6 +26,7 @@ def sign_session_token(
         raise MissingJWTSecretError("MAILY_JWT_SECRET is not set")
 
     payload = {
+        "session_id": str(session_id),
         "user_id": str(user_id),
         "workspace_id": str(workspace_id),
         "iss": settings.jwt_issuer,
