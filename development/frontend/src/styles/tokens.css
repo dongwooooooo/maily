@@ -1,0 +1,62 @@
+/*
+ * Maily design tokens — single source of truth.
+ * Ported 1:1 from design/boards/v1/current/shared.css :root (03-keystone.html,
+ * Phase 3 키스톤 확정 — CLAUDE.md source-of-truth stack #3).
+ * Variable names match shared.css exactly (not the old --color-* system) so board
+ * CSS can be ported into App.css without a rename pass. See design-decisions.md
+ * for the tone/color history behind these values.
+ * Fonts: Latin/numerals = Newsreader (serif), Korean/body = Pretendard.
+ */
+:root {
+  /* ── Surfaces ────────────────────────────────────────────── */
+  --bg: #ffffff;
+  --panel: var(--bg);
+  --surface: #ffffff;
+  --soft: #f6f4ef;
+
+  /* ── Ink ─────────────────────────────────────────────────── */
+  --ink: #26282b;
+  --body: #43464a;
+  --muted: rgba(38, 40, 43, 0.64);
+  --label: rgba(38, 40, 43, 0.78); /* 구조 라벨 텍스트 — 계정 라벨/발신자/섹션·서브 카운트 숫자 전용 */
+
+  /* ── Hairlines / control ─────────────────────────────────── */
+  --line: rgba(38, 40, 43, 0.12);
+  --line-strong: rgba(38, 40, 43, 0.22);
+  --control: rgba(38, 40, 43, 0.48);
+  --selected: rgba(38, 40, 43, 0.06);
+  --hover-ink: rgba(38, 40, 43, 0.04);
+
+  /* ── Accent (restrained teal point) ──────────────────────── */
+  --teal: #14807a;
+  --teal-deep: #0e5e59; /* 틴트 위 텍스트 스텝 (6.85:1) */
+  --teal-soft: rgba(20, 128, 122, 0.04);
+  --teal-line: rgba(20, 128, 122, 0.28);
+
+  /* ── Semantic (status moments only) ──────────────────────── */
+  --success: #218358;
+  --warning: #a16207;
+  --danger: #ce2c31;
+
+  /* ── On-color ────────────────────────────────────────────── */
+  --on-color: #ffffff;
+
+  /* ── Motion ──────────────────────────────────────────────── */
+  --motion: 180ms;
+  --easing: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ── Focus (keyboard nav only, :focus-visible) ───────────── */
+  --focus-color: var(--teal);
+
+  /* ── Type: fonts ─────────────────────────────────────────── */
+  --font-sans:
+    'Pretendard Variable',
+    Pretendard,
+    -apple-system,
+    'Apple SD Gothic Neo',
+    'Noto Sans KR',
+    Inter,
+    system-ui,
+    sans-serif;
+  --font-serif: 'Newsreader', 'Pretendard Variable', Pretendard, Georgia, serif;
+}

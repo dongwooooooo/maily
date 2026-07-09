@@ -1,0 +1,29 @@
+@import './styles/tokens.css';
+
+/*
+ * Base reset only. Body/button/focus-visible/reduced-motion rules live in
+ * app-shell/App.css (ported 1:1 from design/boards/v1/current/shared.css) —
+ * kept here to avoid duplicating the same rules across two files.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--ink);
+  margin: 0;
+}
+
+/* 0-5k G4: 클릭 가능한 요소는 포인터 커서 (ui-ux-pro-max `cursor-pointer`) */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']),
+a[href],
+label[for],
+select,
+summary {
+  cursor: pointer;
+}
