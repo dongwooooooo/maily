@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="800" viewBox="0 0 1440 800">
+<rect width="1440" height="800" fill="#ffffff"/>
+<rect x="0.0" y="0.0" width="210.0" height="800.0" fill="#fafafa"/>
+<line x1="210.0" y1="0.0" x2="210.0" y2="800.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="16.0" y="30.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">My</text>
+<text x="16.0" y="46.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">woomacho@gmail.com</text>
+<line x1="12.0" y1="58.0" x2="198.0" y2="58.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="18.0" y="84.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Today's Briefing</text>
+<text x="18.0" y="114.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Priority</text>
+<rect x="0.0" y="126.0" width="210.0" height="27.0" fill="#efefef"/>
+<rect x="0.0" y="126.0" width="3.0" height="27.0" fill="#1a1a1a"/>
+<text x="18.0" y="144.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="700">Cleanup Review</text>
+<text x="196.0" y="144.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a" text-anchor="end">3</text>
+<text x="18.0" y="174.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Activity Log</text>
+<text x="18.0" y="204.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Settings</text>
+<rect x="210.0" y="0.0" width="1230.0" height="56.0" fill="#ffffff"/>
+<line x1="210.0" y1="56.0" x2="1440.0" y2="56.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="230.0" y="35.0" font-family="Inter, sans-serif" font-size="16" fill="#1a1a1a" font-weight="700">Cleanup Review</text>
+<rect x="377.5" y="14.0" width="112.2" height="28.0" fill="#ffffff" rx="5" stroke="#c4c4c4" stroke-width="1"/>
+<text x="389.5" y="32.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a">All accounts</text>
+<text x="471.8" y="32.0" font-family="Inter, sans-serif" font-size="10" fill="#555555">▾</text>
+<rect x="1324.3" y="17.0" width="95.7" height="22.0" fill="#fafafa" rx="11" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1334.3" y="32.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Activity Log →</text>
+<rect x="1179.1" y="17.0" width="137.3" height="22.0" fill="#fafafa" rx="11" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1189.1" y="32.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">3 suggestions pending</text>
+<rect x="230.0" y="76.0" width="1180.0" height="38.0" fill="#fafafa" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="230.0" y="76.0" width="4.0" height="38.0" fill="#1a1a1a" rx="2"/>
+<text x="244.0" y="100.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a">✓ 방금 적용됨: Newsletters 18건 — Newsletter 라벨 + 아카이브</text>
+<rect x="1260.0" y="83.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1270.0" y="99.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Undo</text>
+<text x="1396.0" y="100.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" text-anchor="end">로그 보기</text>
+<rect x="230.0" y="130.0" width="1180.0" height="160.0" fill="#ffffff" rx="6" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="230.0" y="130.0" width="1180.0" height="40.0" fill="#fafafa" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="244.0" y="142.0" width="56.4" height="16.0" fill="#efefef" rx="3" stroke="#c4c4c4" stroke-width="1"/>
+<text x="250.0" y="154.0" font-family="Inter, sans-serif" font-size="10" fill="#555555" font-weight="600">Personal</text>
+<text x="310.4" y="155.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">GitHub notifications → Label: GitHub + Archive</text>
+<text x="617.8" y="155.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">12 mails · low confidence</text>
+<rect x="1245.3" y="138.0" width="82.5" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="1255.3" y="154.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Approve all</text>
+<rect x="1335.8" y="138.0" width="62.2" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1345.8" y="154.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Dismiss</text>
+<text x="244.0" y="190.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="600">[repo] PR #482 merged</text>
+<text x="1318.0" y="190.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a" text-anchor="end">Inbox → Archived · Label: GitHub</text>
+<rect x="1328.0" y="176.0" width="62.0" height="18.0" fill="none" rx="3" stroke="#d9d9d9" stroke-width="1"/>
+<text x="1336.0" y="189.0" font-family="Inter, sans-serif" font-size="10" fill="#555555">exclude</text>
+<line x1="230.0" y1="200.0" x2="1410.0" y2="200.0" stroke="#efefef" stroke-width="1"/>
+<text x="244.0" y="220.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="600">[repo] CI failed on main</text>
+<text x="1318.0" y="220.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a" text-anchor="end">Inbox → Archived · Label: GitHub</text>
+<rect x="1328.0" y="206.0" width="62.0" height="18.0" fill="none" rx="3" stroke="#d9d9d9" stroke-width="1"/>
+<text x="1336.0" y="219.0" font-family="Inter, sans-serif" font-size="10" fill="#555555">exclude</text>
+<line x1="230.0" y1="230.0" x2="1410.0" y2="230.0" stroke="#efefef" stroke-width="1"/>
+<text x="244.0" y="250.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="600">[repo] New issue #501</text>
+<text x="1318.0" y="250.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a" text-anchor="end">Inbox → Archived · Label: GitHub</text>
+<rect x="1328.0" y="236.0" width="62.0" height="18.0" fill="none" rx="3" stroke="#d9d9d9" stroke-width="1"/>
+<text x="1336.0" y="249.0" font-family="Inter, sans-serif" font-size="10" fill="#555555">exclude</text>
+<line x1="230.0" y1="260.0" x2="1410.0" y2="260.0" stroke="#efefef" stroke-width="1"/>
+<text x="244.0" y="280.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">… 9 more</text>
+<text x="1390.0" y="280.0" font-family="Inter, sans-serif" font-size="10.5" fill="#555555" text-anchor="end">show all</text>
+<rect x="230.0" y="306.0" width="1180.0" height="164.0" fill="#ffffff" rx="6" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="230.0" y="306.0" width="1180.0" height="40.0" fill="#fafafa" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="244.0" y="318.0" width="36.2" height="16.0" fill="#efefef" rx="3" stroke="#c4c4c4" stroke-width="1"/>
+<text x="250.0" y="330.0" font-family="Inter, sans-serif" font-size="10" fill="#555555" font-weight="600">Work</text>
+<text x="290.2" y="331.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">새 카테고리 제안: Recruiting</text>
+<text x="475.4" y="331.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">6 mails · rule suggested</text>
+<rect x="1193.4" y="314.0" width="134.4" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="1203.4" y="330.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Create section &amp; rule</text>
+<rect x="1335.8" y="314.0" width="62.2" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1345.8" y="330.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Dismiss</text>
+<text x="244.0" y="366.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="600">채용 후보 서류 전달</text>
+<text x="1318.0" y="366.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a" text-anchor="end">Inbox → Label: Recruiting (제안)</text>
+<rect x="1328.0" y="352.0" width="62.0" height="18.0" fill="none" rx="3" stroke="#d9d9d9" stroke-width="1"/>
+<text x="1336.0" y="365.0" font-family="Inter, sans-serif" font-size="10" fill="#555555">exclude</text>
+<line x1="230.0" y1="376.0" x2="1410.0" y2="376.0" stroke="#efefef" stroke-width="1"/>
+<text x="244.0" y="396.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="600">면접 일정 확정 요청</text>
+<text x="1318.0" y="396.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a" text-anchor="end">Inbox → Label: Recruiting (제안)</text>
+<rect x="1328.0" y="382.0" width="62.0" height="18.0" fill="none" rx="3" stroke="#d9d9d9" stroke-width="1"/>
+<text x="1336.0" y="395.0" font-family="Inter, sans-serif" font-size="10" fill="#555555">exclude</text>
+<line x1="230.0" y1="406.0" x2="1410.0" y2="406.0" stroke="#efefef" stroke-width="1"/>
+<text x="244.0" y="426.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">… 4 more</text>
+<text x="1390.0" y="426.0" font-family="Inter, sans-serif" font-size="10.5" fill="#555555" text-anchor="end">show all</text>
+<rect x="244.0" y="446.0" width="11.0" height="11.0" fill="#ffffff" rx="2" stroke="#555555" stroke-width="1"/>
+<text x="245.5" y="455.5" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a">✓</text>
+<text x="261.0" y="456.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Next time, put similar recruiting mail in </text>
+<text x="476.8" y="456.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a" font-weight="700">Recruiting</text>
+<text x="540.1" y="456.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a">— 승인 시 서비스 규칙 + 사이드바 섹션으로 추가</text>
+<rect x="230.0" y="486.0" width="1180.0" height="100.0" fill="#ffffff" rx="6" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="230.0" y="486.0" width="1180.0" height="40.0" fill="#fafafa" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="244.0" y="498.0" width="56.4" height="16.0" fill="#efefef" rx="3" stroke="#c4c4c4" stroke-width="1"/>
+<text x="250.0" y="510.0" font-family="Inter, sans-serif" font-size="10" fill="#555555" font-weight="600">Personal</text>
+<text x="310.4" y="511.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">프로모션 메일 → Archive</text>
+<text x="469.4" y="511.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">9 mails · low confidence</text>
+<rect x="1245.3" y="494.0" width="82.5" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="1255.3" y="510.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Approve all</text>
+<rect x="1335.8" y="494.0" width="62.2" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1345.8" y="510.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Dismiss</text>
+<text x="244.0" y="546.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="600">7월 한정 세일 안내</text>
+<text x="1318.0" y="546.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a" text-anchor="end">Inbox → Archived</text>
+<rect x="1328.0" y="532.0" width="62.0" height="18.0" fill="none" rx="3" stroke="#d9d9d9" stroke-width="1"/>
+<text x="1336.0" y="545.0" font-family="Inter, sans-serif" font-size="10" fill="#555555">exclude</text>
+<line x1="230.0" y1="556.0" x2="1410.0" y2="556.0" stroke="#efefef" stroke-width="1"/>
+<text x="244.0" y="576.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">… 8 more</text>
+<text x="1390.0" y="576.0" font-family="Inter, sans-serif" font-size="10.5" fill="#555555" text-anchor="end">show all</text>
+</svg>

@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+<rect width="1440" height="900" fill="#ffffff"/>
+<rect x="0.0" y="0.0" width="210.0" height="900.0" fill="#fafafa"/>
+<line x1="210.0" y1="0.0" x2="210.0" y2="900.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="16.0" y="30.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">My</text>
+<text x="16.0" y="46.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">woomacho@gmail.com</text>
+<line x1="12.0" y1="58.0" x2="198.0" y2="58.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="18.0" y="84.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Today's Briefing</text>
+<text x="18.0" y="114.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Priority</text>
+<text x="18.0" y="144.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Cleanup Review</text>
+<text x="18.0" y="174.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Activity Log</text>
+<rect x="0.0" y="186.0" width="210.0" height="27.0" fill="#efefef"/>
+<rect x="0.0" y="186.0" width="3.0" height="27.0" fill="#1a1a1a"/>
+<text x="18.0" y="204.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="700">Settings</text>
+<rect x="210.0" y="0.0" width="1230.0" height="56.0" fill="#ffffff"/>
+<line x1="210.0" y1="56.0" x2="1440.0" y2="56.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="230.0" y="35.0" font-family="Inter, sans-serif" font-size="16" fill="#1a1a1a" font-weight="700">Settings</text>
+<rect x="318.0" y="14.0" width="112.2" height="28.0" fill="#ffffff" rx="5" stroke="#c4c4c4" stroke-width="1"/>
+<text x="330.0" y="32.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a">All accounts</text>
+<text x="412.2" y="32.0" font-family="Inter, sans-serif" font-size="10" fill="#555555">▾</text>
+<rect x="1356.0" y="17.0" width="64.0" height="22.0" fill="#fafafa" rx="11" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1366.0" y="32.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Notif on</text>
+<text x="230.0" y="94.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">Service login</text>
+<rect x="230.0" y="110.0" width="860.0" height="54.0" fill="#ffffff" rx="6" stroke="#d9d9d9" stroke-width="1"/>
+<text x="246.0" y="132.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="600">이동우</text>
+<text x="295.0" y="132.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">woomacho@gmail.com</text>
+<text x="246.0" y="150.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a">이 계정으로 서비스에 로그인합니다. 아래 Gmail 계정들은 메일 소스로만 연결됩니다.</text>
+<rect x="962.0" y="126.0" width="104.5" height="22.0" fill="#fafafa" rx="11" stroke="#c4c4c4" stroke-width="1"/>
+<text x="972.0" y="141.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">서비스 대표 계정</text>
+<text x="230.0" y="200.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">Connected Gmail accounts (3)</text>
+<rect x="973.0" y="184.0" width="117.0" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="983.0" y="200.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">+ Connect account</text>
+<rect x="230.0" y="216.0" width="860.0" height="340.0" fill="#ffffff" rx="6" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="231.0" y="217.0" width="858.0" height="42.0" fill="#fafafa"/>
+<rect x="246.0" y="231.0" width="14.0" height="14.0" fill="#666666" rx="4"/>
+<text x="270.0" y="243.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">Personal</text>
+<line x1="270.0" y1="248.0" x2="327.7" y2="248.0" stroke="#c4c4c4" stroke-width="1"/>
+<text x="339.7" y="243.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">woomacho@gmail.com</text>
+<circle cx="930.0" cy="238.0" r="4" fill="#7a7a7a"/>
+<text x="940.0" y="242.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Synced · 8분 전</text>
+<text x="1066.0" y="243.0" font-family="Inter, sans-serif" font-size="12" fill="#8a8a8a">^</text>
+<line x1="230.0" y1="260.0" x2="1090.0" y2="260.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="274.0" y="281.0" font-family="Inter, sans-serif" font-size="12.5" fill="#1a1a1a" font-weight="600">AI summary</text>
+<text x="274.0" y="297.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a">짧은 요약 생성을 위해 메일 내용이 처리될 수 있습니다. 끄면 메타데이터만 표시됩니다.</text>
+<rect x="1044.0" y="275.0" width="30.0" height="16.0" fill="#1e1e1e" rx="8"/>
+<circle cx="1066.0" cy="283.0" r="6" fill="#ffffff"/>
+<line x1="230.0" y1="308.0" x2="1090.0" y2="308.0" stroke="#efefef" stroke-width="1"/>
+<text x="274.0" y="329.0" font-family="Inter, sans-serif" font-size="12.5" fill="#1a1a1a" font-weight="600">Include in briefing</text>
+<text x="274.0" y="345.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a">이 계정의 메일을 오늘 브리핑과 우선순위에 포함합니다.</text>
+<rect x="1044.0" y="323.0" width="30.0" height="16.0" fill="#1e1e1e" rx="8"/>
+<circle cx="1066.0" cy="331.0" r="6" fill="#ffffff"/>
+<line x1="230.0" y1="356.0" x2="1090.0" y2="356.0" stroke="#efefef" stroke-width="1"/>
+<text x="274.0" y="377.0" font-family="Inter, sans-serif" font-size="12.5" fill="#1a1a1a" font-weight="600">Browser notifications</text>
+<text x="274.0" y="393.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a">이 계정의 중요 메일·리마인더를 브라우저 알림으로 받습니다.</text>
+<rect x="1044.0" y="371.0" width="30.0" height="16.0" fill="#1e1e1e" rx="8"/>
+<circle cx="1066.0" cy="379.0" r="6" fill="#ffffff"/>
+<line x1="230.0" y1="404.0" x2="1090.0" y2="404.0" stroke="#efefef" stroke-width="1"/>
+<text x="274.0" y="425.0" font-family="Inter, sans-serif" font-size="12.5" fill="#1a1a1a" font-weight="600">Disconnect</text>
+<text x="274.0" y="441.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a">연결 해제 시 이 계정의 브리핑·규칙이 중지됩니다. Gmail 데이터는 변경되지 않습니다.</text>
+<rect x="989.1" y="416.0" width="84.9" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="999.1" y="432.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Disconnect…</text>
+<line x1="230.0" y1="452.0" x2="1090.0" y2="452.0" stroke="#efefef" stroke-width="1"/>
+<rect x="231.0" y="453.0" width="858.0" height="46.0" fill="#fafafa"/>
+<rect x="246.0" y="469.0" width="14.0" height="14.0" fill="#a3a3a3" rx="4"/>
+<rect x="270.0" y="464.0" width="53.5" height="24.0" fill="#ffffff" rx="4" stroke="#1a1a1a" stroke-width="1.5"/>
+<text x="278.0" y="481.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">Work</text>
+<line x1="313.5" y1="469.0" x2="313.5" y2="483.0" stroke="#1a1a1a" stroke-width="1"/>
+<text x="335.5" y="481.0" font-family="Inter, sans-serif" font-size="9.5" fill="#8a8a8a">Enter 저장 · Esc 취소</text>
+<text x="471.5" y="481.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">work@company.com</text>
+<circle cx="930.0" cy="476.0" r="4" fill="#dddddd" stroke="#8a8a8a" stroke-width="1" stroke-dasharray="2,2"/>
+<text x="940.0" y="480.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Syncing 62%</text>
+<text x="1066.0" y="481.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">v</text>
+<line x1="230.0" y1="500.0" x2="1090.0" y2="500.0" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="231.0" y="501.0" width="858.0" height="54.0" fill="#fafafa"/>
+<rect x="246.0" y="515.0" width="14.0" height="14.0" fill="#ffffff" rx="4" stroke="#444444" stroke-width="2"/>
+<text x="270.0" y="527.0" font-family="Inter, sans-serif" font-size="13" fill="#8a8a8a" font-weight="700">school@gmail.com</text>
+<line x1="270.0" y1="532.0" x2="382.1" y2="532.0" stroke="#c4c4c4" stroke-width="1"/>
+<text x="394.1" y="527.0" font-family="Inter, sans-serif" font-size="9.5" fill="#8a8a8a">표시 이름 없음 — 클릭해서 지정</text>
+<text x="270.0" y="547.0" font-family="Inter, sans-serif" font-size="10.5" fill="#555555">Gmail 권한이 만료되었습니다. 동기화가 중단되었습니다.</text>
+<rect x="940.0" y="514.0" width="91.1" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="950.0" y="530.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Re-authorize</text>
+<text x="1066.0" y="527.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">v</text>
+<text x="230.0" y="592.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">Notifications</text>
+<rect x="230.0" y="608.0" width="860.0" height="96.0" fill="#ffffff" rx="6" stroke="#d9d9d9" stroke-width="1"/>
+<text x="246.0" y="629.0" font-family="Inter, sans-serif" font-size="12.5" fill="#1a1a1a" font-weight="600">Browser notification permission</text>
+<text x="246.0" y="645.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a">브라우저 권한: 허용됨. 계정별 알림은 위 계정 설정에서 제어합니다.</text>
+<rect x="1044.0" y="623.0" width="30.0" height="16.0" fill="#1e1e1e" rx="8"/>
+<circle cx="1066.0" cy="631.0" r="6" fill="#ffffff"/>
+<line x1="230.0" y1="656.0" x2="1090.0" y2="656.0" stroke="#efefef" stroke-width="1"/>
+<text x="246.0" y="677.0" font-family="Inter, sans-serif" font-size="12.5" fill="#1a1a1a" font-weight="600">New briefing notification</text>
+<text x="246.0" y="693.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a">새 브리핑이 준비되면 알림을 보냅니다.</text>
+<rect x="1044.0" y="671.0" width="30.0" height="16.0" fill="#1e1e1e" rx="8"/>
+<circle cx="1066.0" cy="679.0" r="6" fill="#ffffff"/>
+<line x1="230.0" y1="704.0" x2="1090.0" y2="704.0" stroke="#efefef" stroke-width="1"/>
+<text x="230.0" y="728.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">설정창 패턴: 행 = 왼쪽 제목+설명 / 오른쪽 컨트롤. 계정 행은 아코디언(Personal 펼침 · Work 이름 편집 중 · school@ 권한 경고).</text>
+</svg>

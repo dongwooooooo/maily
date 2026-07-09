@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>03 키스톤 — 톤 후보 A/B/C 비교 보드</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<style>
+  :root {
+    --ink:#26282b; --body:#43464a; --muted:rgba(38,40,43,.64); --line:rgba(38,40,43,.14);
+    --bg:#f6f4ef; --card:#fff; --teal:#14807a;
+    --sans:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo",system-ui,sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:var(--sans); color:var(--body); background:var(--bg); }
+  header.board { padding:32px 40px 20px; }
+  header.board h1 { font-weight:800; font-size:22px; letter-spacing:-0.01em; color:var(--ink); margin:0 0 8px; }
+  header.board p { margin:0; font-size:13.5px; color:var(--muted); max-width:760px; line-height:1.6; }
+
+  table.matrix { margin:20px 40px; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; font-size:13px; }
+  table.matrix th, table.matrix td { text-align:left; padding:11px 16px; border-bottom:1px solid var(--line); vertical-align:top; }
+  table.matrix thead th { background:#faf9f5; font-weight:700; font-size:13.5px; color:var(--ink); }
+  table.matrix tbody tr:last-child td { border-bottom:0; }
+  table.matrix td:first-child, table.matrix th:first-child { color:var(--muted); font-weight:700; width:110px; }
+
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; padding:8px 40px 60px; }
+  .col { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+  .col-head { padding:16px 18px; border-bottom:1px solid var(--line); }
+  .col-head .tag { font-size:12px; font-weight:700; color:var(--teal); letter-spacing:.02em; }
+  .col-head h2 { margin:3px 0 6px; font-weight:800; font-size:18px; color:var(--ink); }
+  .col-head ul { margin:0; padding-left:18px; font-size:12.5px; color:var(--body); line-height:1.6; }
+  .col-head ul li { margin-bottom:2px; }
+  .frame-wrap { position:relative; height:380px; overflow:hidden; background:#fff; border-bottom:1px solid var(--line); }
+  .frame-wrap iframe { position:absolute; top:0; left:0; width:1440px; height:1160px; border:0; transform:scale(.336); transform-origin:top left; }
+  .col-foot { padding:12px 18px; display:flex; justify-content:flex-end; align-items:center; }
+  .col-foot a { font-size:13px; color:var(--teal); text-decoration:none; font-weight:700; }
+  .col-foot a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+  <header class="board">
+    <h1>03 오늘 브리핑 — 톤 후보 A / B / C 비교</h1>
+    <p>같은 화면 구조, 같은 확정 카피, 같은 색상 hue(배경/아이보리/잉크/틸/시맨틱 3색) 고정. 타이포그래피·아이콘·밀도·표면 처리·모션만 다른 3개 톤 후보다. 세로 스크롤 축소 미리보기 — 실물은 각 열 하단 "전체 화면"으로 확인. 하나를 고르면 그 톤을 shared.css에 반영하고 나머지 9개 화면(01~10)에 전파한다.</p>
+  </header>
+
+  <table class="matrix">
+    <thead>
+      <tr><th>축</th><th>A · Editorial Serif</th><th>B · Systematic Mono-Grotesk</th><th>C · Warm Paper</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>서체</td><td>헤딩 Newsreader(세리프) + 본문 Pretendard</td><td>Pretendard 단일, 자간 좁힘</td><td>Pretendard 단일, 중간 굵기</td></tr>
+      <tr><td>웨이트 대비</td><td>헤딩 500 · 본문 400 (완만)</td><td>헤딩 700~800 · 본문 400 (강함)</td><td>헤딩 700~800 · 본문 400 (중간)</td></tr>
+      <tr><td>여백/밀도</td><td>넓음 — 매거진 리듬</td><td>촘촘 — 대시보드 리듬</td><td>중간 — 카드 사이 gap로 구분</td></tr>
+      <tr><td>카드 표면</td><td>보더 없음, 헤어라인 구분 + 좌측 틸 룰 선택</td><td>1px 보더(잉크 14%), 그림자 없음</td><td>아이보리 카드 배경, 그림자 5% 이하 1개</td></tr>
+      <tr><td>Radius</td><td>8~10px (팝오버 10px)</td><td>4~6px</td><td>8~10px (카드 10px)</td></tr>
+      <tr><td>아이콘</td><td>얇은 스트로크 1.5~1.6, 둥근 join</td><td>굵은 스트로크 2.5, 각진 join</td><td>스트로크 2.2, 둥근 join, 원형 버튼</td></tr>
+      <tr><td>모션 easing</td><td>ease-out 표준 (0.4,0,0.2,1)</td><td>스냅 (0.65,0,0.35,1)</td><td>ease-out-quint (0.22,1,0.36,1)</td></tr>
+      <tr><td>아이보리 비중</td><td>중간 — 사이드바·상세 패널만</td><td>최소 — 계정 배지 등에만</td><td>큼 — 사이드바·상세·카드 전반</td></tr>
+      <tr><td>인상</td><td>차분한 프리미엄 브리핑</td><td>업무용 대시보드, 정보 밀도</td><td>따뜻한 종이 다이제스트</td></tr>
+    </tbody>
+  </table>
+
+  <div class="grid">
+    <div class="col">
+      <div class="col-head">
+        <span class="tag">A · Editorial Serif</span>
+        <h2>Newsreader 헤딩 · 여백형</h2>
+        <ul>
+          <li>타이포: 헤딩 세리프(Newsreader) + 본문 Pretendard, 여백 넓게</li>
+          <li>아이콘: 스트로크 1.5, 얇고 우아함</li>
+          <li>밀도: 낮음 — 카드 세로 여백 크고 매거진 리듬</li>
+          <li>표면: 보더 대신 헤어라인 + 좌측 틸 룰 선택 표시</li>
+        </ul>
+      </div>
+      <div class="frame-wrap"><iframe src="03-keystone-tone-editorial.html" title="A" scrolling="no"></iframe></div>
+      <div class="col-foot"><a href="03-keystone-tone-editorial.html" target="_blank">전체 화면 →</a></div>
+    </div>
+
+    <div class="col">
+      <div class="col-head">
+        <span class="tag">B · Systematic Mono-Grotesk</span>
+        <h2>Pretendard 단일 · 조밀형</h2>
+        <ul>
+          <li>타이포: 그로테스크 하나로 통일, 자간 좁힘, 웨이트 대비 강함</li>
+          <li>아이콘: 스트로크 2.5, 각진 join — 대시보드 느낌</li>
+          <li>밀도: 높음 — 촘촘한 gap, 작은 radius(4~6px)</li>
+          <li>표면: 그림자 없이 1px 보더로만 카드 구분</li>
+        </ul>
+      </div>
+      <div class="frame-wrap"><iframe src="03-keystone-tone-systematic.html" title="B" scrolling="no"></iframe></div>
+      <div class="col-foot"><a href="03-keystone-tone-systematic.html" target="_blank">전체 화면 →</a></div>
+    </div>
+
+    <div class="col">
+      <div class="col-head">
+        <span class="tag">C · Warm Paper</span>
+        <h2>아이보리 카드 · 온기형</h2>
+        <ul>
+          <li>타이포: Pretendard 중간 굵기, A/B 사이 중간 밀도</li>
+          <li>아이콘: 스트로크 2.2, 둥근 join, 원형 버튼</li>
+          <li>밀도: 중간 — 카드 사이 gap 12px, radius 8~10px</li>
+          <li>표면: 카드 자체가 아이보리, 그림자 5% 이하 1개만</li>
+        </ul>
+      </div>
+      <div class="frame-wrap"><iframe src="03-keystone-tone-warm.html" title="C" scrolling="no"></iframe></div>
+      <div class="col-foot"><a href="03-keystone-tone-warm.html" target="_blank">전체 화면 →</a></div>
+    </div>
+  </div>
+</body>
+</html>

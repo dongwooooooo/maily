@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>03 오늘 브리핑 - 호버/구분면 틸 토큰 적용판</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --panel: #fafafa;
+      --surface: #ffffff;
+      --soft: #f6f4ef;
+      --ink: #26282b;
+      --body: #43464a;
+      --muted: rgba(38, 40, 43, .64);
+      --line: rgba(38, 40, 43, .12);
+      --line-strong: rgba(38, 40, 43, .22);
+      --control: rgba(38, 40, 43, .48);
+
+      /* ---- 이번 적용분: 호버·구분면 토큰 ---- */
+      --hover: rgba(20, 128, 122, .04);          /* teal 4%  #F6FAFA — 지나가는 피드백 */
+      --selected: rgba(20, 128, 122, .08);       /* teal 8%  #ECF5F4 — 선택·의미 면 */
+      --selected-hover: rgba(20, 128, 122, .12); /* teal 12% #E3F0EF — 상한선 */
+      --hover-ink: rgba(38, 40, 43, .05);        /* 뉴트럴 컨트롤 hover */
+      --teal-solid-hover: #278A85;               /* 솔리드 위 on-color 8% 레이어(M3) */
+
+      --teal: #14807a;
+      --teal-soft: rgba(20, 128, 122, .08);
+      --teal-line: rgba(20, 128, 122, .28);
+      font-family:
+        "Pretendard Variable",
+        Pretendard,
+        -apple-system,
+        "Apple SD Gothic Neo",
+        "Noto Sans KR",
+        Inter,
+        system-ui,
+        sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--body);
+      font-size: 12px;
+      line-height: 1.45;
+      letter-spacing: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font: inherit; letter-spacing: 0; cursor: pointer; }
+
+    .board-note {
+      max-width: 1440px;
+      padding: 10px 20px;
+      font-size: 11px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+    }
+    .board-note b { color: var(--ink); }
+    .board-note code { background: var(--selected); padding: 1px 6px; border-radius: 4px; }
+
+    .app {
+      width: 1440px;
+      height: 1140px;
+      display: grid;
+      grid-template-columns: 210px 630px 600px;
+      grid-template-rows: 56px 1fr;
+      background: var(--bg);
+    }
+
+    .sidebar {
+      grid-column: 1;
+      grid-row: 1 / 3;
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      padding: 17px 12px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 14px;
+    }
+
+    .identity { padding: 0 4px 10px; border-bottom: 1px solid var(--line); }
+
+    .brand-home { display: inline-grid; place-items: center; color: var(--ink); text-decoration: none; }
+
+    .brand-mark {
+      width: 26px; height: 26px; border-radius: 6px;
+      display: grid; place-items: center;
+      background: var(--teal); color: #ffffff;
+      font-size: 12px; font-weight: 800;
+    }
+
+    .service-footer { padding: 12px 4px 0; border-top: 1px solid var(--line); display: grid; gap: 9px; }
+
+    .service-strip {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .service-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .88) 0 2px, transparent 3px),
+        linear-gradient(135deg, #14807a, #0e5e59);
+      box-shadow: inset 0 0 0 1px rgba(38, 40, 43, .12);
+    }
+
+    .service-name {
+      min-width: 0; color: var(--ink);
+      font-size: 15px; line-height: 1.2; font-weight: 750;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .icon-button {
+      position: relative; width: 30px; height: 30px;
+      border: 1px solid var(--line-strong); border-radius: 50%;
+      background: var(--surface); color: var(--body);
+      display: grid; place-items: center; padding: 0;
+      transition: background-color 140ms ease;
+    }
+    .icon-button:hover { background: var(--hover); }
+
+    .icon-button svg {
+      width: 15px; height: 15px;
+      stroke: currentColor; stroke-width: 2; fill: none;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .unread-dot {
+      position: absolute; top: -3px; right: -2px;
+      width: 11px; height: 11px; border-radius: 50%;
+      background: var(--teal);
+      border: 2px solid var(--panel);
+    }
+
+    .scope-control {
+      min-height: 34px; border: 0; border-radius: 6px;
+      background: transparent;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 6px;
+      color: var(--ink); font-size: 12px; font-weight: 700; white-space: nowrap;
+      transition: background-color 140ms ease;
+    }
+    .scope-control:hover { background: var(--hover); }
+
+    .scope-icon {
+      width: 18px; height: 18px; border-radius: 5px;
+      display: inline-grid; place-items: center;
+      background: var(--teal-soft); color: var(--teal);
+      flex: 0 0 auto;
+    }
+
+    .scope-icon svg {
+      width: 13px; height: 13px;
+      stroke: currentColor; stroke-width: 2; fill: none;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .scope-control .sync-spinner { width: 10px; height: 10px; border-width: 2px; margin-left: 2px; }
+
+    .mail-scope { display: flex; align-items: center; gap: 6px; }
+    .mail-scope-label { color: var(--muted); font-size: 10px; font-weight: 700; }
+    .mail-scope-main {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      color: var(--ink); font-size: 12px; font-weight: 750;
+    }
+
+    .side-nav { margin-top: 8px; display: grid; gap: 4px; align-content: start; }
+
+    /* 내비: hover와 active가 같은 지오메트리를 공유하도록 기본 행에 확장 박스 적용 */
+    .nav-row {
+      min-height: 27px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      color: var(--body);
+      margin-left: -12px;
+      margin-right: -12px;
+      padding: 0 14px 0 30px;
+      border-radius: 0; /* 끝 라운드 제거 — 플랫 풀블리드 하이라이트 */
+      text-decoration: none;
+      font-size: 12px;
+      position: relative;
+      transition: background-color 140ms ease;
+    }
+    .nav-row:hover { background: var(--hover); color: var(--ink); }
+    .nav-row.active { background: var(--selected); color: var(--ink); font-weight: 750; }
+    .nav-row.active:hover { background: var(--selected-hover); }
+    .nav-row.active::before { content: none; }
+
+    .nav-count { color: var(--muted); font-size: 10px; }
+
+    .sub-nav {
+      position: relative;
+      margin: 6px 0 10px;
+      padding-left: 36px;
+      display: grid;
+      gap: 7px;
+    }
+
+    .sub-nav::before {
+      content: "";
+      position: absolute;
+      left: 14px; top: 0; bottom: 0;
+      width: 1px;
+      background: var(--line);
+    }
+
+    .sub-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      min-height: 24px;
+      align-items: center;
+      margin-left: -8px;
+      margin-right: -8px;
+      padding: 0 8px;
+      border-radius: 0; /* 끝 라운드 제거 */
+      color: var(--muted);
+      font-size: 11px;
+      text-decoration: none;
+      transition: background-color 140ms ease;
+    }
+    .sub-row:hover { background: var(--hover); color: var(--ink); }
+    .sub-row[aria-current="true"] { background: var(--selected); color: var(--ink); font-weight: 700; }
+    .sub-row[aria-current="true"]:hover { background: var(--selected-hover); }
+
+    .topbar {
+      grid-column: 2 / 4;
+      grid-row: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+      border-bottom: 1px solid var(--line);
+      padding: 0 20px;
+      background: var(--bg);
+    }
+
+    .notification-button {
+      position: relative;
+      width: 34px; height: 34px;
+      border: 0; border-radius: 6px;
+      background: transparent; color: var(--body);
+      display: grid; place-items: center; padding: 0;
+      transition: background-color 140ms ease;
+    }
+    .notification-button:hover { background: var(--hover); }
+
+    .notification-button svg {
+      width: 15px; height: 15px;
+      stroke: currentColor; stroke-width: 2; fill: none;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .notification-button .unread-dot { border-color: var(--bg); }
+
+    .button-icon {
+      width: 15px; height: 15px;
+      stroke: currentColor; stroke-width: 2; fill: none;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .sync-spinner {
+      width: 12px; height: 12px; border-radius: 50%;
+      border: 2px solid var(--teal-line);
+      border-top-color: var(--teal);
+      animation: spin 900ms linear infinite;
+    }
+
+    .top-button, .ghost-button, .dark-button {
+      min-height: 28px;
+      border-radius: 5px;
+      border: 0;
+      background: var(--soft);
+      color: var(--body);
+      padding: 0 10px;
+      font-size: 11px;
+      font-weight: 650;
+      white-space: nowrap;
+      transition: background-color 140ms ease;
+    }
+    .top-button:hover, .ghost-button:hover {
+      background-image: linear-gradient(var(--hover-ink), var(--hover-ink));
+    }
+
+    .dark-button { border-color: var(--teal); background: var(--teal); color: #ffffff; }
+    .dark-button:hover { background: var(--teal-solid-hover); }
+
+    .top-button.primary { border-color: var(--teal); background: var(--teal); color: #ffffff; }
+    .top-button.primary:hover { background: var(--teal-solid-hover); }
+
+    .ghost-button { background: var(--soft); color: var(--ink); }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .list-pane {
+      grid-column: 2;
+      grid-row: 2;
+      padding: 30px 20px 40px;
+      overflow: auto;
+      scroll-behavior: smooth;
+      background: var(--bg);
+    }
+
+    .section { margin-bottom: 26px; }
+
+    .section-head {
+      min-height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .section-title { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+    .section-title h2 { margin: 0; color: var(--ink); font-size: 13px; line-height: 1.2; font-weight: 750; }
+    .section-title span { color: var(--muted); font-size: 11px; }
+
+    .section-menu {
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 2px;
+      border-radius: 5px;
+      padding: 0 6px;
+      transition: background-color 140ms ease;
+    }
+    .section-menu:hover { background: var(--hover); }
+
+    .account-line {
+      display: flex; align-items: center; gap: 7px; height: 18px;
+      color: var(--body); font-size: 11px; font-weight: 700;
+    }
+
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); }
+    .dot.work { background: var(--soft); border: 1px dashed var(--control); }
+    .dot.school { background: #ffffff; border: 2px solid var(--control); }
+
+    .mail-list { display: grid; gap: 9px; }
+
+    .mail-card {
+      width: 590px;
+      min-height: 96px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      display: grid;
+      overflow: hidden;
+      transition: background-color 140ms ease, border-color 140ms ease;
+    }
+    .mail-card:hover { background: var(--hover); }
+
+    /* 선택 카드: 넓은 면 틴트 채움은 순백 위에서 탁해 보임 → 서페이스는 흰색 유지,
+       선택 표시는 틸 보더 + 좌측 인셋 바로. 틴트 면은 사이드바(회색 패널 위 좁은 띠)와
+       요약 블록에만 허용 */
+    .mail-card.selected {
+      border-color: var(--teal-line);
+      background: var(--surface);
+      box-shadow: inset 3px 0 0 var(--teal);
+    }
+    .mail-card.selected:hover { background: var(--hover); }
+
+    .mail-card.compact {
+      min-height: 32px;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: 0 12px;
+      overflow: visible;
+    }
+
+    .card-content {
+      min-width: 0;
+      padding: 14px 16px 13px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .card-top { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+
+    .card-title {
+      margin: 0; color: var(--ink);
+      font-size: 13px; line-height: 1.25; font-weight: 680;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .card-sender { color: var(--muted); font-size: 11px; white-space: nowrap; }
+
+    .card-summary {
+      margin: 0; color: var(--body); font-size: 12px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .compact-title {
+      min-width: 0; color: var(--ink); font-size: 12px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .compact-meta { color: var(--muted); font-size: 11px; white-space: nowrap; }
+
+    .add-section {
+      width: 590px; height: 32px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 6px;
+      display: grid; place-items: center;
+      color: var(--muted); font-size: 11px;
+      transition: background-color 140ms ease;
+    }
+    .add-section:hover { background: var(--hover); }
+
+    .detail-pane {
+      grid-column: 3;
+      grid-row: 2;
+      background: var(--panel);
+      border-left: 1px solid var(--line);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-width: 0;
+    }
+
+    .detail-head { padding: 25px 24px 18px; display: grid; gap: 10px; }
+    .detail-account { color: var(--body); font-size: 10.5px; font-weight: 650; }
+    .message-header { display: grid; gap: 6px; }
+
+    .message-title-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .detail-title { margin: 0; color: var(--ink); font-size: 18px; line-height: 1.3; font-weight: 800; }
+    .detail-meta { color: var(--muted); font-size: 10.5px; }
+    /* 배경 제거 후 아이콘만 남으니 8px 간격이 벌어져 보임 → 2px로 압축, 버튼도 32px로.
+       hover 배경끼리는 2px 틈으로 분리 유지 */
+    .detail-actions-top { align-items: center; display: flex; gap: 2px; }
+
+    .icon-action, .more-action {
+      width: 32px; height: 32px;
+      border: 0; border-radius: 6px;
+      display: grid; place-items: center; padding: 0;
+      transition: background-color 140ms ease;
+    }
+
+    /* 아이콘 액션: 기본은 배경 없이 틸 아이콘만, hover 시 틸 배경 + 흰 아이콘 반전 */
+    .icon-action { background: transparent; color: var(--teal); }
+    .icon-action:hover { background: var(--teal); color: #ffffff; }
+    .icon-action:active { background: var(--teal-solid-hover); color: #ffffff; }
+    /* 아이콘 굵기 보강: 24 viewBox를 15px로 축소하면 실효 굵기 ~1.25px라 얇음 → 16px + stroke 2.6 (실효 ~1.75px) */
+    .icon-action .button-icon { width: 16px; height: 16px; stroke-width: 2.6; }
+
+    /* 오버플로(...)는 리스트 쪽(뉴트럴)을 따른다 — 틸은 주행동 전용, ...은 옵션 입구.
+       색만 다르고 크기·호버 패턴·굵기는 icon-action과 동일 패밀리 */
+    .more-action { background: transparent; color: var(--muted); }
+    .more-action:hover { background: rgba(38, 40, 43, .07); color: var(--ink); }
+    .more-action .button-icon { width: 16px; height: 16px; stroke-width: 2.6; }
+
+    .detail-body {
+      padding: 4px 24px 24px;
+      overflow: auto;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .detail-block {
+      width: 552px;
+      border: 1px solid var(--line-strong);
+      border-radius: 5px;
+      background: var(--surface);
+      padding: 14px 14px 13px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-block.summary {
+      border-color: var(--teal-line);
+      background:
+        linear-gradient(0deg, var(--teal-soft), var(--teal-soft)),
+        var(--surface);
+    }
+
+    .detail-block.body { background: var(--surface); }
+
+    .detail-block h3 {
+      margin: 0; color: var(--teal);
+      font-size: 9.5px; line-height: 1.2; font-weight: 750; letter-spacing: .04em;
+    }
+
+    .detail-block p { margin: 0; color: var(--body); font-size: 12px; line-height: 1.65; }
+
+    .mail-body-copy { display: grid; gap: 10px; }
+
+    @media (max-width: 1439px) {
+      .app { width: 100%; grid-template-columns: 210px minmax(520px, 1fr) minmax(520px, 600px); }
+      .mail-card, .add-section { width: 100%; }
+      .detail-block { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="board-note" style="background:#F6E9E8;border-bottom:2px solid #CE2C31">
+    <b style="color:#CE2C31">기각된 실험 — 보관용.</b> 결정 로그 0-5c(선택 상태는 중립 면색, 틸/아이보리 면색·테두리/바 금지)로 대체됨.
+    현재 기준 목업은 <code>03-briefing-no-buttons.html</code>, 선택 면색 토큰은 <code>tokens.css --color-selected</code>.
+  </div>
+  <div class="board-note">
+    <b>호버/구분면 틸 토큰 적용판</b> (원본 03-briefing-no-buttons.html 무수정 보존) —
+    hover <code>teal 4% #F6FAFA</code> · 선택+hover 상한 <code>teal 12%</code> · 솔리드 버튼 hover <code>#278A85</code>(on-color 8%) ·
+    뉴트럴 컨트롤 hover <code>ink 5%</code> · 트랜지션 140ms.
+    <b>틴트 면 운용 규칙(2차 보정):</b> 틸 8% 틴트는 회색 패널 위 좁은 띠(사이드바 하이라이트)와 요약 블록에만 —
+    순백 위 넓은 카드 채움은 탁해 보여 금지. 메인의 선택 카드는 흰 서페이스 + 틸 보더 + 좌측 3px 바.
+    내비 하이라이트 라운드 제거(플랫 풀블리드). 알림 도트 블루→틸, 아바타 블루 제거.
+  </div>
+  <div class="app">
+    <aside class="sidebar" aria-label="메일 브리핑 내비게이션">
+      <div class="identity">
+        <a class="brand-home" href="#" aria-label="홈으로 이동">
+          <span class="brand-mark">M</span>
+        </a>
+      </div>
+
+      <nav class="side-nav" aria-label="주요 화면">
+        <a class="nav-row active" href="#today-briefing"><span>오늘 브리핑</span><span class="nav-count">6</span></a>
+        <div class="sub-nav" aria-label="오늘 브리핑 섹션">
+          <a class="sub-row" href="#section-important" aria-current="true"><span>새 중요 항목</span><span>2</span></a>
+          <a class="sub-row" href="#section-reply"><span>답장 필요</span><span>1</span></a>
+          <a class="sub-row" href="#section-later"><span>나중에 봐도 됨</span><span>1</span></a>
+          <a class="sub-row" href="#section-organized"><span>정리됨</span><span></span></a>
+          <a class="sub-row" href="#section-approval"><span>승인 필요</span><span>1</span></a>
+          <a class="sub-row" href="#section-payments"><span>결제</span><span></span></a>
+        </div>
+        <a class="nav-row" href="#"><span>우선순위</span><span class="nav-count">14</span></a>
+        <a class="nav-row" href="#"><span>정리 검토</span><span class="nav-count">3</span></a>
+        <a class="nav-row" href="#"><span>활동 로그</span><span></span></a>
+        <a class="nav-row" href="#"><span>설정</span><span></span></a>
+      </nav>
+
+      <div class="service-footer" aria-label="서비스 계정">
+        <div class="service-strip">
+          <span class="service-avatar" aria-hidden="true"></span>
+          <span class="service-name">dongwoo</span>
+          <button class="icon-button" type="button" aria-label="계정 설정">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="19" cy="12" r="1"></circle>
+              <circle cx="5" cy="12" r="1"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <header class="topbar" aria-label="브리핑 대상 계정">
+      <div class="mail-scope" title="업무 계정 동기화 중">
+        <button class="scope-control" type="button">
+          <span class="scope-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+              <path d="m3 7 9 6 9-6"></path>
+            </svg>
+          </span>
+          <span>전체 메일 계정</span>
+          <span class="sync-spinner" aria-hidden="true"></span>
+          <span>▾</span>
+        </button>
+        <button class="notification-button" type="button" aria-label="알림">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+            <path d="M10 21h4"></path>
+          </svg>
+          <span class="unread-dot" aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="list-pane" id="today-briefing" aria-label="오늘 브리핑 목록">
+      <section class="section" aria-labelledby="section-important">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-important">새 중요 항목</h2>
+            <span>2</span>
+          </div>
+          <span class="section-menu">···</span>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="dot work"></span><span>업무 계정</span></div>
+          <article class="mail-card selected">
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="card-title">PR 리뷰 요청</h3>
+                <span class="card-sender">김지현 · 오늘 09:12</span>
+              </div>
+              <p class="card-summary">요약: 금요일까지 결제 플로우 PR 리뷰를 요청합니다.</p>
+            </div>
+          </article>
+
+          <div class="account-line"><span class="dot"></span><span>개인 계정</span></div>
+          <article class="mail-card">
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="card-title">카드 결제 확인 안내</h3>
+                <span class="card-sender">현대카드 · 오늘 07:55</span>
+              </div>
+              <p class="card-summary">요약: 7월 2일 45,000원 정기 결제가 승인되었습니다.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="section-reply">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-reply">답장 필요</h2>
+            <span>1</span>
+          </div>
+          <span class="section-menu">···</span>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="dot work"></span><span>업무 계정</span></div>
+          <article class="mail-card">
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="card-title">미팅 일정 조율</h3>
+                <span class="card-sender">박서준 · 어제 19:20</span>
+              </div>
+              <p class="card-summary">요약: 다음 주 화/수 중 킥오프 미팅 가능 시간을 요청합니다.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="section-later">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-later">나중에 봐도 됨</h2>
+            <span>1</span>
+          </div>
+          <span class="section-menu">···</span>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="dot school"></span><span>school@gmail.com</span></div>
+          <article class="mail-card">
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="card-title">7월 학사 일반 공지</h3>
+                <span class="card-sender">학사지원팀 · 어제 17:30</span>
+              </div>
+              <p class="card-summary">요약이 꺼진 계정입니다. 필요하면 Gmail에서 원문을 확인합니다.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="section-organized">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-organized">정리됨</h2>
+          </div>
+          <span class="section-menu">···</span>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="dot"></span><span>개인 계정</span></div>
+          <article class="mail-card compact">
+            <span class="compact-title">뉴스레터 묶음</span>
+            <span class="compact-meta">18개</span>
+          </article>
+          <div class="account-line"><span class="dot work"></span><span>업무 계정</span></div>
+          <article class="mail-card compact">
+            <span class="compact-title">GitHub 알림 묶음</span>
+            <span class="compact-meta">12개</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="section-approval">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-approval">승인 필요</h2>
+            <span>1</span>
+          </div>
+          <span class="section-menu">···</span>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="dot work"></span><span>업무 계정</span></div>
+          <article class="mail-card compact">
+            <span class="compact-title">새 섹션 제안: 채용</span>
+            <span class="compact-meta">6개</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="section-payments">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-payments">결제</h2>
+            <span>사용자 섹션</span>
+          </div>
+          <span class="section-menu">···</span>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="dot"></span><span>개인 계정</span></div>
+          <article class="mail-card compact">
+            <span class="compact-title">6월 통신요금 청구서</span>
+            <span class="compact-meta">확인됨</span>
+          </article>
+          <div class="add-section">섹션 추가</div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="detail-pane" aria-label="선택한 메일 상세">
+      <header class="detail-head">
+        <div class="detail-account">업무 계정</div>
+        <div class="message-header">
+          <div class="message-title-row">
+            <h2 class="detail-title">PR 리뷰 요청</h2>
+            <div class="detail-actions-top" aria-label="주요 처리">
+              <button class="icon-action" type="button" aria-label="Gmail에서 열기">
+                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 7h10v10"></path>
+                  <path d="M7 17 17 7"></path>
+                </svg>
+              </button>
+              <button class="icon-action" type="button" aria-label="Gmail도 읽음 처리">
+                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m5 12 4 4L19 6"></path>
+                </svg>
+              </button>
+              <button class="more-action" type="button" aria-label="이동 및 아카이브 더보기">
+                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="5" cy="12" r="1"></circle>
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="19" cy="12" r="1"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="detail-meta">김지현 &lt;jihyun@company.com&gt; · 오늘 09:12</div>
+        </div>
+      </header>
+
+      <section class="detail-body" aria-label="선택한 메일 내용">
+        <article class="detail-block summary">
+          <h3>요약</h3>
+          <p>금요일까지 결제 플로우 PR 리뷰를 요청합니다. 관련 이슈 #482 링크가 포함되어 있습니다.</p>
+        </article>
+
+        <article class="detail-block body">
+          <h3>본문</h3>
+          <div class="mail-body-copy">
+            <p>안녕하세요. 금요일 배포 전에 결제 플로우 PR을 한 번 더 봐주면 좋겠습니다.</p>
+            <p>특히 쿠폰 적용 후 총액 계산과 실패 케이스 메시지를 확인해 주세요. 리뷰가 가능하면 오늘 오후까지 코멘트를 남겨주세요.</p>
+            <p>급한 수정이 있으면 내일 오전 배포 전에 반영하겠습니다.</p>
+          </div>
+        </article>
+      </section>
+    </aside>
+  </div>
+</body>
+</html>

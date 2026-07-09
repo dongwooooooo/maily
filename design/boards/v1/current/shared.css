@@ -1,0 +1,679 @@
+/*
+ * Maily boards v1 — shared visual language
+ * 근거: design/boards/v1/03-keystone.html (CLAUDE.md 명시 하이파이 기준 목업)
+ * 추출 대상: :root 토큰, 베이스 리셋, 앱 셸(사이드바/상단 계정 컨트롤/내비),
+ *            목록·카드, 상세 패널, Undo 토스트.
+ * 이 파일은 v1 폴더 안에서만 쓰는 로컬 공용 시트다. development/frontend/src/styles/tokens.css와는
+ * 별개이며, 전역 토큰 체계를 새로 발명하지 않고 03-keystone.html의 값을 그대로 옮겼다.
+ *
+ * 사용법: 각 보드 HTML의 <head>에 이 파일을 <link rel="stylesheet" href="shared.css">로
+ * 연결하고, 그 파일만의 고유 레이아웃/컴포넌트만 로컬 <style>에 남긴다.
+ *
+ * 톤 갱신 (03 키스톤 톤 재설계 A안 "Editorial Serif" 채택, 근거:
+ * design/boards/v1/candidates/03-keystone-tone-editorial.html):
+ * 헤딩 세리프(Newsreader)·아이콘 스트로크(1.5~1.6로 축소)·카드/패널 표면
+ * (보더 박스 → 헤어라인 + 좌측 틸 룰 선택 표시)·radius(6~8→7~10)·여백 리듬을 갱신했다.
+ * 색상 hue·변수명 체계·레이아웃 그리드(.app 컬럼/행)·상태 레이어 알파값은 유지.
+ */
+
+:root {
+  --bg: #ffffff;
+  --panel: var(--bg); /* 색상 재검토(2026-07-08): #fafafa(확정 토큰 밖 회색) 정규화 — brand-color-final.md는 배경=화이트/아이보리 2단만 확정, 아이보리는 "배지·칩·보조 필 전용"이라 사이드바·상세 패널 같은 대면적 패널에는 못 씀. 화이트로 통일 */
+  --surface: #ffffff;
+  --soft: #f6f4ef;
+  --ink: #26282b;
+  --body: #43464a;
+  --muted: rgba(38, 40, 43, .64);
+  --line: rgba(38, 40, 43, .12);
+  --line-strong: rgba(38, 40, 43, .22);
+  --control: rgba(38, 40, 43, .48);
+  --selected: rgba(38, 40, 43, .06);
+  --hover-ink: rgba(38, 40, 43, .04);
+  --teal: #14807a;
+  --teal-soft: rgba(20, 128, 122, .04);
+  --teal-line: rgba(20, 128, 122, .28);
+  --success: #218358;
+  --warning: #a16207;
+  --danger: #ce2c31;
+  --motion: 180ms;
+  --easing: cubic-bezier(0.2, 0, 0, 1);
+  --teal-deep: #0e5e59; /* 틸 텍스트 스텝 — 틴트 위 라벨용 (6.85) */
+  --label: rgba(38, 40, 43, .78); /* 03 키스톤 위계 재설계(2026-07-08): 구조를 알려주는 라벨 텍스트 —
+    muted(64%, 부가정보용)보다 진하게. 계정 라벨/발신자/섹션·서브 카운트 숫자 전용 */
+  --on-color: #ffffff; /* 틸/잉크 solid fill 위 텍스트·아이콘 색 (브랜드 마크, 토스트) — 확정 배경 화이트와 동일 값 */
+  --focus-color: var(--teal); /* G1 확정: 틸 포커스 링 */
+  --font-sans:
+    "Pretendard Variable",
+    Pretendard,
+    -apple-system,
+    "Apple SD Gothic Neo",
+    "Noto Sans KR",
+    Inter,
+    system-ui,
+    sans-serif;
+  --font-serif: "Newsreader", "Pretendard Variable", Pretendard, Georgia, serif;
+  font-family: var(--font-sans);
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--body);
+  font-size: 13px;
+  line-height: 1.55;
+  letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  letter-spacing: 0;
+  cursor: pointer; /* 0-5k G4 */
+}
+
+/* 0-5k G5 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* G1 확정: 가시 포커스 링 — 키보드 탐색 시에만 */
+:focus-visible {
+  outline: 2px solid var(--focus-color);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.app {
+  width: 1440px;
+  height: 1140px;
+  display: grid;
+  grid-template-columns: 210px 630px 600px;
+  grid-template-rows: 56px 1fr;
+  background: var(--bg);
+}
+
+.sidebar {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  padding: 26px 18px 20px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 20px;
+}
+
+.identity { padding: 0 6px 18px; border-bottom: 1px solid var(--line); }
+.brand-home { display: inline-grid; place-items: center; color: var(--ink); text-decoration: none; }
+.brand-mark {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: grid; place-items: center;
+  background: var(--teal); color: var(--on-color);
+  font-family: var(--font-serif); font-size: 14px; font-weight: 600; font-style: italic;
+}
+
+.service-footer { padding: 18px 6px 0; border-top: 1px solid var(--line); display: grid; gap: 11px; }
+.service-strip { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.service-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .88) 0 2px, transparent 3px),
+    linear-gradient(135deg, var(--teal), var(--teal-deep));
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.service-name {
+  min-width: 0; color: var(--ink);
+  font-family: var(--font-serif); font-size: 16px; line-height: 1.2; font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.icon-button {
+  position: relative; width: 30px; height: 30px;
+  border: 1px solid var(--line-strong); border-radius: 50%;
+  background: var(--surface); color: var(--body);
+  display: grid; place-items: center; padding: 0;
+  transition: background-color var(--motion) var(--easing);
+}
+.icon-button:hover { background: var(--hover-ink); }
+.icon-button svg {
+  width: 14px; height: 14px;
+  stroke: currentColor; stroke-width: 1.5; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* 알림 도트: 버튼 박스 안쪽 배치 — 벨 표시 전체 높이가 계정 컨트롤과 동일해지도록 */
+.unread-dot {
+  position: absolute; top: 6px; right: 7px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--teal);
+  border: 2px solid var(--panel);
+}
+
+/* ── 상단 계정 컨트롤 + 열림 상태 ── */
+.topbar {
+  grid-column: 2 / 4;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 28px;
+  background: var(--bg);
+  position: relative;
+  z-index: 30;
+}
+
+.mail-scope { display: flex; align-items: center; gap: 6px; position: relative; }
+
+.scope-control {
+  min-height: 34px; border: 0; border-radius: 8px;
+  background: transparent;
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 0 10px;
+  color: var(--ink); font-size: 13px; font-weight: 500; letter-spacing: -0.005em; white-space: nowrap;
+  transition: background-color var(--motion) var(--easing);
+}
+.scope-control:hover { background: var(--hover-ink); }
+.scope-control[aria-expanded="true"] { background: var(--selected); }
+
+.scope-icon {
+  width: 20px; height: 20px;
+  display: inline-grid; place-items: center;
+  background: transparent; color: var(--body);
+  flex: 0 0 auto;
+}
+/* 상단 아이콘 광학 보정: 봉투 글리프(24박스 중 14 높이)가 벨(≈18)보다 작게 차므로
+   봉투 18px ↔ 벨 16px로 렌더 시각 높이를 일치시킨다 */
+.scope-icon svg {
+  width: 18px; height: 18px;
+  stroke: currentColor; stroke-width: 1.5; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+.scope-caret { color: var(--muted); font-size: 10px; }
+
+.sync-spinner {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 2px solid var(--teal-line);
+  border-top-color: var(--teal);
+  animation: spin 900ms linear infinite;
+  margin-left: 2px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.scope-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 312px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(38, 40, 43, .10);
+  padding: 8px;
+  display: none;
+  z-index: 40;
+}
+.scope-menu[data-open="true"] { display: block; }
+
+.scope-menu-label {
+  padding: 8px 12px 6px;
+  font-family: var(--font-serif); font-style: italic;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.scope-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  padding: 0 12px;
+  color: var(--ink);
+  font-size: 13px;
+  text-align: left;
+  transition: background-color var(--motion) var(--easing);
+}
+.scope-row:hover { background: var(--hover-ink); }
+.scope-row[aria-current="true"] { background: var(--selected); font-weight: 600; }
+
+.scope-row .row-state { font-size: 11px; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; }
+.scope-row .row-state .ok { color: var(--success); font-weight: 700; }
+.scope-row .row-state .warn-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--warning); display: inline-block; }
+
+.acc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); }
+.acc-dot.work { background: var(--soft); border: 1px dashed var(--control); }
+.acc-dot.school { background: var(--surface); border: 2px solid var(--control); }
+.acc-dot.all { background: var(--ink); }
+
+.scope-menu-foot {
+  margin-top: 5px;
+  border-top: 1px solid var(--line);
+  padding: 8px 12px 4px;
+}
+.scope-menu-foot a { font-size: 12px; color: var(--muted); text-decoration: none; }
+.scope-menu-foot a:hover { color: var(--ink); text-decoration: underline; }
+
+.notification-button {
+  position: relative;
+  width: 36px; height: 36px;
+  border: 0; border-radius: 8px;
+  background: transparent; color: var(--body);
+  display: grid; place-items: center; padding: 0;
+  transition: background-color var(--motion) var(--easing);
+}
+.notification-button:hover { background: var(--hover-ink); }
+.notification-button svg {
+  width: 16px; height: 16px;
+  stroke: currentColor; stroke-width: 1.5; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.notification-button .unread-dot { border-color: var(--bg); }
+
+/* ── 사이드바 내비 ── */
+.side-nav { margin-top: 4px; display: grid; gap: 3px; align-content: start; }
+
+.nav-row {
+  min-height: 30px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  color: var(--body);
+  margin-left: -18px; margin-right: -18px;
+  padding: 0 18px 0 34px;
+  border-radius: 0;
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: -0.005em;
+  transition: background-color var(--motion) var(--easing);
+}
+.nav-row:hover { background: var(--hover-ink); color: var(--ink); }
+.nav-row.active { background: var(--selected); color: var(--ink); font-weight: 600; }
+
+.nav-count {
+  color: var(--label); font-family: var(--font-sans); font-style: normal;
+  font-variant-numeric: tabular-nums; font-weight: 700; font-size: 11px;
+}
+
+/* 03 위계 재설계: "오늘 브리핑" 하위 섹션 접기/펼치기 — 네이티브 details/summary, JS 상태 관리 없음 */
+.nav-details summary { list-style: none; cursor: pointer; }
+.nav-details summary::-webkit-details-marker { display: none; }
+.nav-details summary .nav-row { grid-template-columns: auto 1fr; gap: 8px; }
+.nav-chev {
+  width: 12px; height: 12px;
+  stroke: var(--muted); stroke-width: 1.8; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+  transition: transform var(--motion) var(--easing);
+  flex: 0 0 auto;
+}
+.nav-details[open] .nav-chev { transform: rotate(90deg); }
+
+.nav-group {
+  margin: 10px -12px 2px;
+  padding: 10px 14px 2px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .05em;
+}
+
+.sub-nav {
+  margin: 8px 0 14px;
+  padding-left: 40px;
+  display: grid;
+  gap: 9px;
+}
+.sub-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  min-height: 22px;
+  align-items: center;
+  margin-left: -8px; margin-right: -8px;
+  padding: 0 8px;
+  border-radius: 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: none;
+  transition: background-color var(--motion) var(--easing);
+}
+.sub-row:hover { background: var(--hover-ink); color: var(--ink); }
+.sub-row[aria-current="true"] { color: var(--ink); font-weight: 750; }
+.sub-row span:last-child {
+  font-family: var(--font-sans); font-style: normal;
+  font-variant-numeric: tabular-nums; font-weight: 700; font-size: 11px;
+  color: var(--label);
+}
+
+/* 섹션 이원화 표시: 상태 파생 섹션 ↔ 내 섹션(분류함) 층위 분리 */
+.zone-head {
+  width: 566px;
+  border-top: 1px solid var(--line);
+  margin: 32px 0 16px;
+  padding-top: 16px;
+  color: var(--muted);
+  font-family: var(--font-serif); font-style: italic;
+  font-size: 13px;
+}
+.sub-group {
+  margin: 8px -8px 2px;
+  padding: 8px 8px 2px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .05em;
+}
+
+/* ── 목록 ── */
+.list-pane {
+  grid-column: 2;
+  grid-row: 2;
+  padding: 40px 32px 48px;
+  overflow: auto;
+  scroll-behavior: smooth;
+  background: var(--bg);
+}
+
+.section { margin-bottom: 34px; }
+/* 03 위계 재설계: 목록 섹션도 details/summary로 접기/펼치기 (기본 열림) */
+details.section > summary.section-head { list-style: none; cursor: pointer; }
+details.section > summary.section-head::-webkit-details-marker { display: none; }
+.section-chevron {
+  width: 13px; height: 13px;
+  stroke: var(--muted); stroke-width: 1.8; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+  transition: transform var(--motion) var(--easing);
+  flex: 0 0 auto; align-self: center;
+}
+details.section[open] .section-chevron { transform: rotate(90deg); }
+
+.section-head {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.section-title { display: flex; align-items: baseline; gap: 11px; min-width: 0; }
+.section-title h2 { margin: 0; color: var(--ink); font-family: var(--font-serif); font-size: 17px; line-height: 1.2; font-weight: 500; letter-spacing: -0.01em; }
+.section-title span {
+  color: var(--label); font-family: var(--font-sans); font-style: normal;
+  font-variant-numeric: tabular-nums; font-weight: 700; font-size: 12px;
+}
+/* 섹션 오버플로: 텍스트 글리프(···) → 아이콘 버튼 패밀리 규칙 적용
+   (SVG stroke 1.6 · 뉴트럴 · 호버 워시 · 히트 44px) */
+.section-menu {
+  position: relative;
+  width: 28px; height: 28px;
+  border: 0; border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  display: grid; place-items: center; padding: 0;
+  transition: background-color var(--motion) var(--easing);
+}
+.section-menu:hover { background: var(--hover-ink); color: var(--ink); }
+.section-menu::after { content: ""; position: absolute; inset: -8px; }
+.section-menu svg {
+  width: 16px; height: 16px;
+  stroke: currentColor; stroke-width: 1.6; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* 03 위계 재설계(J절 최종): 계정 구분은 아바타(사진 우선·없으면 등록 아이콘)만으로 —
+   색·선·배경 장치 없음(계정 배지 뉴트럴 원칙 유지). 간격만으로 계정 그룹 시작을 알림 */
+.avatar { width: 16px; height: 16px; border-radius: 50%; flex: 0 0 auto; display: grid; place-items: center; overflow: hidden; }
+.avatar.icon { background: var(--hover-ink); color: var(--label); }
+.avatar.icon svg { width: 9px; height: 9px; stroke: currentColor; stroke-width: 1.7; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.avatar.photo {
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .85) 0 2px, transparent 3px),
+    linear-gradient(135deg, var(--teal), var(--teal-deep));
+}
+
+.account-line {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--label); font-size: 11px; font-weight: 700; letter-spacing: .02em;
+  margin-top: 18px;
+}
+.account-line:first-child { margin-top: 0; }
+
+.mail-list { display: grid; gap: 12px; }
+
+.mail-card {
+  width: 566px;
+  min-height: 92px;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 8px;
+  background: var(--surface);
+  display: grid;
+  overflow: hidden;
+  transition: background-color var(--motion) var(--easing), border-color var(--motion) var(--easing);
+}
+.mail-card:not(.compact) { cursor: pointer; }
+.mail-card:hover { background: var(--teal-soft); }
+.mail-card.selected { background: var(--teal-soft); border-left-color: var(--teal); }
+.mail-card.selected:hover { background: var(--teal-soft); }
+
+.mail-card.compact {
+  min-height: 38px;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 0 14px;
+  overflow: visible;
+}
+
+.card-content { min-width: 0; padding: 18px 18px 17px 20px; display: grid; gap: 8px; align-content: start; }
+.card-top { display: flex; align-items: baseline; gap: 11px; min-width: 0; }
+.card-title {
+  margin: 0; color: var(--ink);
+  font-family: var(--font-serif); font-size: 16px; line-height: 1.3; font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.card-sender { color: var(--label); font-size: 11px; white-space: nowrap; }
+.card-summary {
+  margin: 0; color: var(--body); font-size: 13px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* "요약: " 접두 문구를 별도 태그로 분리 — 카피 자체는 유지, 구조만 재구성 */
+.sum-tag {
+  font-family: var(--font-sans); font-size: 10px; font-weight: 700;
+  letter-spacing: .03em; color: var(--label); margin-right: 6px;
+}
+.compact-title { min-width: 0; color: var(--ink); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.compact-meta { color: var(--muted); font-family: var(--font-serif); font-style: italic; font-size: 11px; white-space: nowrap; }
+
+.add-section {
+  width: 566px; height: 36px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  background: transparent;
+  display: grid; place-items: center;
+  color: var(--muted); font-size: 12px;
+  transition: background-color var(--motion) var(--easing);
+}
+.add-section:hover { background: var(--hover-ink); }
+
+/* ── 상세 패널 ── */
+.detail-pane {
+  grid-column: 3;
+  grid-row: 2;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+}
+
+.detail-head { padding: 34px 32px 22px; display: grid; gap: 12px; border-bottom: 1px solid var(--line); }
+.detail-account {
+  display: inline-flex; align-items: center; gap: 7px;
+  color: var(--label); font-size: 11px; font-weight: 700; letter-spacing: .02em;
+}
+.message-header { display: grid; gap: 8px; }
+.message-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+.detail-title { margin: 0; color: var(--ink); font-family: var(--font-serif); font-size: 26px; line-height: 1.25; font-weight: 500; letter-spacing: -0.01em; }
+.detail-meta { color: var(--muted); font-size: 11px; }
+/* G3 확정: 시각 32px + 히트 44px. gap 12px이면 이웃 히트 영역이 정확히 맞닿고 겹치지 않음 (32+6+6=44) */
+.detail-actions-top { align-items: center; display: flex; gap: 12px; }
+
+.icon-action, .more-action {
+  position: relative;
+  width: 32px; height: 32px;
+  border: 0; border-radius: 8px;
+  display: grid; place-items: center; padding: 0;
+  transition: background-color var(--motion) var(--easing);
+}
+.icon-action::after, .more-action::after {
+  content: "";
+  position: absolute;
+  inset: -6px; /* 히트 영역 44×44 — 시각 변화 없음 */
+}
+
+.icon-action { background: transparent; color: var(--teal); }
+.icon-action:hover, .icon-action:focus-visible { background: var(--teal); color: #ffffff; }
+.icon-action .button-icon { width: 16px; height: 16px; stroke-width: 1.6; }
+
+.more-action { background: transparent; color: var(--muted); }
+.more-action:hover { background: var(--hover-ink); color: var(--ink); }
+.more-action .button-icon { width: 16px; height: 16px; stroke-width: 1.6; }
+
+.button-icon {
+  width: 15px; height: 15px;
+  stroke: currentColor; stroke-width: 1.5; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+.detail-body {
+  padding: 6px 32px 32px;
+  overflow: auto;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+/* 03 위계 재설계(C절): 인용구형(좌측 룰+세리프 이탤릭) → 틴트 박스. 라벨 텍스트 "요약"은 그대로 —
+   "AI 요약"은 artifact 안 예시로 지어낸 카피이며 확정 문구 아님, 절대 사용 금지 */
+.summary-quote {
+  background: var(--teal-soft);
+  border: 1px solid var(--teal-line);
+  border-radius: 10px;
+  padding: 13px 15px;
+  display: grid; gap: 6px;
+  margin: 4px 0 0;
+  max-width: 512px;
+}
+.summary-quote .q-label {
+  font-family: var(--font-sans); font-style: normal;
+  font-size: 10px; font-weight: 700; letter-spacing: .04em;
+  color: var(--teal-deep);
+}
+.summary-quote p { margin: 0; color: var(--ink); font-family: var(--font-sans); font-size: 13.5px; line-height: 1.6; font-weight: 400; }
+
+/* G7 확정, 03 위계 재설계로 세리프 지정: 원문 본문은 세리프 — 요약(산세리프 틴트 박스)과의
+   서체 대비로 "원문 vs 비서 요약"을 구분. 가독 폭 제한 */
+.mail-body-copy { display: grid; gap: 13px; max-width: 500px; margin-top: 10px; }
+.mail-body-copy p { margin: 0; color: var(--body); font-family: var(--font-serif); font-size: 15px; line-height: 1.75; }
+
+/* ── 배너 (공지·상태바) ──
+   06-card-and-detail.html의 규칙 확인 배너를 공용 컴포넌트로 승격.
+   CLAUDE.md 제약: 시맨틱 틴트(10%) 위에 시맨틱 색 텍스트 금지 — 텍스트는 잉크, 색은 좌측 도트로만.
+   info(틸)는 기존 규칙 확인 배너 원안 그대로 유지(도트 없음, 액션 링크만 틸 딥 텍스트 — 0-5c 요약 라벨과
+   동일한 틴트 위 틸 텍스트 선례를 따름). success/warning/danger는 본문 텍스트를 잉크로 고정하고 도트로만 색 표현. */
+.banner {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--ink);
+  font-size: 12px;
+}
+.banner[data-show="true"] { display: flex; }
+.banner .banner-text { display: inline-flex; align-items: center; gap: 8px; }
+.banner .banner-dot { width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto; }
+.banner .banner-action {
+  border: 0; background: transparent;
+  color: var(--ink); font-size: 12px; font-weight: 700;
+  text-decoration: underline; text-underline-offset: 3px;
+  padding: 0; flex: 0 0 auto;
+}
+
+.banner--info {
+  border: 1px solid rgba(20, 128, 122, .12);
+  background: rgba(20, 128, 122, .08);
+}
+.banner--info .banner-action { color: var(--teal-deep); }
+
+.banner--success {
+  border: 1px solid rgba(33, 131, 88, .12);
+  background: rgba(33, 131, 88, .10);
+}
+.banner--success .banner-dot { background: var(--success); }
+
+.banner--warning {
+  border: 1px solid rgba(161, 98, 7, .12);
+  background: rgba(161, 98, 7, .10);
+}
+.banner--warning .banner-dot { background: var(--warning); }
+
+.banner--danger {
+  border: 1px solid rgba(206, 44, 49, .12);
+  background: rgba(206, 44, 49, .10);
+}
+.banner--danger .banner-dot { background: var(--danger); }
+
+/* ── Undo 토스트 (G6 비교) ── */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translate(-50%, 8px);
+  background: var(--ink);
+  color: var(--on-color);
+  border-radius: 9px;
+  padding: 12px 16px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  box-shadow: 0 10px 30px rgba(38, 40, 43, .24);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion) var(--easing), transform var(--motion) var(--easing);
+  z-index: 90;
+}
+.toast[data-show="true"] {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+.toast button {
+  border: 0; background: transparent;
+  color: var(--on-color); font-weight: 750; font-size: 13px;
+  text-decoration: underline; text-underline-offset: 3px;
+  padding: 0;
+}
+/* opacity 금지 규칙 준수: 요소 opacity 대신 색상 알파로 약한 대비 표현 */
+.toast .toast-close { text-decoration: none; color: rgba(255, 255, 255, .7); font-weight: 400; }

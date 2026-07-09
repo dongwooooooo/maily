@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="760" viewBox="0 0 1440 760">
+<rect width="1440" height="760" fill="#fafafa"/>
+<rect x="500.0" y="110.0" width="440.0" height="500.0" fill="#ffffff" rx="8" stroke="#c4c4c4" stroke-width="1"/>
+<rect x="536.0" y="138.0" width="56.4" height="16.0" fill="#efefef" rx="3" stroke="#c4c4c4" stroke-width="1"/>
+<text x="542.0" y="150.0" font-family="Inter, sans-serif" font-size="10" fill="#555555" font-weight="600">Personal</text>
+<text x="602.4" y="150.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="600">woomacho@gmail.com</text>
+<text x="536.0" y="186.0" font-family="Inter, sans-serif" font-size="16" fill="#1a1a1a" font-weight="700">이 계정에 Mail Assistant를 적용합니다</text>
+<text x="536.0" y="208.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">이 계정의 메일에서 중요 메일 브리핑과 리마인더를 준비합니다.</text>
+<rect x="536.0" y="232.0" width="368.0" height="64.0" fill="#fafafa" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="548.0" y="249.0" font-family="Inter, sans-serif" font-size="9.5" fill="#555555" font-weight="700">PERMISSIONS</text>
+<text x="548.0" y="266.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">•  메일 읽기 · 라벨 관리 (Gmail API)</text>
+<text x="548.0" y="282.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">•  메일 발송 권한은 요청하지 않음</text>
+<rect x="536.0" y="308.0" width="368.0" height="64.0" fill="#fafafa" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="548.0" y="325.0" font-family="Inter, sans-serif" font-size="9.5" fill="#555555" font-weight="700">USER CONTROL</text>
+<text x="548.0" y="342.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">•  언제든 이 계정 연결을 해제할 수 있습니다.</text>
+<text x="548.0" y="358.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">•  확신이 낮은 정리 제안은 반드시 승인 후 적용됩니다.</text>
+<rect x="536.0" y="396.0" width="368.0" height="40.0" fill="#1e1e1e" rx="5"/>
+<text x="720.0" y="421.0" font-family="Inter, sans-serif" font-size="13" fill="#ffffff" font-weight="700" text-anchor="middle">Start applying</text>
+</svg>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>03 키스톤 에디토리얼 — 3안 비교 보드</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<style>
+  :root {
+    --ink:#1a1c1e; --body:#3d4043; --muted:#6b6f74; --line:#e6e3dc; --bg:#f4f2ec; --card:#fff; --teal:#0f6f69;
+    --serif:"Newsreader",serif; --sans:"Pretendard Variable",Pretendard,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--sans);color:var(--body);background:var(--bg);}
+  header.board{padding:32px 40px 20px;}
+  header.board h1{font-family:var(--serif);font-weight:500;font-size:30px;letter-spacing:-.01em;color:var(--ink);margin:0 0 6px;}
+  header.board h1 em{font-style:italic;color:var(--teal);}
+  header.board p{margin:0;font-size:14px;color:var(--muted);max-width:720px;}
+
+  table.matrix{margin:20px 40px;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:13.5px;}
+  table.matrix th,table.matrix td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);}
+  table.matrix thead th{background:#faf9f6;font-family:var(--serif);font-weight:500;font-size:15px;color:var(--ink);}
+  table.matrix tbody tr:last-child td{border-bottom:0;}
+  table.matrix td:first-child,table.matrix th:first-child{color:var(--muted);font-weight:500;width:120px;}
+  table.matrix .k{font-family:var(--serif);}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:8px 40px 60px;}
+  .col{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
+  .col-head{padding:16px 18px;border-bottom:1px solid var(--line);}
+  .col-head .tag{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--teal);}
+  .col-head h2{margin:2px 0 4px;font-family:var(--serif);font-weight:500;font-size:20px;color:var(--ink);}
+  .col-head p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.5;}
+  .frame-wrap{position:relative;height:380px;overflow:hidden;background:#fff;border-bottom:1px solid var(--line);}
+  .frame-wrap iframe{position:absolute;top:0;left:0;width:1360px;height:1188px;border:0;transform:scale(.336);transform-origin:top left;}
+  .col-foot{padding:12px 18px;display:flex;justify-content:space-between;align-items:center;}
+  .col-foot a{font-size:13px;color:var(--teal);text-decoration:none;font-weight:600;}
+  .col-foot a:hover{text-decoration:underline;}
+  .col-foot .clean{font-size:12px;color:var(--muted);}
+  .col-foot .clean b{color:#0b6a2f;}
+</style>
+</head>
+<body>
+  <header class="board">
+    <h1>03 키스톤 — <em>에디토리얼</em> 3안 비교</h1>
+    <p>같은 오늘 브리핑 화면, 확정 카피·샘플 데이터 고정. 폰트·밀도·톤만 다름. 세로 스크롤 축소 미리보기 — 실물은 각 열 하단 "전체 화면"으로 확인. 최종 1안 선택 후 design-decisions.md 기록.</p>
+  </header>
+
+  <table class="matrix">
+    <thead>
+      <tr><th>축</th><th>E1 · 기준</th><th>B · docs</th><th>C · 매거진</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>세리프</td><td class="k">Newsreader</td><td class="k">Spectral</td><td class="k">Source Serif 4</td></tr>
+      <tr><td>밀도</td><td>중간 (본문 15.5 / 제목 32)</td><td>조밀 (본문 14.5 / 제목 28)</td><td>여유 (본문 16 / 제목 38)</td></tr>
+      <tr><td>톤</td><td>웜 뉴트럴</td><td>쿨 화이트</td><td>웜 아이보리 (강)</td></tr>
+      <tr><td>요약 블록</td><td>세리프 풀쿼트 + 좌측 룰</td><td>틴트 박스 + 얇은 보더</td><td>둥근 틸 틴트 룰</td></tr>
+      <tr><td>리드</td><td>드롭캡</td><td>없음 (건조)</td><td>드롭캡 (큼)</td></tr>
+      <tr><td>인상</td><td>차분한 프리미엄</td><td>업무·집중</td><td>고급 편집물</td></tr>
+    </tbody>
+  </table>
+
+  <div class="grid">
+    <div class="col">
+      <div class="col-head">
+        <span class="tag">E1 · 기준</span>
+        <h2>Newsreader · 중간</h2>
+        <p>차분한 프리미엄. 웜 뉴트럴, 세리프 풀쿼트 요약, 드롭캡.</p>
+      </div>
+      <div class="frame-wrap"><iframe src="03-keystone-editorial.html" title="E1" scrolling="no"></iframe></div>
+      <div class="col-foot"><span class="clean">impeccable <b>클린</b></span><a href="03-keystone-editorial.html" target="_blank">전체 화면 →</a></div>
+    </div>
+
+    <div class="col">
+      <div class="col-head">
+        <span class="tag">B · docs</span>
+        <h2>Spectral · 조밀</h2>
+        <p>업무·집중. 쿨 화이트, 틴트 박스 요약, 드롭캡 없음. 정보 밀도 높음.</p>
+      </div>
+      <div class="frame-wrap"><iframe src="03-keystone-editorial-b.html" title="B" scrolling="no"></iframe></div>
+      <div class="col-foot"><span class="clean">impeccable <b>클린</b></span><a href="03-keystone-editorial-b.html" target="_blank">전체 화면 →</a></div>
+    </div>
+
+    <div class="col">
+      <div class="col-head">
+        <span class="tag">C · 매거진</span>
+        <h2>Source Serif · 여유</h2>
+        <p>고급 편집물. 웜 아이보리 강, 큰 타입·넓은 여백, 큰 드롭캡.</p>
+      </div>
+      <div class="frame-wrap"><iframe src="03-keystone-editorial-c.html" title="C" scrolling="no"></iframe></div>
+      <div class="col-foot"><span class="clean">impeccable <b>클린</b></span><a href="03-keystone-editorial-c.html" target="_blank">전체 화면 →</a></div>
+    </div>
+  </div>
+</body>
+</html>
