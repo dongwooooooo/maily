@@ -1,0 +1,19 @@
+{
+  "name": "maily",
+  "private": true,
+  "packageManager": "pnpm@11.10.0",
+  "scripts": {
+    "frontend:dev": "pnpm --dir development/frontend dev",
+    "frontend:build": "pnpm --dir development/frontend build",
+    "frontend:lint": "pnpm --dir development/frontend lint",
+    "frontend:format": "pnpm --dir development/frontend format"
+  },
+  "engines": {
+    "node": "24.18.x",
+    "pnpm": "11.10.x"
+  },
+  "volta": {
+    "node": "24.18.0",
+    "pnpm": "11.10.0"
+  }
+}
