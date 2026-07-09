@@ -33,6 +33,8 @@ def _map_error(exc: Exception) -> LLMError:
         return LLMInvalidRequestError(str(exc))
     if isinstance(exc, errors.ServerError) or (isinstance(code, int) and code >= 500):
         return LLMTransientError(str(exc))
+    if isinstance(code, int) and 400 <= code < 500:
+        return LLMInvalidRequestError(str(exc))
     return LLMTransientError(str(exc))
 
 
@@ -80,13 +82,15 @@ class GeminiAdapter:
 
         if request.output_schema is not None:
             parsed = resp.parsed
-            if parsed is not None and not isinstance(parsed, BaseModel):
-                raise LLMError(f"unexpected non-BaseModel parsed result: {type(parsed)!r}")
+            if parsed is None or not isinstance(parsed, BaseModel):
+                raise LLMInvalidRequestError(
+                    f"structured output missing or invalid parsed result: {type(parsed)!r}"
+                )
             result = LLMResult(
                 parsed=parsed,
                 model_name=model_name,
                 usage=usage,
-                finish_reason="stop",
+                finish_reason=finish_reason,
             )
         else:
             result = LLMResult(

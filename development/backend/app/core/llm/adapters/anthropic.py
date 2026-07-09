@@ -7,6 +7,7 @@ from app.core.llm.errors import (
     LLMError,
     LLMInvalidRequestError,
     LLMRateLimitError,
+    LLMRefusalError,
     LLMTransientError,
 )
 from app.core.llm.observability import log_completion
@@ -26,6 +27,8 @@ def _map_error(exc: Exception) -> LLMError:
         return LLMTransientError(str(exc))
     if isinstance(exc, anthropic.APIStatusError) and exc.status_code >= 500:
         return LLMTransientError(str(exc))
+    if isinstance(exc, anthropic.APIStatusError) and 400 <= exc.status_code < 500:
+        return LLMInvalidRequestError(str(exc))
     return LLMTransientError(str(exc))
 
 
@@ -63,12 +66,19 @@ class AnthropicAdapter:
             output_tokens=resp.usage.output_tokens,
         )
         if request.output_schema is not None:
-            block = next(b for b in resp.content if b.type == "tool_use")
+            block = next((b for b in resp.content if b.type == "tool_use"), None)
+            if block is None:
+                if resp.stop_reason == "refusal":
+                    raise LLMRefusalError("structured output request was refused")
+                raise LLMInvalidRequestError(
+                    "structured output returned no tool_use block "
+                    f"(stop_reason={resp.stop_reason})"
+                )
             result = LLMResult(
                 parsed=request.output_schema.model_validate(block.input),
                 model_name=resp.model,
                 usage=usage,
-                finish_reason="stop",
+                finish_reason=_STOP_REASON.get(resp.stop_reason, "stop"),
             )
         else:
             text = next((b.text for b in resp.content if b.type == "text"), "")

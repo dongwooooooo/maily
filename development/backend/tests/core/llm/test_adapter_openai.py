@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from app.core.llm import LLMMessage, LLMRequest
 from app.core.llm.adapters.openai import OpenAIAdapter
-from app.core.llm.errors import LLMInvalidRequestError, LLMRefusalError
+from app.core.llm.errors import LLMInvalidRequestError, LLMRefusalError, LLMTransientError
 
 
 class _Band(BaseModel):
@@ -49,8 +49,50 @@ async def test_structured_completion():
     adapter = OpenAIAdapter(client)
     result = await adapter.complete(_req(output_schema=_Band))
     assert result.parsed.band == "urgent"
+    assert result.finish_reason == "stop"
     kwargs = client.chat.completions.parse.call_args.kwargs
     assert kwargs["response_format"] is _Band
+
+
+@pytest.mark.asyncio
+async def test_structured_completion_maps_finish_reason():
+    msg = SimpleNamespace(parsed=_Band(band="urgent", reason="boss"), refusal=None)
+    client = SimpleNamespace(
+        chat=SimpleNamespace(
+            completions=SimpleNamespace(
+                parse=AsyncMock(return_value=_choice(msg, finish_reason="length"))
+            )
+        )
+    )
+    adapter = OpenAIAdapter(client)
+    result = await adapter.complete(_req(output_schema=_Band))
+    assert result.finish_reason == "length"
+
+
+@pytest.mark.asyncio
+async def test_structured_parsed_none_raises_invalid_request():
+    msg = SimpleNamespace(parsed=None, refusal=None)
+    client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(parse=AsyncMock(return_value=_choice(msg))))
+    )
+    adapter = OpenAIAdapter(client)
+    with pytest.raises(LLMInvalidRequestError):
+        await adapter.complete(_req(output_schema=_Band))
+
+
+@pytest.mark.asyncio
+async def test_empty_choices_raises_transient():
+    resp = SimpleNamespace(
+        choices=[],
+        model="gpt-5-2026",
+        usage=SimpleNamespace(prompt_tokens=9, completion_tokens=3),
+    )
+    client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=AsyncMock(return_value=resp)))
+    )
+    adapter = OpenAIAdapter(client)
+    with pytest.raises(LLMTransientError):
+        await adapter.complete(_req())
 
 
 @pytest.mark.asyncio
@@ -62,6 +104,20 @@ async def test_refusal_raises():
     adapter = OpenAIAdapter(client)
     with pytest.raises(LLMRefusalError):
         await adapter.complete(_req(output_schema=_Band))
+
+
+@pytest.mark.asyncio
+async def test_not_found_maps_to_invalid_request_not_transient():
+    import openai
+
+    err = openai.NotFoundError.__new__(openai.NotFoundError)
+    Exception.__init__(err, "404")
+    client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=AsyncMock(side_effect=err)))
+    )
+    adapter = OpenAIAdapter(client)
+    with pytest.raises(LLMInvalidRequestError):
+        await adapter.complete(_req())
 
 
 @pytest.mark.asyncio

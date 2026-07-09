@@ -6,7 +6,12 @@ from pydantic import BaseModel
 
 from app.core.llm import LLMMessage, LLMRequest
 from app.core.llm.adapters.anthropic import AnthropicAdapter
-from app.core.llm.errors import LLMAuthError, LLMRateLimitError
+from app.core.llm.errors import (
+    LLMAuthError,
+    LLMInvalidRequestError,
+    LLMRateLimitError,
+    LLMRefusalError,
+)
 
 
 class _Band(BaseModel):
@@ -28,6 +33,15 @@ def _tool_response():
     return SimpleNamespace(
         content=[SimpleNamespace(type="tool_use", name="emit", input=tool_input)],
         stop_reason="tool_use",
+        model="claude-sonnet-5-2026",
+        usage=SimpleNamespace(input_tokens=11, output_tokens=4),
+    )
+
+
+def _no_tool_response(stop_reason: str):
+    return SimpleNamespace(
+        content=[SimpleNamespace(type="text", text="")],
+        stop_reason=stop_reason,
         model="claude-sonnet-5-2026",
         usage=SimpleNamespace(input_tokens=11, output_tokens=4),
     )
@@ -58,10 +72,41 @@ async def test_structured_completion_returns_parsed():
     adapter = AnthropicAdapter(client)
     result = await adapter.complete(_req(output_schema=_Band))
     assert result.parsed.band == "urgent"
+    assert result.finish_reason == "tool"
     # forced tool_choice was sent
     kwargs = client.messages.create.call_args.kwargs
     assert kwargs["tool_choice"]["name"] == "emit"
     assert kwargs["tools"][0]["input_schema"]["properties"]["band"]
+
+
+@pytest.mark.asyncio
+async def test_structured_refusal_with_no_tool_use_raises_refusal():
+    create = AsyncMock(return_value=_no_tool_response("refusal"))
+    client = SimpleNamespace(messages=SimpleNamespace(create=create))
+    adapter = AnthropicAdapter(client)
+    with pytest.raises(LLMRefusalError):
+        await adapter.complete(_req(output_schema=_Band))
+
+
+@pytest.mark.asyncio
+async def test_structured_truncated_with_no_tool_use_raises_invalid_request():
+    create = AsyncMock(return_value=_no_tool_response("max_tokens"))
+    client = SimpleNamespace(messages=SimpleNamespace(create=create))
+    adapter = AnthropicAdapter(client)
+    with pytest.raises(LLMInvalidRequestError):
+        await adapter.complete(_req(output_schema=_Band))
+
+
+@pytest.mark.asyncio
+async def test_not_found_maps_to_invalid_request_not_transient():
+    import anthropic
+
+    err = anthropic.NotFoundError.__new__(anthropic.NotFoundError)
+    Exception.__init__(err, "404")
+    client = SimpleNamespace(messages=SimpleNamespace(create=AsyncMock(side_effect=err)))
+    adapter = AnthropicAdapter(client)
+    with pytest.raises(LLMInvalidRequestError):
+        await adapter.complete(_req())
 
 
 @pytest.mark.asyncio

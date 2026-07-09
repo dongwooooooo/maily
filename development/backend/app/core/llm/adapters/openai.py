@@ -34,6 +34,8 @@ def _map_error(exc: Exception) -> LLMError:
         return LLMTransientError(str(exc))
     if isinstance(exc, openai.APIStatusError) and exc.status_code >= 500:
         return LLMTransientError(str(exc))
+    if isinstance(exc, openai.APIStatusError) and 400 <= exc.status_code < 500:
+        return LLMInvalidRequestError(str(exc))
     return LLMTransientError(str(exc))
 
 
@@ -75,11 +77,13 @@ class OpenAIAdapter:
                 )
                 if getattr(choice.message, "refusal", None):
                     raise LLMRefusalError(choice.message.refusal)
+                if choice.message.parsed is None:
+                    raise LLMInvalidRequestError("structured output missing parsed result")
                 result = LLMResult(
                     parsed=choice.message.parsed,
                     model_name=parsed_resp.model,
                     usage=usage,
-                    finish_reason="stop",
+                    finish_reason=_FINISH.get(choice.finish_reason, "stop"),
                 )
             else:
                 resp = await self._client.chat.completions.create(
@@ -88,6 +92,8 @@ class OpenAIAdapter:
                     max_tokens=max_tokens,
                     temperature=temperature,
                 )
+                if not resp.choices:
+                    raise LLMTransientError("no choices returned")
                 text_choice = resp.choices[0]
                 usage_data = resp.usage
                 usage = TokenUsage(

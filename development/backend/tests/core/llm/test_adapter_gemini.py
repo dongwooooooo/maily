@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from app.core.llm import LLMMessage, LLMRequest
 from app.core.llm.adapters.gemini import GeminiAdapter
-from app.core.llm.errors import LLMAuthError, LLMTransientError
+from app.core.llm.errors import LLMAuthError, LLMInvalidRequestError, LLMTransientError
 
 
 class _Band(BaseModel):
@@ -53,9 +53,34 @@ async def test_structured_completion():
     adapter = GeminiAdapter(client)
     result = await adapter.complete(_req(output_schema=_Band))
     assert result.parsed.band == "urgent"
+    assert result.finish_reason == "stop"
     kwargs = client.aio.models.generate_content.call_args.kwargs
     assert kwargs["config"].response_schema is _Band
     assert kwargs["config"].response_mime_type == "application/json"
+
+
+@pytest.mark.asyncio
+async def test_structured_completion_maps_finish_reason():
+    client = _client(_response(parsed=_Band(band="urgent", reason="boss"), finish="MAX_TOKENS"))
+    adapter = GeminiAdapter(client)
+    result = await adapter.complete(_req(output_schema=_Band))
+    assert result.finish_reason == "length"
+
+
+@pytest.mark.asyncio
+async def test_structured_parsed_none_raises_invalid_request():
+    client = _client(_response(parsed=None))
+    adapter = GeminiAdapter(client)
+    with pytest.raises(LLMInvalidRequestError):
+        await adapter.complete(_req(output_schema=_Band))
+
+
+@pytest.mark.asyncio
+async def test_structured_non_basemodel_parsed_raises_invalid_request():
+    client = _client(_response(parsed={"band": "urgent"}))
+    adapter = GeminiAdapter(client)
+    with pytest.raises(LLMInvalidRequestError):
+        await adapter.complete(_req(output_schema=_Band))
 
 
 @pytest.mark.asyncio
@@ -74,6 +99,18 @@ async def test_client_error_maps():
     err.code = 403
     adapter = GeminiAdapter(_client(side_effect=err))
     with pytest.raises(LLMAuthError):
+        await adapter.complete(_req())
+
+
+@pytest.mark.asyncio
+async def test_not_found_maps_to_invalid_request_not_transient():
+    from google.genai import errors
+
+    err = errors.ClientError.__new__(errors.ClientError)
+    Exception.__init__(err, "404 not found")
+    err.code = 404
+    adapter = GeminiAdapter(_client(side_effect=err))
+    with pytest.raises(LLMInvalidRequestError):
         await adapter.complete(_req())
 
 
