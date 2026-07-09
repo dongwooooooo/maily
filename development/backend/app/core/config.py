@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     jwt_issuer: str = "maily"
     google_oauth_client_id: str = ""
     google_oauth_client_secret: str = ""
+    anthropic_api_key: str = ""
+    openai_api_key: str = ""
+    google_api_key: str = ""
+    llm_default_model: str = "claude-sonnet-5"
 
 
 settings = Settings()
