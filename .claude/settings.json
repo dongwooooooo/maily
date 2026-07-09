@@ -8,14 +8,10 @@
       "Edit(**/.env)",
       "Edit(**/.env.*)",
       "Edit(**/secrets/**)",
-      "Edit(**/migrations/**)",
       "Edit(**/alembic/versions/**)",
       "Bash(rm -rf:*)"
     ],
-    "ask": [
-      "Edit(design/wireframes/**)",
-      "Bash(git push:*)"
-    ],
+    "ask": ["Edit(design/wireframes/**)"],
     "allow": [
       "Bash(pytest:*)",
       "Bash(pnpm test:*)",
