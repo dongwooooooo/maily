@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime, timedelta, timezone
 
+import structlog
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
@@ -19,6 +20,8 @@ from app.domains.labels.schemas import (
 _INACTIVE_ACCOUNT_STATUSES = ("disconnected", "disconnecting")
 _MOVE_IDEMPOTENCY_SCOPE = "labels.move_message_to_label"
 _MOVE_IDEMPOTENCY_TTL = timedelta(hours=24)
+
+logger = structlog.get_logger()
 
 
 def _to_schema(label: dict, mapping: dict) -> ServiceLabel:
@@ -123,6 +126,7 @@ async def create_or_update_label(
         "gmail_label_id": None,
         "gmail_label_name": gmail_label_name,
     }
+    logger.info("사용자 라벨 생성", label_id=str(label_id), gmail_label_name=gmail_label_name)
     return _to_schema(label_row, mapping_row), True
 
 
@@ -292,5 +296,10 @@ async def move_message_to_label(
         scope=_MOVE_IDEMPOTENCY_SCOPE,
         key=data.idempotency_key,
         response_snapshot=result.model_dump(mode="json"),
+    )
+    logger.info(
+        "메일 라벨 이동 신호 기록",
+        message_id=str(data.message_id),
+        service_label_id=str(data.label_id),
     )
     return result

@@ -15,9 +15,9 @@ async def maily_error_handler(request: Request, exc: MailyError) -> JSONResponse
     request_id = _request_id(request)
     log = logger.bind(request_id=request_id, error_code=exc.error_code)
     if exc.status_code >= 500:
-        log.error("domain_error", message=str(exc), details=exc.details)
+        log.error("도메인 예외 발생", message=str(exc), details=exc.details)
     else:
-        log.warning("domain_error", message=str(exc), details=exc.details)
+        log.warning("도메인 예외 발생", message=str(exc), details=exc.details)
 
     return JSONResponse(
         status_code=exc.status_code,
@@ -33,7 +33,7 @@ async def maily_error_handler(request: Request, exc: MailyError) -> JSONResponse
 
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     request_id = _request_id(request)
-    logger.error("unhandled_exception", request_id=request_id, exc_info=exc)
+    logger.error("처리되지 않은 예외 발생", request_id=request_id, exc_info=exc)
 
     return JSONResponse(
         status_code=500,

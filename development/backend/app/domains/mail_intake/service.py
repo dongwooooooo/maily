@@ -5,7 +5,7 @@ import structlog
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app.core.errors import ConflictError, NotFoundError
+from app.core.errors import ConflictError, ExternalServiceError, NotFoundError
 from app.domains.mail_intake import events, repository
 from app.domains.mail_intake.gmail_reader import GmailAuthError, get_reader
 from app.domains.mail_sources import repository as mail_sources_repository
@@ -151,7 +151,7 @@ async def sync_full(
         sync_run_id=sync_run_id,
         message_ids=changed_message_ids,
     )
-    logger.info("mail_intake.sync_full_succeeded", messages_changed=len(changed_message_ids))
+    logger.info("Gmail 전체 동기화 완료", messages_changed=len(changed_message_ids))
     return {"sync_run_id": sync_run_id, "message_ids": changed_message_ids}
 
 
@@ -230,7 +230,7 @@ async def _apply_history_record(
         )
         return existing["id"]
 
-    raise ValueError(f"unknown history record_type: {record_type}")
+    raise ExternalServiceError(f"unknown Gmail history record_type: {record_type}")
 
 
 async def sync_delta(
@@ -364,7 +364,7 @@ async def sync_delta(
         sync_run_id=sync_run_id,
         message_ids=changed_message_ids,
     )
-    logger.info("mail_intake.sync_delta_succeeded", messages_changed=len(changed_message_ids))
+    logger.info("Gmail 증분 동기화 완료", messages_changed=len(changed_message_ids))
     return {"sync_run_id": sync_run_id, "message_ids": changed_message_ids}
 
 
@@ -394,7 +394,7 @@ async def process_notification(
         is_new = False
 
     if not is_new:
-        logger.info("mail_intake.notification_deduped", email_address=email_address)
+        logger.info("중복 Pub/Sub 알림 무시", email_address=email_address)
         return {"deduped": True, "queued_source_ids": []}
 
     await events.publish_notification_received(
@@ -418,7 +418,7 @@ async def process_notification(
 
     await repository.mark_notification_processed(connection, notification_id=row_id)
     logger.info(
-        "mail_intake.notification_processed",
+        "Pub/Sub 알림 처리 완료",
         email_address=email_address,
         queued_source_count=len(queued_source_ids),
     )
@@ -499,7 +499,7 @@ async def register_watch(connection: AsyncConnection, *, connected_account_id: u
             scheduled_at=datetime.now(timezone.utc),
         )
 
-    logger.info("mail_intake.watch_registered", topic_name=registration["topic_name"])
+    logger.info("Gmail watch 등록 완료", topic_name=registration["topic_name"])
     return {"topic_name": registration["topic_name"], "expiration": registration["expiration"]}
 
 
