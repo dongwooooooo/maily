@@ -50,6 +50,8 @@ _REQUIRED_PAYLOAD_KEYS: dict[str, set[str]] = {
     "build_briefing": {"workspace_id"},
     "generate_summary": {"message_id"},
     "classify_importance": {"message_id"},
+    "execute_action": {"command_id"},
+    "reconcile_action": {"message_id"},
 }
 
 # _integration-contract.md §2 lock_key rules: source-targeted jobs lock per
@@ -105,12 +107,40 @@ def _single_message_id_to_build_briefing_payload(event_payload: dict) -> list[di
     ]
 
 
+def _optional_message_id_to_build_briefing_payload(event_payload: dict) -> list[dict]:
+    # gmail_action_applied/gmail_action_undone's message_id can genuinely
+    # be null (a command not tied to one message, e.g. a future bulk
+    # action) — unlike summary/importance which always evaluate a real
+    # message. No message_id means nothing for briefing to rebuild, so
+    # this returns no job rather than enqueuing build_briefing with a
+    # message_ids: [None] that would blow up in the handler.
+    if not event_payload.get("message_id"):
+        return []
+    return [
+        {
+            "workspace_id": event_payload["workspace_id"],
+            "message_ids": [event_payload["message_id"]],
+        }
+    ]
+
+
+def _skip_if_no_message_id(event_payload: dict) -> list[dict]:
+    # Same message-less-command guard as above, for reconcile_action —
+    # nothing to reconcile without a message_id.
+    if not event_payload.get("message_id"):
+        return []
+    return [dict(event_payload)]
+
+
 _PAYLOAD_BUILDERS: dict[tuple[str, str], Callable[[dict], list[dict]]] = {
     ("gmail_source_connected", "sync_full"): _override_reason_initial_connect,
     ("gmail_snapshot_changed", "generate_summary"): _fan_out_per_message_id,
     ("gmail_snapshot_changed", "classify_importance"): _fan_out_per_message_id,
     ("summary_completed", "build_briefing"): _single_message_id_to_build_briefing_payload,
     ("importance_classified", "build_briefing"): _single_message_id_to_build_briefing_payload,
+    ("gmail_action_applied", "build_briefing"): _optional_message_id_to_build_briefing_payload,
+    ("gmail_action_undone", "build_briefing"): _optional_message_id_to_build_briefing_payload,
+    ("gmail_action_applied", "reconcile_action"): _skip_if_no_message_id,
 }
 
 
@@ -195,11 +225,18 @@ async def dispatch_pending_events(
                     f"(event_id={event['id']})"
                 ) from exc
             for index, job_payload in enumerate(job_payloads):
-                missing = _REQUIRED_PAYLOAD_KEYS.get(job_type, set()) - job_payload.keys()
+                required = _REQUIRED_PAYLOAD_KEYS.get(job_type, set())
+                # Value-level check, not just key presence: a required key
+                # present but null (e.g. a producer emitting
+                # {"workspace_id": None} instead of omitting the key
+                # entirely) must fail exactly the same way as a missing
+                # key — a downstream job handler doing uuid.UUID(str(None))
+                # is the same silent-retry-exhaustion failure either way.
+                missing = {key for key in required if job_payload.get(key) is None}
                 if missing:
                     raise MissingJobPayloadKeyError(
-                        f"{event['event_type']} -> {job_type} payload missing {sorted(missing)} "
-                        f"(event_id={event['id']})"
+                        f"{event['event_type']} -> {job_type} payload missing/null "
+                        f"{sorted(missing)} (event_id={event['id']})"
                     )
                 # A fan-out event (job_payloads has >1 entry) needs a
                 # distinct idempotency_key per payload, or the UNIQUE

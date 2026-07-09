@@ -31,4 +31,11 @@ ACTIVE_EVENT_CONSUMERS: dict[str, list[str]] = {
     "gmail_snapshot_changed": ["build_briefing", "generate_summary", "classify_importance"],
     "summary_completed": ["build_briefing"],
     "importance_classified": ["build_briefing"],
+    # IC4 (action ledger) — tests/integration/test_ic4_action_ledger.py.
+    # gmail_action_applied also drives mail_intake's own-action snapshot
+    # reconcile (outbox_dispatcher.py's _skip_if_no_message_id guard for
+    # message-less commands), not just briefing.
+    "gmail_action_requested": ["execute_action"],
+    "gmail_action_applied": ["build_briefing", "reconcile_action"],
+    "gmail_action_undone": ["build_briefing"],
 }
