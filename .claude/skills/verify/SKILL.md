@@ -14,6 +14,7 @@ description: 완료 선언 전 결과를 3층(자동/구조/반례)으로 검증
 - `git diff --stat` — **예상한 파일만** 바뀌었나
 - public API/인터페이스 변경 여부 — 의도된 것만
 - secret/config 건드렸나 (`.env`, settings, 마이그레이션)
+- 백엔드 diff: `docs/areas/backend/error-handling-and-logging.md` 체크리스트 — `MailyError` 서브클래스만 던지는가, 로그 메시지가 한국어인가(필드 키는 영어), 레벨 기준(info 남발·error에 exc_info)이 맞는가
 
 ## 3. 반례 검증
 - edge case 최소 1개 직접 실행

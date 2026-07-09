@@ -75,7 +75,7 @@ async def _finalize_undo_if_reverse(connection, *, command_id: uuid.UUID) -> Non
 async def run_execute_action(connection, *, command_id: uuid.UUID) -> None:
     command = await repository.lock_command_for_update(connection, command_id=command_id)
     if command is None:
-        logger.warning("execute_action_command_missing", command_id=str(command_id))
+        logger.warning("존재하지 않는 command_id로 execute_action 호출", command_id=str(command_id))
         return
 
     if command["status"] == "pending":
@@ -86,7 +86,7 @@ async def run_execute_action(connection, *, command_id: uuid.UUID) -> None:
             # [선행조건] account disconnecting/disconnected -> stop, leave
             # status as pending; purge owns cleanup for this source.
             logger.info(
-                "execute_action_blocked_by_account_state",
+                "계정 연결 해제 중이라 액션 실행 보류",
                 command_id=str(command_id),
                 account_status=None if scope is None else scope["status"],
             )
@@ -111,7 +111,7 @@ async def run_execute_action(connection, *, command_id: uuid.UUID) -> None:
                 payload={"command_id": str(command_id)},
                 idempotency_key=events.failed_key(command_id, new_version),
             )
-            logger.warning("gmail_action_failed", command_id=str(command_id), reason=str(exc))
+            logger.warning("Gmail 액션 실패", command_id=str(command_id), reason=str(exc))
             return
 
         new_version = command["version"] + 1
@@ -136,7 +136,7 @@ async def run_execute_action(connection, *, command_id: uuid.UUID) -> None:
             payload={"command_id": str(command_id)},
             idempotency_key=events.applied_key(command_id, new_version),
         )
-        logger.info("gmail_action_applied", command_id=str(command_id), changed=result.changed)
+        logger.info("Gmail 액션 적용 완료", command_id=str(command_id), changed=result.changed)
     elif command["status"] != "applied":
         # failed/compensating/undone are terminal or owned by a different
         # in-flight path — [선행조건] guard against re-execution.

@@ -32,11 +32,12 @@ Task 1~3 구현 시점 기준으로 아래 상태였다.
 
 1. **도메인 예외는 `MailyError`를 상속한다.** `app/core/errors.py`가 유일한 베이스. 도메인이 `ValueError`, `Exception`, FastAPI `HTTPException`을 직접 던지지 않는다 — 서비스/레포지토리 계층은 항상 `MailyError` 서브클래스만 던진다.
 2. **HTTP 상태 코드는 예외 클래스가 소유한다.** 라우터가 `status_code=401`을 직접 쓰지 않는다. `UnauthorizedError.status_code = 401`처럼 예외 클래스 자체가 상태 코드를 갖고, 공통 핸들러(`app/core/error_handlers.py`)가 이걸 읽어 응답을 만든다. 라우터는 `raise UnauthorizedError("invalid session")`만 하면 끝난다.
-3. **에러 응답 바디는 한 가지 모양만 존재한다.** `{"error": {"code": "...", "message": "...", "request_id": "..."}}`. `code`는 프론트엔드가 분기하는 안정적인 키(`session_expired`, `duplicate_source` 등), `message`는 사용자에게 보여줘도 안전한 문장, `request_id`는 사용자가 문의할 때 서버 로그와 대조하는 상관관계 키.
+3. **에러 응답 바디는 한 가지 모양만 존재한다.** `{"error": {"code": "...", "message": "...", "request_id": "..."}}`. `code`는 프론트엔드가 분기하는 안정적인 키(`session_expired`, `duplicate_source` 등)이며 실제 UI에 보여줄 확정 카피는 프론트엔드가 `code`를 보고 자체적으로 고른다(`design/copy-principles.md` 소관). `message`는 프론트엔드에 직접 렌더링되지 않는 개발자용 기술 설명 — 로그 상관, 디버깅, 지원팀 문의 대응이 목적이라 스택 트레이스만 아니면 영어로 남겨도 된다(§8). `request_id`는 사용자가 문의할 때 서버 로그와 대조하는 상관관계 키.
 4. **500번대는 메시지를 감춘다.** `ConfigurationError`(설정 누락), 처리 안 된 `Exception` 전부 클라이언트에는 `"Internal server error"`만 내려간다. 원인은 서버 로그에만 `exc_info`로 남는다 — 스택 트레이스나 설정값 이름을 응답 바디에 절대 포함하지 않는다.
 5. **모든 요청은 `request_id`를 갖는다.** 클라이언트가 `X-Request-Id` 헤더를 보내면 그대로 쓰고, 없으면 서버가 생성한다. 응답 헤더로 그대로 돌려준다 — 프론트엔드 에러 토스트에 "문의 시 이 번호를 알려주세요" 형태로 노출 가능.
 6. **로그는 사람이 아니라 프로그램이 먼저 읽는다.** JSON 구조화 로그(`structlog`)만 쓴다. `print`, f-string 로그 금지 — grep으로는 찾을 수 있어도 로그 수집기(예: 향후 도입될 중앙 로그 시스템)가 파싱을 못 한다.
 7. **컨텍스트는 로그 콜마다 반복해서 넘기지 않는다.** `structlog.contextvars`로 요청 시작 시점에 `request_id`를 바인딩하고, 인증 이후 `workspace_id`/`user_id`를 추가 바인딩한다. 이후 그 요청 안에서 발생하는 모든 로그 호출이 파라미터 없이도 컨텍스트를 포함한다.
+8. **로그 메시지(첫 인자)는 한국어, 구조화 필드 키는 영어.** 2026-07-09 사용자 결정(대화·개인 전역 설정 반영, 이 문서가 프로젝트 기준의 정본). `logger.info("Gmail 전체 동기화 완료", source_id=..., messages_changed=...)`처럼 사람이 읽는 문장은 한국어, `source_id`/`messages_changed` 같은 필드 이름(코드 식별자)은 영어 snake_case를 유지한다 — 필드 키는 로그 수집기가 필터링·집계하는 스키마라 "코드"에 해당하고, 메시지 문장만 "로그 메시지"에 해당한다. 예외 클래스의 `.message`는 이 규칙 대상이 아니다 — §3에서 규정한 대로 개발자용 기술 설명이라 영어를 유지해도 된다.
 
 ## 예외 계층
 
@@ -58,7 +59,7 @@ MailyError (500, "internal_error")
 | `ValidationError` | 422 | pydantic 스키마 통과 후의 비즈니스 규칙 위반 | OAuth callback profile에 `gmail.modify` scope 없음 |
 | `UnauthorizedError` | 401 | 인증 실패 — 세션 없음/만료/폐기 | `resolve_request_context`가 세션을 못 찾음 |
 | `ForbiddenError` | 403 | 인증은 됐지만 권한 없음 | 세션 workspace ≠ 요청 대상 workspace |
-| `ExternalServiceError` | 502 | Gmail API·Google OAuth 등 외부 호출 실패 | `GmailReaderPort` 호출이 5xx/타임아웃 |
+| `ExternalServiceError` | 502 | Gmail API·Google OAuth 등 외부 호출 실패, 또는 응답이 우리가 처리 가능한 형태가 아님 | `GmailReaderPort` 호출이 5xx/타임아웃, 또는 알 수 없는 history record_type |
 | `ConfigurationError` | 500 | 서버 설정 누락 — 클라이언트 잘못이 아님 | `MAILY_JWT_SECRET`/`MAILY_TOKEN_ENC_KEY` 미설정 |
 
 `MailyError`를 직접 던지지 않는다 — 반드시 구체적인 서브클래스를 쓴다. 새로운 실패 유형이 이 표에 없으면 임의로 상태 코드를 고르지 않고, 이 문서에 행을 먼저 추가한다(db-schema.md의 "표에 없는 값을 임의로 채우지 않는다"와 같은 규칙).
@@ -83,8 +84,8 @@ structlog.contextvars.bind_contextvars(workspace_id=str(context.workspace_id), u
 # Gmail 소스 작업 시점 (job handler) — source 관련 작업만
 structlog.contextvars.bind_contextvars(source_id=str(source_id))
 
-logger.info("gmail_source_connected", gmail_address=masked_address)
-# {"event": "gmail_source_connected", "request_id": "...", "workspace_id": "...", "gmail_address": "a***@gmail.com", "level": "info", "timestamp": "..."}
+logger.info("Gmail 계정 연결 완료", gmail_address=masked_address)
+# {"event": "Gmail 계정 연결 완료", "request_id": "...", "workspace_id": "...", "gmail_address": "a***@gmail.com", "level": "info", "timestamp": "..."}
 ```
 
 로그에 남기면 안 되는 값: `access_token_ciphertext`/`refresh_token_ciphertext`(암호문이어도 로그에 안 남긴다), 복호화된 토큰 원문, `MAILY_JWT_SECRET`/`MAILY_TOKEN_ENC_KEY` 값, 메일 본문·요약 원문(`~/.claude/rules/security.md`, module-boundaries.md의 raw body 미보관 invariant와 같은 이유). Gmail 주소처럼 개인식별정보 성격이 있는 값은 로그 레벨에 따라 마스킹을 검토한다 — POC 단계는 workspace 소유자 본인 확인 목적상 전체 노출을 허용하되, 운영 전환 시 재검토 대상으로 남긴다.
@@ -113,11 +114,27 @@ except security.InvalidSessionTokenError as exc:
 
 응답: `{"error": {"code": "unauthorized", "message": "invalid session", "request_id": "..."}}`. `maily_error_handler`가 자동으로 `structlog` warning 로그(`request_id`, `error_code=unauthorized` 포함)를 남기고 상태 코드를 예외 클래스에서 읽는다 — 라우터는 상태 코드를 몰라도 된다.
 
+## 로깅 레벨 기준
+
+| 레벨 | 언제 | 예시 |
+|---|---|---|
+| `info` | 정상 흐름의 의미 있는 완료 지점 — job 성공, 동기화 완료, 상태 전이 성공 | `logger.info("Gmail 전체 동기화 완료", source_id=..., messages_changed=...)` |
+| `warning` | 요청은 실패했지만 시스템 결함은 아님 — 4xx급 도메인 예외(`MailyError`, 500 미만), 재시도로 회복 가능한 job 실패 | `logger.warning("멱등 키 중복으로 커맨드 재사용", command_id=...)` |
+| `error` | 원인 불명 예외, 5xx, 재시도해도 회복 안 되는 실패 — `exc_info` 필수 | `logger.error("Gmail mutation 실패", command_id=..., exc_info=exc)` |
+
+`info`를 매 함수 진입/DB 쿼리마다 찍지 않는다 — 의미 있는 상태 변화(동기화 완료, 커맨드 적용, 계정 연결)에만 남긴다. 로그 볼륨이 커지면 실제 장애 신호가 묻힌다.
+
 ## 테스트 전략
 
 - `tests/core/test_errors.py`: 예외 클래스 7종 각각이 올바른 상태 코드·`error_code`로 매핑되는지, 처리 안 된 일반 `Exception`이 500 + 제네릭 메시지로 감싸지는지(원인 메시지가 응답 바디에 안 남는지) 검증.
 - `tests/core/test_logging.py`: `X-Request-Id`를 클라이언트가 보내면 그대로 응답 헤더에 돌아오는지, 안 보내면 서버가 생성해서 돌려주는지 검증.
 - 기존 도메인 테스트(`test_router.py` 등)는 상태 코드 assertion만 하고 있어 응답 바디 형태가 `{"detail": ...}`에서 `{"error": {...}}`로 바뀌어도 깨지지 않는다 — 새 도메인은 응답 바디 형태까지 assert하는 걸 권장한다(카드 문법처럼 "응답 계약"이 이 형태로 고정됐다는 걸 테스트가 증명하도록).
+
+## 하네싱 — 자동 리마인더와 리뷰
+
+- `.claude/hooks/log-guard.mjs`(PostToolUse, `development/backend/**/*.py` Edit/Write 시 실행)가 `print(`, `raise ValueError`/`raise Exception`/`raise HTTPException`, 한국어 문자가 없는 `logger.info/warning/error(...)` 첫 인자를 감지해 리마인더를 띄운다. `doc-guard.mjs`와 동일하게 비차단(reminder-only) — 항상 exit 0.
+- `/verify` 스킬의 자동 검증 단계가 이 문서의 체크리스트를 구조 검증 항목으로 포함한다(§구조 검증).
+- 새 도메인의 로깅/에러 코드를 짤 때는 이 문서를 먼저 읽고 시작한다 — `docs/CONTEXT.md` 작업 라우팅 표의 "백엔드 예외/로깅 구현" 행이 진입점.
 
 ## 체크리스트 (새 도메인 워크트리 착수 전)
 
@@ -125,5 +142,7 @@ except security.InvalidSessionTokenError as exc:
 - [ ] 새로운 실패 유형이 위 예외 표에 없다면, 표에 행을 먼저 추가했는가(임의로 상태 코드를 고르지 않았는가).
 - [ ] 500번대로 응답하는 경로에서 원인 메시지·설정값 이름·스택 트레이스가 응답 바디에 안 남는가.
 - [ ] job handler·외부 API 호출부에서 `logger.info`/`logger.warning`/`logger.error`를 `print` 대신 썼는가.
+- [ ] 로그 메시지(첫 인자)가 한국어 문장인가 — 필드 키(`source_id` 등)만 영어로 남아있는가.
+- [ ] 로그 레벨이 위 표 기준과 맞는가(info 남발 없는가, error에 `exc_info` 있는가).
 - [ ] 로그 호출에 토큰 원문·메일 본문·시크릿 값을 넘기지 않았는가.
 - [ ] source 관련 job은 `source_id`를 컨텍스트에 바인딩했는가.
