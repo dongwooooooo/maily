@@ -226,12 +226,16 @@ export const sections: Section[] = [
   },
 ]
 
-const PASSIVE_SECTION_IDS = ['organized', 'done']
+export const PASSIVE_SECTION_IDS = ['organized', 'done']
 
 /** True when any urgent-derived section (excludes 정리됨/완료, which are already resolved) has items. */
-export const hasUrgentItems = sections.some(
-  (section) => !PASSIVE_SECTION_IDS.includes(section.id) && (section.count ?? 0) > 0,
-)
+export function computeHasUrgentItems(sectionList: Pick<Section, 'id' | 'count'>[]): boolean {
+  return sectionList.some(
+    (section) => !PASSIVE_SECTION_IDS.includes(section.id) && (section.count ?? 0) > 0,
+  )
+}
+
+export const hasUrgentItems = computeHasUrgentItems(sections)
 
 export interface DigestItem {
   value: string

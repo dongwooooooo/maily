@@ -152,12 +152,12 @@ docker compose -f development/infra/docker/docker-compose.yml up -d
 
 ## 테스트 방침
 
-현재 테스트 0개 (POC 단계). 설정값·규칙만 여기 적는다 — 무엇을 검증할지(엣지 케이스, 공유 컴포넌트 영향 범위, 시크릿 등)는 문서화하지 않고 `/code-review`·`/verify` 스킬 실행으로 처리한다.
+Vitest + React Testing Library 설치 완료, 순수 로직 위주로 유닛테스트 시작함 (POC 단계, 컴포넌트 렌더 테스트는 아직 범위 밖). 설정값·규칙만 여기 적는다 — 무엇을 검증할지(엣지 케이스, 공유 컴포넌트 영향 범위, 시크릿 등)는 문서화하지 않고 `/code-review`·`/verify` 스킬 실행으로 처리한다.
 
-- 프레임워크: Vitest + React Testing Library. E2E는 필요해지는 시점에 별도 결정 (지금은 범위 아님)
+- 프레임워크: Vitest + React Testing Library (`vitest.config.ts`, `vitest.setup.ts`). E2E는 필요해지는 시점에 별도 결정 (지금은 범위 아님)
 - 파일 위치: 대상 파일 옆에 co-location (`Foo.tsx` → `Foo.test.tsx`). `__tests__/` 디렉토리 금지
-- 실행 명령: `pnpm test` — 테스트 첫 추가 시 devDependency와 함께 `package.json`에 스크립트 등록
-- 우선순위: 순수 로직(상태 파생 — `hasUrgentItems` 같은 것, 향후 정리 제안 확신도 계산 등) 우선. 목업을 그대로 옮긴 프레젠테이션 컴포넌트는 후순위
+- 실행 명령: `pnpm test`
+- 우선순위: 순수 로직(상태 파생 — `computeHasUrgentItems`, `useAutoHideToast` 타이머 로직 등) 우선. 목업을 그대로 옮긴 프레젠테이션 컴포넌트는 후순위
 - mock data는 `features/*/data/*.mock.ts` 기존 fixture 재사용, 테스트 전용 fixture 새로 만들지 않는다
 - lint(`pnpm lint`)는 커밋 전 훅으로 자동 실행됨 (`.claude/settings.json` 참조)
 
