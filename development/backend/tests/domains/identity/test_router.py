@@ -42,6 +42,9 @@ def test_get_session_without_token_returns_401() -> None:
     response = client.get("/auth/session")
 
     assert response.status_code == 401
+    body = response.json()
+    assert body["error"]["code"] == "unauthorized"
+    assert "request_id" in body["error"]
 
 
 def test_get_session_with_garbage_token_returns_401() -> None:
@@ -50,3 +53,4 @@ def test_get_session_with_garbage_token_returns_401() -> None:
     response = client.get("/auth/session", headers={"Authorization": "Bearer not-a-real-token"})
 
     assert response.status_code == 401
+    assert response.json()["error"]["code"] == "unauthorized"

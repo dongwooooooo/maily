@@ -1,11 +1,13 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+import structlog
+from fastapi import APIRouter, Depends, Header
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.api.deps import get_db_connection
 from app.core import security
+from app.core.errors import UnauthorizedError
 from app.domains.identity import repository
 from app.domains.identity.oauth import verify_google_id_token
 from app.domains.identity.service import google_login, issue_session, resolve_request_context
@@ -38,7 +40,7 @@ def get_google_profile_verifier():
 
 async def get_bearer_token(authorization: str = Header(default="")) -> str:
     if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="missing bearer token")
+        raise UnauthorizedError("missing bearer token")
     return authorization.removeprefix("Bearer ")
 
 
@@ -69,7 +71,11 @@ async def get_session(
     try:
         context = await resolve_request_context(connection, token)
     except security.InvalidSessionTokenError as exc:
-        raise HTTPException(status_code=401, detail="invalid session") from exc
+        raise UnauthorizedError("invalid session") from exc
+
+    structlog.contextvars.bind_contextvars(
+        workspace_id=str(context.workspace_id), user_id=str(context.user_id)
+    )
 
     summary = await repository.get_session_summary(
         connection, user_id=context.user_id, workspace_id=context.workspace_id
