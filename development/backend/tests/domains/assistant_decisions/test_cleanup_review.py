@@ -17,6 +17,34 @@ from tests.domains.assistant_decisions.conftest import (
 )
 
 
+async def test_rerun_does_not_duplicate_pending_proposal() -> None:
+    """[멱등] 같은 message+action 조합으로 두 번 실행해도 pending proposal이
+    하나만 유지된다(assistant_decisions.md "같은 후보 중복 proposal 방지")."""
+    workspace_id, user_id, account_id = await seed_scope()
+    message_id = await seed_message(account_id, is_read=True, is_archived=False)
+    await seed_message_labels(message_id, ["INBOX"])
+
+    async with engine.begin() as connection:
+        first = await prepare_cleanup_proposals(
+            connection,
+            workspace_id=workspace_id,
+            message_ids=[message_id],
+            requested_by=user_id,
+        )
+        second = await prepare_cleanup_proposals(
+            connection,
+            workspace_id=workspace_id,
+            message_ids=[message_id],
+            requested_by=user_id,
+        )
+
+    async with engine.connect() as connection:
+        count = await repository.count_cleanup_proposals_for_message(connection, message_id=message_id)
+
+    assert count == 1
+    assert first[0]["id"] == second[0]["id"]
+
+
 async def test_confidence_band_routes_proposal() -> None:
     """[정상] read+PROMOTIONS -> auto-apply (즉시 command 요청, status=approved).
     read+no-promo-label -> approval-required (승인 큐 pending)."""

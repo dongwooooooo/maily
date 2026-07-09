@@ -3,14 +3,6 @@
 Revision ID: 0008_briefing_items
 Revises: 0007_gmail_actions
 Create Date: 2026-07-09
-
-COORDINATOR NOTE: this worktree only has migrations through
-0007_gmail_actions locally (per _integration-contract.md §1, briefing's
-assigned down_revision IS 0007_gmail_actions — labels(6) and
-gmail_actions(7) merge before briefing(8,9)). revision/down_revision below
-match the Revision 배정표 exactly; no placeholder renumbering should be
-needed at merge time unless a sibling worktree's migration lands with a
-conflicting slug.
 """
 
 from alembic import op

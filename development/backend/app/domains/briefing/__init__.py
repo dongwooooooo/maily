@@ -24,6 +24,10 @@ EVENT_CONSUMERS: dict = {
     "summary_completed": ["build_briefing"],
     "importance_classified": ["build_briefing"],
     "reminder_reactivated": ["build_briefing"],
+    # module-boundaries.md / assistant_decisions.md both list briefing as a
+    # cleanup_proposal_created consumer (alongside notifications) — omitted
+    # from this worktree's original trigger count, added at integration.
+    "cleanup_proposal_created": ["build_briefing"],
 }
 
 

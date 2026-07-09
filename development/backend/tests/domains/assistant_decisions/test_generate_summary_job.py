@@ -27,6 +27,32 @@ async def test_job_wrapper_resolves_message_id_and_delegates() -> None:
     assert summary["is_metadata_only"] is False
 
 
+async def test_rerun_upserts_single_row_not_duplicate() -> None:
+    """[멱등] assistant_decisions.md "같은 message 재실행은 upsert라 row
+    하나만 유지" — 두 번 실행해도 message_summaries에 message_id당 row가
+    하나만 남고 version만 올라간다."""
+    _, _, account_id = await seed_scope(summary_enabled=True)
+    message_id = await seed_message(account_id, snippet="본문 스니펫")
+
+    await generate_summary_job({"message_id": str(message_id)})
+    await generate_summary_job({"message_id": str(message_id)})
+
+    async with engine.connect() as connection:
+        from app.domains.assistant_decisions.models import message_summaries
+
+        rows = (
+            (
+                await connection.execute(
+                    select(message_summaries).where(message_summaries.c.message_id == message_id)
+                )
+            )
+            .mappings()
+            .all()
+        )
+    assert len(rows) == 1
+    assert rows[0]["summary_version"] == 2
+
+
 async def test_llm_payload_allows_only_metadata_fields() -> None:
     """[데이터경계] The payload handed to the LLM port is built exclusively
     from SummaryInput's fixed field set — subject/sender/snippet/labels/

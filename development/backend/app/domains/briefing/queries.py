@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app.core.errors import NotFoundError
+from app.core.errors import NotFoundError, ValidationError
 from app.domains.briefing import repository
 from app.domains.briefing.schemas import (
     AccountBriefingGroup,
@@ -54,7 +54,10 @@ async def get_today_briefing(
     """
     source_id = None
     if scope != "all":
-        source_id = uuid.UUID(scope)
+        try:
+            source_id = uuid.UUID(scope)
+        except ValueError as exc:
+            raise ValidationError("scope는 'all' 또는 유효한 source_id여야 합니다") from exc
 
     accounts = await repository.list_connected_accounts_for_workspace(
         connection, workspace_id=workspace_id, source_id=source_id

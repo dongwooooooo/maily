@@ -25,6 +25,33 @@ async def test_job_wrapper_resolves_message_id_and_delegates() -> None:
     assert classification is not None
 
 
+async def test_rerun_upserts_single_row_not_duplicate() -> None:
+    """[멱등] 같은 message로 두 번 실행해도 message_importance_classifications에
+    row 하나만 남고 classification_version만 올라간다."""
+    _, _, account_id = await seed_scope()
+    message_id = await seed_message(account_id)
+
+    await classify_importance_job({"message_id": str(message_id)})
+    await classify_importance_job({"message_id": str(message_id)})
+
+    async with engine.connect() as connection:
+        from app.domains.assistant_decisions.models import message_importance_classifications
+
+        rows = (
+            (
+                await connection.execute(
+                    select(message_importance_classifications).where(
+                        message_importance_classifications.c.message_id == message_id
+                    )
+                )
+            )
+            .mappings()
+            .all()
+        )
+    assert len(rows) == 1
+    assert rows[0]["classification_version"] == 2
+
+
 async def test_llm_payload_allows_only_metadata_fields() -> None:
     assert set(ImportanceInput.__annotations__.keys()) == {
         "subject",

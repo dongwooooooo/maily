@@ -102,7 +102,7 @@ pending
 
 ## Job: `build_briefing`
 
-- 트리거(§integration §3): `gmail_snapshot_changed`, `summary_completed`, `importance_classified`, `gmail_action_applied`, `gmail_action_undone`, `reminder_reactivated`
+- 트리거(§integration §3): `gmail_snapshot_changed`, `summary_completed`, `importance_classified`, `gmail_action_applied`, `gmail_action_undone`, `reminder_reactivated`, `cleanup_proposal_created`(module-boundaries.md·assistant_decisions.md 공통 표기 — briefing도 구독. 카드에 어떤 필드로 반영할지는 미정, IC5/IC6 배선 시 결정)
 - payload: `{workspace_id, source_id?, message_ids?}`, `lock_key = null`(message 단위 upsert는 idempotency로 충분, §integration §2)
 - 내부: 트리거 event별로 재생성할 message_id를 결정해 `rebuild_briefing` command 실행. **매번 전체가 아니라 해당 message_id만** 부분 rebuild.
 
@@ -187,4 +187,4 @@ F09 보관함 — remind_later 예정 타임라인.
 - 마이그레이션 2개: `0008_briefing_items`(down `0007_gmail_actions`, Task 6 — `briefing_items`), `0009_briefing_state`(down `0008_briefing_items`, Task 7 — `briefing_item_states`, `reminders`). 자기 down_revision은 `0007`이지만, briefing 로직·테스트는 `gmail_messages`(0004)만 있으면 로컬 개발·테스트 가능하다(요약/중요도는 fake 결과로 대체). 머지 순서는 `_integration-contract.md §1` 표를 따른다 — 로컬에서 상위 테이블만 만들어 개발하되 머지는 표 순서.
 - `section`·`importance_band` 값 집합은 db-schema **[미정]** — `fake_section`/`fake_importance_band` 계약 상수로만 참조하고, 확정 시 db-schema [미정] 해소를 반영. 이 도메인 워크트리가 값을 임의로 정하지 않는다.
 - summary/importance 원본(`message_summaries`·`message_importance_classifications`, 0010)은 briefing보다 뒤 머지 — briefing 로컬 테스트는 fake 결과 또는 nullable denormalize로 진행. build_briefing은 원본 부재 시 band/summary null로 rebuild.
-- `_integration-contract.md §2` job 계약(`build_briefing`/`reactivate_reminders` payload·lock_key)·§3 event wiring(트리거 6종, 발행 event 2종)·§5 `reminders.status` 값 준수. purge handler는 §4 `PURGE_HANDLER(source_id)` 고정 — content-bearing(◆) `briefing_items`·`briefing_item_states` purge, `reminders`는 state 삭제 시 연쇄 정리.
+- `_integration-contract.md §2` job 계약(`build_briefing`/`reactivate_reminders` payload·lock_key)·§3 event wiring(트리거 7종, 발행 event 2종)·§5 `reminders.status` 값 준수. purge handler는 §4 `PURGE_HANDLER(source_id)` 고정 — content-bearing(◆) `briefing_items`·`briefing_item_states` purge, `reminders`는 state 삭제 시 연쇄 정리.

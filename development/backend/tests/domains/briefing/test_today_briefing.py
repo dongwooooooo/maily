@@ -62,6 +62,17 @@ async def test_briefing_disabled_excluded() -> None:
     assert response.json() == []
 
 
+async def test_invalid_scope_returns_422_not_500() -> None:
+    workspace_id, user_id, _account_id = await seed_scope()
+    headers = await _headers_for(user_id, workspace_id)
+
+    client = TestClient(app)
+    response = client.get("/briefing/today?scope=not-a-uuid", headers=headers)
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "validation_error"
+
+
 async def test_empty_state() -> None:
     workspace_id, user_id, _account_id = await seed_scope()
     headers = await _headers_for(user_id, workspace_id)

@@ -2,17 +2,8 @@
 message_importance_classifications
 
 Revision ID: 0010_assistant_eval
-Revises: 0007_gmail_actions
+Revises: 0009_briefing_state
 Create Date: 2026-07-09
-
-NOTE (worktree isolation): _integration-contract.md §1 assigns this
-revision's down_revision as `0009_briefing_state` (after briefing's two
-migrations). This worktree only has `0007_gmail_actions` merged locally —
-briefing (0008/0009) is being built in a sibling worktree and isn't visible
-here. down_revision is pointed at `0007_gmail_actions` as a placeholder;
-the coordinator must repoint it to `0009_briefing_state` at merge time
-per the documented chain order. revision/down_revision slugs otherwise
-match the contract table exactly (no autogenerate).
 """
 
 from alembic import op
@@ -21,7 +12,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "0010_assistant_eval"
-down_revision = "0007_gmail_actions"  # placeholder — coordinator repoints to 0009_briefing_state
+down_revision = "0009_briefing_state"
 branch_labels = None
 depends_on = None
 

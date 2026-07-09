@@ -45,13 +45,9 @@ briefing_item_states = Table(
     Column("seen", Boolean, nullable=False, server_default="false"),
     Column("seen_at", DateTime(timezone=True), nullable=True),
     Column("remind_later_at", DateTime(timezone=True), nullable=True),
-    # NOTE: not listed in docs/areas/backend/db-schema.md's
-    # briefing_item_states column table — added because
-    # docs/goals/backend-plans/briefing.md's set_item_seen/schedule_reminder
-    # checklists require a monotonic version to build the
-    # `item:{id}:state:{version}` outbox idempotency key and to make a
-    # no-op update distinguishable from a real change ([멱등] checklist
-    # entries). Flagged for the coordinator to fold back into db-schema.md.
+    # docs/areas/backend/db-schema.md documents this column — monotonic
+    # version for the `item:{id}:state:{version}` outbox idempotency key
+    # and no-op-update detection ([멱등] checklist entries).
     Column("version", Integer, nullable=False, server_default="0"),
     Column("updated_at", DateTime(timezone=True), nullable=False),
 )

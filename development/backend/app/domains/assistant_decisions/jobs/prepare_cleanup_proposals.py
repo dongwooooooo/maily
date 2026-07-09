@@ -5,6 +5,7 @@ wiring deferred, same scope note as the other jobs in this module)."""
 import uuid
 
 from app.core.database import engine
+from app.core.errors import ValidationError
 from app.domains.assistant_decisions.cleanup import prepare_cleanup_proposals
 
 
@@ -17,6 +18,8 @@ async def prepare_cleanup_proposals_job(payload: dict) -> None:
     # requested_by explicitly via cleanup.prepare_cleanup_proposals instead;
     # the event-triggered path (auto-apply with no human actor) is an open
     # question for the coordinator — see task report.
+    if "requested_by" not in payload:
+        raise ValidationError("requested_by is required in prepare_cleanup_proposals payload")
     requested_by = uuid.UUID(str(payload["requested_by"]))
     async with engine.begin() as connection:
         await prepare_cleanup_proposals(

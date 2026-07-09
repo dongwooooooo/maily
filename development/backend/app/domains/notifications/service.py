@@ -186,13 +186,20 @@ def resolve_route_target(trigger: str, payload: dict) -> RouteResolution | None:
         )
 
     if trigger == TRIGGER_REMINDER_REACTIVATED:
+        # briefing's actual emitted payload (app/domains/briefing/jobs/
+        # reactivate_reminders.py) is {reminder_id, briefing_item_state_id,
+        # message_id} — no briefing_item_id (that's the ephemeral
+        # briefing_items.id, not what briefing keys durable state by), and
+        # no version (reminders have no version column; briefing's own
+        # reminder_reactivated_key fixes version=0). reminder_id alone is
+        # unique per reactivation (producer's idempotency_key is keyed on
+        # the reminder row id), so it's sufficient for dedupe here too.
         reminder_id = _require(payload, "reminder_id")
-        briefing_item_id = _uuid(payload, "briefing_item_id")
-        version = _require(payload, "version")
+        message_id = _uuid(payload, "message_id")
         return RouteResolution(
             notification_type=NOTIFICATION_TYPE_REMINDER_DUE,
-            route_target=_route_target(SCREEN_BRIEFING_TODAY, briefing_item_id),
-            dedupe_key=f"reminder:{reminder_id}:reactivated:{version}",
+            route_target=_route_target(SCREEN_BRIEFING_TODAY, message_id),
+            dedupe_key=f"reminder:{reminder_id}:reactivated",
             connected_account_id=None,
         )
 

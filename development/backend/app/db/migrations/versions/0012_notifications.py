@@ -1,20 +1,8 @@
 """notifications: notification_subscriptions, notification_events
 
 Revision ID: 0012_notifications
-Revises: 0007_gmail_actions
+Revises: 0011_assistant_rules
 Create Date: 2026-07-09
-
-COORDINATOR-INTEGRATION PLACEHOLDER: per
-docs/goals/backend-plans/_integration-contract.md §1 the real chain slot
-for notifications is #12, down_revision=0011_assistant_rules (after
-briefing 0008/0009 and assistant_decisions 0010/0011). Those sibling
-domains are being built in parallel worktrees and are not visible here,
-so this migration is pinned to 0007_gmail_actions (the latest revision
-visible in this worktree) so `alembic upgrade head` and the local test
-suite work in isolation. The coordinator must re-point down_revision to
-0011_assistant_rules at merge time — this file creates no tables that
-depend on briefing/assistant_decisions output (only FKs to workspaces/
-users from 0002_identity, per notifications.md "워크트리 격리 노트").
 """
 
 from alembic import op
@@ -23,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = "0012_notifications"
-down_revision = "0007_gmail_actions"
+down_revision = "0011_assistant_rules"
 branch_labels = None
 depends_on = None
 

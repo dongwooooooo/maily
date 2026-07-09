@@ -25,8 +25,8 @@ async def test_type_maps_to_screen_and_item() -> None:
     source_id = uuid.uuid4()
     command_id = uuid.uuid4()
     proposal_id = uuid.uuid4()
-    briefing_item_id = uuid.uuid4()
     message_id = uuid.uuid4()
+    reminder_message_id = uuid.uuid4()
 
     cases = [
         (
@@ -67,12 +67,12 @@ async def test_type_maps_to_screen_and_item() -> None:
             {
                 "workspace_id": str(uuid.uuid4()),
                 "reminder_id": str(uuid.uuid4()),
-                "briefing_item_id": str(briefing_item_id),
-                "version": 1,
+                "briefing_item_state_id": str(uuid.uuid4()),
+                "message_id": str(reminder_message_id),
             },
             service.NOTIFICATION_TYPE_REMINDER_DUE,
             service.SCREEN_BRIEFING_TODAY,
-            briefing_item_id,
+            reminder_message_id,
         ),
         (
             service.TRIGGER_GMAIL_SNAPSHOT_CHANGED_IMPORTANT_MAIL,
