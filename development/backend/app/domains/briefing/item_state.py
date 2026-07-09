@@ -25,7 +25,7 @@ def _to_schema(state: dict) -> ItemStateResult:
     )
 
 
-async def _resolve_owned_item(
+async def resolve_owned_briefing_item(
     connection: AsyncConnection, *, briefing_item_id: uuid.UUID, workspace_id: uuid.UUID
 ) -> dict:
     """briefing_item_id (a card id the client saw in GET /briefing/today) ->
@@ -59,7 +59,7 @@ async def set_item_seen(
     Returns (state, is_new) where is_new is False for the no-op repeat of
     an already-seen item (§멱등 — no version bump, no event).
     """
-    item = await _resolve_owned_item(
+    item = await resolve_owned_briefing_item(
         connection, briefing_item_id=briefing_item_id, workspace_id=workspace_id
     )
     message_id = item["message_id"]
