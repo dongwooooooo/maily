@@ -35,6 +35,7 @@ PostgreSQL 18, Redis 8.8, Authlib, google-auth-oauthlib, PyJWT, httpx, pytest.
 
 - 기능 설명은 `docs/current/product-features.md`에서 관리한다.
 - 모듈 경계는 `docs/areas/backend/module-boundaries.md`의 컨텍스트와 구현 유닛을 따른다.
+- 예외·에러 응답·로깅은 `docs/areas/backend/error-handling-and-logging.md`를 따른다. 서비스/레포지토리 계층에서 `ValueError`/`Exception`/`HTTPException`을 직접 던지지 않는다 — `app/core/errors.py`의 `MailyError` 서브클래스만 쓴다.
 - 외부 Gmail API가 막혀도 fake adapter 기반 TDD가 진행되어야 한다.
 - Gmail 지속 동기화는 프론트 mock 교체보다 먼저 fake 경로로 증명한다.
 - Live Gmail Watch는 integration gate다. 로컬 핵심 구현을 막지 않는다.
@@ -148,6 +149,8 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/app/core/outbox.py`
 - Create: `development/backend/app/core/idempotency.py`
 - Create: `development/backend/app/core/logging.py`
+- Create: `development/backend/app/core/errors.py`
+- Create: `development/backend/app/core/error_handlers.py`
 - Create: `development/backend/app/api/router.py`
 - Create: `development/backend/app/api/deps.py`
 - Create: `development/backend/app/core/jobs/dispatcher.py`
@@ -161,6 +164,8 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/tests/core/test_ready.py`
 - Create: `development/backend/tests/core/test_outbox.py`
 - Create: `development/backend/tests/core/test_idempotency.py`
+- Create: `development/backend/tests/core/test_errors.py`
+- Create: `development/backend/tests/core/test_logging.py`
 - Create: `development/backend/tests/core/jobs/test_dispatcher.py`
 
 **Steps:**
@@ -168,9 +173,11 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - [ ] Write readiness tests for DB/Redis success and failure JSON bodies.
 - [ ] Write outbox dedupe tests keyed by `(event_type, idempotency_key)`.
 - [ ] Write job lock tests that prevent two workers from running the same job concurrently.
+- [ ] Write exception hierarchy tests mapping each `MailyError` subclass to its status code/body, and confirming an unhandled exception returns a generic 500 without leaking details (`docs/areas/backend/error-handling-and-logging.md`).
+- [ ] Write request-id middleware tests (generated when absent, echoed back when client-supplied).
 - [ ] Add FastAPI app factory, root router, request id logging context, async SQLAlchemy session, Redis dependency.
 - [ ] Add baseline Alembic migration for `outbox_events`, `job_runs`, `idempotency_keys`.
-- [ ] Run `cd development/backend && python -m pytest tests/core/test_health.py tests/core/test_ready.py tests/core/test_outbox.py tests/core/test_idempotency.py tests/core/jobs/test_dispatcher.py -q`.
+- [ ] Run `cd development/backend && python -m pytest tests/core/test_health.py tests/core/test_ready.py tests/core/test_outbox.py tests/core/test_idempotency.py tests/core/test_errors.py tests/core/test_logging.py tests/core/jobs/test_dispatcher.py -q`.
 
 **Gate:** G0 passes.
 
