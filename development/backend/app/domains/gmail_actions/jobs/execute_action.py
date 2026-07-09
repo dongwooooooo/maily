@@ -129,7 +129,12 @@ async def run_execute_action(connection, *, command_id: uuid.UUID) -> None:
                 connection,
                 event_type=events.GMAIL_ACTION_FAILED,
                 producer_domain="gmail_actions",
-                payload={"command_id": str(command_id)},
+                payload={
+                    "command_id": str(command_id),
+                    "workspace_id": str(scope["workspace_id"]),
+                    "version": new_version,
+                    "connected_account_id": str(command["connected_account_id"]),
+                },
                 idempotency_key=events.failed_key(command_id, new_version),
             )
             logger.warning("Gmail 액션 실패", command_id=str(command_id), reason=str(exc))

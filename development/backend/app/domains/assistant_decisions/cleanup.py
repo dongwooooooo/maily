@@ -152,7 +152,9 @@ async def prepare_cleanup_proposals(
             producer_domain="assistant_decisions",
             payload={
                 "proposal_id": str(proposal_id),
+                "workspace_id": str(workspace_id),
                 "message_id": str(message_id),
+                "proposal_version": proposal_version,
                 "confidence_band": assessment["confidence_band"],
                 "proposed_action": proposed_action,
             },

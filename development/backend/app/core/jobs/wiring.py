@@ -50,4 +50,19 @@ ACTIVE_EVENT_CONSUMERS: dict[str, list[str]] = {
     # F10), built and tested against the real gmail_actions module back
     # in W3 (Task 9 was already merged by the time assistant_decisions'
     # worktree landed) — no new wiring entry needed here for IC6.
+    # IC7 (알림 라우팅) — tests/integration/test_ic7_notifications.py.
+    # Only the 4 triggers notifications.md's route_target table already
+    # resolves cleanly are wired (notifications/service.py "Trigger scope
+    # note"). gmail_action_undone->emit_notification and the two
+    # gmail_snapshot_changed splits stay unwired — see that same
+    # docstring and outbox_dispatcher.py's IC7 comment for why.
+    "gmail_source_recovery_needed": ["emit_notification"],
+    "gmail_action_failed": ["emit_notification"],
+    "cleanup_proposal_created": ["emit_notification"],
+    # reminder_reactivated -> build_briefing was contract-documented
+    # (_integration-contract.md §3) since IC2/IC3 but never actually
+    # wired (that wave's scope column only named summary_completed/
+    # importance_classified) — completing it here alongside the
+    # notification half since both consume the same event.
+    "reminder_reactivated": ["build_briefing", "emit_notification"],
 }

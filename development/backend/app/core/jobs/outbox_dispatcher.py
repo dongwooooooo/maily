@@ -54,6 +54,21 @@ _REQUIRED_PAYLOAD_KEYS: dict[str, set[str]] = {
     "reconcile_action": {"message_id"},
 }
 
+# emit_notification's job payload is a wrapper — {"trigger": event_type,
+# "payload": {...}} — so the generic _REQUIRED_PAYLOAD_KEYS check (which
+# looks at top-level keys) can't validate it: the fields that actually
+# matter live one level down, and which fields are required depends on
+# which trigger produced the event (notifications.service.resolve_route_
+# target's per-trigger branches). workspace_id is required for every
+# trigger (emit_notification's own unconditional check); the rest mirror
+# resolve_route_target exactly.
+_EMIT_NOTIFICATION_REQUIRED_KEYS: dict[str, set[str]] = {
+    "gmail_source_recovery_needed": {"workspace_id", "source_id", "reason", "version"},
+    "gmail_action_failed": {"workspace_id", "command_id", "version"},
+    "cleanup_proposal_created": {"workspace_id", "proposal_id", "message_id", "proposal_version"},
+    "reminder_reactivated": {"workspace_id", "reminder_id", "message_id"},
+}
+
 # _integration-contract.md §2 lock_key rules: source-targeted jobs lock per
 # source_id (no concurrent sync/watch churn on one account); execute_action
 # locks per command_id; message-level jobs (generate_summary,
@@ -132,6 +147,21 @@ def _skip_if_no_message_id(event_payload: dict) -> list[dict]:
     return [dict(event_payload)]
 
 
+def _wrap_for_emit_notification(event_type: str) -> Callable[[dict], list[dict]]:
+    # emit_notification_job's payload shape is {"trigger": <event_type>,
+    # "payload": <raw event payload>} (notifications/jobs/emit_notification.py) —
+    # a wrapper the generic pass-through can't produce on its own, since it
+    # needs the *event_type string itself* as a payload value, not just
+    # the event's own payload dict. One tiny closure per wired trigger
+    # (registered below) instead of a single parametrized builder, since
+    # _PAYLOAD_BUILDERS values are Callable[[dict], list[dict]] with no
+    # event_type argument.
+    def _builder(event_payload: dict) -> list[dict]:
+        return [{"trigger": event_type, "payload": event_payload}]
+
+    return _builder
+
+
 _PAYLOAD_BUILDERS: dict[tuple[str, str], Callable[[dict], list[dict]]] = {
     ("gmail_source_connected", "sync_full"): _override_reason_initial_connect,
     ("gmail_snapshot_changed", "generate_summary"): _fan_out_per_message_id,
@@ -141,6 +171,23 @@ _PAYLOAD_BUILDERS: dict[tuple[str, str], Callable[[dict], list[dict]]] = {
     ("gmail_action_applied", "build_briefing"): _optional_message_id_to_build_briefing_payload,
     ("gmail_action_undone", "build_briefing"): _optional_message_id_to_build_briefing_payload,
     ("gmail_action_applied", "reconcile_action"): _skip_if_no_message_id,
+    ("reminder_reactivated", "build_briefing"): _optional_message_id_to_build_briefing_payload,
+    # IC7 (알림 라우팅) — the 4 triggers notifications.md's route_target
+    # table already resolves (service.py "Trigger scope note"): the other
+    # 3 (gmail_action_undone, and the two gmail_snapshot_changed splits)
+    # stay unwired — gmail_action_undone->emit_notification would need
+    # its own dedupe/UX decision (already covered for briefing rebuild by
+    # IC4's gmail_action_undone->build_briefing), and the snapshot_changed
+    # splits aren't derivable from mail_intake's actual payload at all
+    # (no importance signal in it) per that same docstring.
+    ("gmail_source_recovery_needed", "emit_notification"): _wrap_for_emit_notification(
+        "gmail_source_recovery_needed"
+    ),
+    ("gmail_action_failed", "emit_notification"): _wrap_for_emit_notification("gmail_action_failed"),
+    ("cleanup_proposal_created", "emit_notification"): _wrap_for_emit_notification(
+        "cleanup_proposal_created"
+    ),
+    ("reminder_reactivated", "emit_notification"): _wrap_for_emit_notification("reminder_reactivated"),
 }
 
 
@@ -238,6 +285,17 @@ async def dispatch_pending_events(
                         f"{event['event_type']} -> {job_type} payload missing/null "
                         f"{sorted(missing)} (event_id={event['id']})"
                     )
+                if job_type == "emit_notification":
+                    inner_required = _EMIT_NOTIFICATION_REQUIRED_KEYS.get(
+                        job_payload.get("trigger"), set()
+                    )
+                    inner_payload = job_payload.get("payload") or {}
+                    inner_missing = {key for key in inner_required if inner_payload.get(key) is None}
+                    if inner_missing:
+                        raise MissingJobPayloadKeyError(
+                            f"{event['event_type']} -> emit_notification payload missing/null "
+                            f"{sorted(inner_missing)} (event_id={event['id']})"
+                        )
                 # A fan-out event (job_payloads has >1 entry) needs a
                 # distinct idempotency_key per payload, or the UNIQUE
                 # constraint on (job_type, idempotency_key) would let only

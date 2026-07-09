@@ -8,36 +8,35 @@ routing module):
 2. `emit_notification` / `subscribe` / `list_notifications` — the
    Command/Job and Read API behaviors.
 
-Trigger scope note (deviation — see task report): only 4 of the 7 mapped
-triggers (`gmail_source_recovery_needed`, `gmail_action_failed`,
-`cleanup_proposal_created`, `reminder_reactivated`) are wired into this
-worktree's `EVENT_CONSUMERS` (see __init__.py), per explicit caller
-instruction. `resolve_route_target` still implements all 7 rows —
-including `gmail_action_undone` and the two `gmail_snapshot_changed`
-splits — because the mapping-table contract itself is not scoped down,
-only the automatic event-consumer wiring is. IC7 wires the remaining
-triggers once briefing/assistant_decisions/mail_intake's real payload
-shapes for "important mail" vs "daily briefing" are settled (that split
-is not derivable from mail_intake's actual `gmail_snapshot_changed`
-payload today — see app/domains/mail_intake/events.py
-`publish_snapshot_changed`, which carries no importance signal).
+Trigger scope note: `app.core.jobs.wiring.ACTIVE_EVENT_CONSUMERS` (IC7)
+wires 4 of the 7 mapped triggers to the outbox dispatcher —
+`gmail_source_recovery_needed`, `gmail_action_failed`,
+`cleanup_proposal_created`, `reminder_reactivated`. `resolve_route_target`
+still implements all 7 rows — including `gmail_action_undone` and the two
+`gmail_snapshot_changed` splits — because the mapping-table contract
+itself isn't scoped down, only the dispatcher wiring is. The 2
+`gmail_snapshot_changed` splits stay unwired because the split (important
+mail vs. daily briefing) isn't derivable from mail_intake's actual
+`gmail_snapshot_changed` payload (no importance signal in it — see
+app/domains/mail_intake/events.py `publish_snapshot_changed`).
+`gmail_action_undone` stays unwired because its own notification UX
+wasn't scoped for this round (its briefing-rebuild half is already wired
+via IC4's `gmail_action_undone -> build_briefing`).
 
-Payload contract note (deviation — see task report):
-_integration-contract.md §2 lists the `emit_notification` job payload
-shape as the already-resolved `{notification_type, route_target,
-workspace_id}`. notifications.md's own checklist ("[정상] 소비 event
-도착 → notification_type 결정 → payload에서 route_target 도출") and this
-task's explicit scope ("accepts event type + payload directly in tests")
-both describe the RAW consumed-event shape instead. This worktree
-follows notifications.md (named primary source of truth) and the task
-instruction: `emit_notification(connection, trigger=..., payload=...)`
-takes the raw trigger + its event payload and resolves notification_type
-/route_target internally. `workspace_id` is required as an explicit
-payload field on every trigger because none of the real producer
-payloads visible in this worktree (mail_intake, gmail_actions) include
-it — IC7 must add a workspace_id lookup/enrichment step (or the
-producing domain must start including it) when wiring the outbox
-dispatcher to this job for real.
+Payload contract note: `emit_notification(connection, trigger=...,
+payload=...)` takes the raw trigger + that event's raw payload and
+resolves notification_type/route_target internally — deliberately not
+_integration-contract.md §2's literal already-resolved
+`{notification_type, route_target, workspace_id}` shape, following
+notifications.md's own checklist wording instead. `workspace_id` is
+required on every trigger's payload (this function's own unconditional
+check below); all 4 IC7-wired producers now include it — see
+app/domains/mail_intake/events.py `publish_recovery_needed`,
+app/domains/gmail_actions/jobs/execute_action.py's `GMAIL_ACTION_FAILED`
+payload, app/domains/assistant_decisions/cleanup.py's
+`CLEANUP_PROPOSAL_CREATED` payload, and
+app/domains/briefing/jobs/reactivate_reminders.py's
+`REMINDER_REACTIVATED` payload.
 """
 
 import uuid

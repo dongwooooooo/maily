@@ -43,6 +43,19 @@ async def run_reactivate_reminders(connection: AsyncConnection) -> list[uuid.UUI
         state = await repository.get_item_state(
             connection, item_state_id=result["briefing_item_state_id"]
         )
+        if state is None:
+            # briefing_item_state_id is a non-nullable FK with no delete
+            # path today, so this shouldn't happen — but if it ever does
+            # (mirrors gmail_actions execute_action._finalize_undo_if_
+            # reverse's identical guard), skip publishing rather than
+            # emit a workspace_id/message_id: null event that would only
+            # fail once a worker later picks up the resulting job.
+            logger.warning(
+                "reminder의 item_state row가 사라져 reminder_reactivated 발행 생략",
+                reminder_id=str(result["id"]),
+            )
+            reactivated_ids.append(result["id"])
+            continue
         await append_event(
             connection,
             event_type=events.REMINDER_REACTIVATED,
@@ -50,7 +63,8 @@ async def run_reactivate_reminders(connection: AsyncConnection) -> list[uuid.UUI
             payload={
                 "reminder_id": str(result["id"]),
                 "briefing_item_state_id": str(result["briefing_item_state_id"]),
-                "message_id": str(state["message_id"]) if state is not None else None,
+                "message_id": str(state["message_id"]),
+                "workspace_id": str(state["workspace_id"]),
             },
             idempotency_key=events.reminder_reactivated_key(result["id"]),
         )
