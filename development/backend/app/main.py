@@ -2,9 +2,11 @@ from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 
 from app.api.deps import get_database_check, get_redis_check
+from app.api.router import api_router
 from app.core.config import settings
 
 app = FastAPI(title=settings.app_name)
+app.include_router(api_router)
 
 
 @app.get("/health")
