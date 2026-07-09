@@ -18,7 +18,8 @@ dependencies = [
   "google-auth-oauthlib==1.4.0",
   "python-multipart==0.0.32",
   "httpx==0.28.1",
-  "structlog==26.1.0"
+  "structlog==26.1.0",
+  "cryptography==49.0.0"
 ]
 
 [project.optional-dependencies]
