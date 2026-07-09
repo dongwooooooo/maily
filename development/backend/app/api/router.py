@@ -19,6 +19,10 @@ _PREFIX_BY_DOMAIN = {
     # /storage/*) — _integration-contract.md §3 lists three top-level path
     # groups for this domain, same reasoning as labels above.
     "briefing": "",
+    # assistant_decisions.router declares full paths itself (/rules, /cleanup) —
+    # same pattern as labels/briefing above.
+    "assistant_decisions": "",
+    "notifications": "/notifications",
 }
 
 api_router = APIRouter()
