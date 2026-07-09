@@ -15,6 +15,10 @@ _PREFIX_BY_DOMAIN = {
     # see app/domains/labels/router.py for why a blanket prefix doesn't fit.
     "labels": "",
     "gmail_actions": "/actions",
+    # briefing.router declares full paths itself (/briefing/*, /messages/{id},
+    # /storage/*) — _integration-contract.md §3 lists three top-level path
+    # groups for this domain, same reasoning as labels above.
+    "briefing": "",
 }
 
 api_router = APIRouter()
