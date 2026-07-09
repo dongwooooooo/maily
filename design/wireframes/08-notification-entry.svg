@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
+<rect width="1400" height="760" fill="#ffffff"/>
+<text x="40.0" y="36.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">알림 클릭 → 종류별 직접 진입 (일반 랜딩 페이지 없음)</text>
+<rect x="40.0" y="60.0" width="640.0" height="188.0" fill="#ffffff" rx="6" stroke="#c4c4c4" stroke-width="1"/>
+<rect x="40.0" y="60.0" width="640.0" height="36.0" fill="#1e1e1e" rx="6"/>
+<rect x="40.0" y="90.0" width="640.0" height="6.0" fill="#1e1e1e"/>
+<rect x="52.0" y="72.0" width="12.0" height="12.0" fill="none" rx="3" stroke="#eeeeee" stroke-width="1.5"/>
+<text x="72.0" y="83.0" font-family="Inter, sans-serif" font-size="11" fill="#eeeeee">놓친 중요 메일 2건 — Work 계정에 기한 지난 메일이 있습니다.</text>
+<rect x="41.0" y="96.0" width="638.0" height="22.0" fill="#fafafa"/>
+<text x="52.0" y="111.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">→ Priority detail · filtered: Missed items</text>
+<rect x="52.0" y="128.0" width="75.9" height="24.0" fill="#1e1e1e" rx="12"/>
+<text x="63.0" y="144.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff">Missed (2)</text>
+<rect x="133.9" y="128.0" width="37.6" height="24.0" fill="#ffffff" rx="12" stroke="#c4c4c4" stroke-width="1"/>
+<text x="144.9" y="144.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">All</text>
+<rect x="52.0" y="162.0" width="616.0" height="36.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="62.0" y="172.0" width="36.2" height="16.0" fill="#efefef" rx="3" stroke="#c4c4c4" stroke-width="1"/>
+<text x="68.0" y="184.0" font-family="Inter, sans-serif" font-size="10" fill="#555555" font-weight="600">Work</text>
+<text x="108.2" y="185.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="600">계약 갱신 안내</text>
+<text x="200.4" y="185.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">Inbox · 기한 경과</text>
+<rect x="611.4" y="168.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="621.4" y="184.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Done</text>
+<rect x="556.5" y="168.0" width="49.9" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="566.5" y="184.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Gmail</text>
+<rect x="52.0" y="204.0" width="616.0" height="36.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="62.0" y="214.0" width="36.2" height="16.0" fill="#efefef" rx="3" stroke="#c4c4c4" stroke-width="1"/>
+<text x="68.0" y="226.0" font-family="Inter, sans-serif" font-size="10" fill="#555555" font-weight="600">Work</text>
+<text x="108.2" y="227.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="600">PR 리뷰 요청</text>
+<text x="194.1" y="227.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">Inbox · 금요일 기한</text>
+<rect x="607.6" y="210.0" width="50.4" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="617.6" y="226.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Later</text>
+<rect x="552.7" y="210.0" width="49.9" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="562.7" y="226.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Gmail</text>
+<rect x="40.0" y="320.0" width="640.0" height="178.0" fill="#ffffff" rx="6" stroke="#c4c4c4" stroke-width="1"/>
+<rect x="40.0" y="320.0" width="640.0" height="36.0" fill="#1e1e1e" rx="6"/>
+<rect x="40.0" y="350.0" width="640.0" height="6.0" fill="#1e1e1e"/>
+<rect x="52.0" y="332.0" width="12.0" height="12.0" fill="none" rx="3" stroke="#eeeeee" stroke-width="1.5"/>
+<text x="72.0" y="343.0" font-family="Inter, sans-serif" font-size="11" fill="#eeeeee">새 브리핑 도착 — 오늘 6개 항목이 준비되었습니다.</text>
+<rect x="41.0" y="356.0" width="638.0" height="22.0" fill="#fafafa"/>
+<text x="52.0" y="371.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">→ Today's Briefing (화면 3)</text>
+<circle cx="57.0" cy="395.0" r="4" fill="#dddddd" stroke="#8a8a8a" stroke-width="1" stroke-dasharray="2,2"/>
+<text x="68.0" y="399.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">Work</text>
+<rect x="52.0" y="406.0" width="616.0" height="32.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="64.0" y="426.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a">PR 리뷰 요청 — Reply needed</text>
+<circle cx="57.0" cy="451.0" r="4" fill="#7a7a7a"/>
+<text x="68.0" y="455.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">Personal</text>
+<rect x="52.0" y="462.0" width="616.0" height="32.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="64.0" y="482.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a">카드 결제 확인 안내 — Check needed</text>
+<rect x="40.0" y="550.0" width="640.0" height="124.0" fill="#ffffff" rx="6" stroke="#c4c4c4" stroke-width="1"/>
+<rect x="40.0" y="550.0" width="640.0" height="36.0" fill="#1e1e1e" rx="6"/>
+<rect x="40.0" y="580.0" width="640.0" height="6.0" fill="#1e1e1e"/>
+<rect x="52.0" y="562.0" width="12.0" height="12.0" fill="none" rx="3" stroke="#eeeeee" stroke-width="1.5"/>
+<text x="72.0" y="573.0" font-family="Inter, sans-serif" font-size="11" fill="#eeeeee">권한 오류 — school@gmail.com 접근 권한 갱신이 필요합니다.</text>
+<rect x="41.0" y="586.0" width="638.0" height="22.0" fill="#fafafa"/>
+<text x="52.0" y="601.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">→ Settings › Connected accounts · 해당 계정으로 딥링크</text>
+<rect x="52.0" y="618.0" width="616.0" height="44.0" fill="#efefef" rx="5" stroke="#c4c4c4" stroke-width="1"/>
+<text x="66.0" y="644.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">! school@gmail.com — Gmail 권한 만료. 동기화 중단됨.</text>
+<rect x="562.0" y="628.0" width="91.1" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="572.0" y="644.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Re-authorize</text>
+<rect x="720.0" y="60.0" width="640.0" height="226.0" fill="#ffffff" rx="6" stroke="#c4c4c4" stroke-width="1"/>
+<rect x="720.0" y="60.0" width="640.0" height="36.0" fill="#1e1e1e" rx="6"/>
+<rect x="720.0" y="90.0" width="640.0" height="6.0" fill="#1e1e1e"/>
+<rect x="732.0" y="72.0" width="12.0" height="12.0" fill="none" rx="3" stroke="#eeeeee" stroke-width="1.5"/>
+<text x="752.0" y="83.0" font-family="Inter, sans-serif" font-size="11" fill="#eeeeee">리마인더 — "미팅 일정 조율"에 답장할 시간입니다. (14:00)</text>
+<rect x="721.0" y="96.0" width="638.0" height="22.0" fill="#fafafa"/>
+<text x="732.0" y="111.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">→ 해당 메일의 상세 패널 열림</text>
+<rect x="732.0" y="128.0" width="36.2" height="16.0" fill="#efefef" rx="3" stroke="#c4c4c4" stroke-width="1"/>
+<text x="738.0" y="140.0" font-family="Inter, sans-serif" font-size="10" fill="#555555" font-weight="600">Work</text>
+<text x="776.2" y="140.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">미팅 일정 조율</text>
+<text x="732.0" y="158.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">박서준 · Reply needed · Inbox</text>
+<rect x="732.0" y="168.0" width="616.0" height="49.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="742.0" y="185.0" font-family="Inter, sans-serif" font-size="9.5" fill="#555555" font-weight="700">SUMMARY</text>
+<text x="742.0" y="201.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">화/수 중 킥오프 미팅 가능 시간 요청.</text>
+<rect x="732.0" y="244.0" width="93.9" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="742.0" y="260.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Open in Gmail</text>
+<rect x="831.9" y="244.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="841.9" y="260.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Done</text>
+<rect x="884.5" y="244.0" width="91.1" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="894.5" y="260.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Snooze again</text>
+<rect x="981.6" y="244.0" width="56.5" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="991.6" y="260.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Move ▾</text>
+<rect x="720.0" y="360.0" width="640.0" height="154.0" fill="#ffffff" rx="6" stroke="#c4c4c4" stroke-width="1"/>
+<rect x="720.0" y="360.0" width="640.0" height="36.0" fill="#1e1e1e" rx="6"/>
+<rect x="720.0" y="390.0" width="640.0" height="6.0" fill="#1e1e1e"/>
+<rect x="732.0" y="372.0" width="12.0" height="12.0" fill="none" rx="3" stroke="#eeeeee" stroke-width="1.5"/>
+<text x="752.0" y="383.0" font-family="Inter, sans-serif" font-size="11" fill="#eeeeee">정리 승인 대기 — 뉴스레터 18건 아카이브 제안을 검토해 주세요.</text>
+<rect x="721.0" y="396.0" width="638.0" height="22.0" fill="#fafafa"/>
+<text x="732.0" y="411.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">→ Cleanup Review (화면 10)</text>
+<rect x="732.0" y="428.0" width="616.0" height="32.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="744.0" y="448.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a">Newsletters → Archive + Label: Newsletter</text>
+<text x="1336.0" y="448.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a" text-anchor="end">18 mails</text>
+<rect x="732.0" y="472.0" width="82.5" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="742.0" y="488.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Approve all</text>
+<rect x="820.5" y="472.0" width="90.2" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="830.5" y="488.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Review items</text>
+<text x="40.0" y="726.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">각 랜딩: 계정 배지/소제목 · 요약 또는 메타데이터 · Gmail 상태 · 주 액션 · 수정 컨트롤 표시. 비서 판단 이유는 노출하지 않음.</text>
+</svg>

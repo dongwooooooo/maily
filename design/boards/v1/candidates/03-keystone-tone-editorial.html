@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>03 오늘 브리핑 — 톤 후보 A: Editorial Serif</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <style>
+    /*
+     * 톤 후보 A — Editorial Serif
+     * 색상 hue(배경/아이보리/잉크/틸/시맨틱 3색)는 03-keystone.html과 동일 hex 고정.
+     * 바꾼 것: 헤딩 세리프(Newsreader), 여백을 넓혀 매거진 편집 리듬, 카드 표면은
+     * 보더 박스 대신 헤어라인 구분 + 좌측 틸 룰 선택 표시, 아이콘은 얇은 스트로크.
+     * 이 파일은 독립 CSS다 — shared.css를 참조하지 않는다.
+     */
+    :root {
+      --bg: #ffffff;
+      --panel: #f6f4ef;
+      --surface: #ffffff;
+      --soft: #f6f4ef;
+      --ink: #26282b;
+      --body-c: #43464a;
+      --muted: rgba(38, 40, 43, .64);
+      --line: rgba(38, 40, 43, .12);
+      --line-strong: rgba(38, 40, 43, .22);
+      --hover: rgba(38, 40, 43, .08);
+      --pressed: rgba(38, 40, 43, .11);
+      --selected: rgba(38, 40, 43, .07);
+      --disabled: rgba(38, 40, 43, .38);
+      --teal: #14807a;
+      --teal-soft: rgba(20, 128, 122, .08);
+      --teal-line: rgba(20, 128, 122, .28);
+      --teal-deep: #0e5e59;
+      --success: #218358;
+      --warning: #a16207;
+      --danger: #ce2c31;
+      --motion: 180ms;
+      --easing: cubic-bezier(0.4, 0, 0.2, 1);
+      --focus-color: var(--teal);
+      --font-sans: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", Inter, system-ui, sans-serif;
+      --font-serif: "Newsreader", "Pretendard Variable", Pretendard, Georgia, serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      color: var(--body-c);
+      background: var(--bg);
+      font-size: 13px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; cursor: pointer; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
+    :focus-visible { outline: 2px solid var(--focus-color); outline-offset: 2px; border-radius: 4px; }
+
+    .app {
+      width: 1440px;
+      height: 1180px;
+      display: grid;
+      grid-template-columns: 226px 626px 588px;
+      grid-template-rows: 64px 1fr;
+      background: var(--bg);
+    }
+
+    /* ── 사이드바 ── */
+    .sidebar {
+      grid-column: 1; grid-row: 1 / 3;
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      padding: 26px 18px 20px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 20px;
+    }
+    .identity { padding: 0 6px 18px; border-bottom: 1px solid var(--line); }
+    .brand-home { display: inline-grid; place-items: center; color: var(--ink); text-decoration: none; }
+    .brand-mark {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: grid; place-items: center;
+      background: var(--teal); color: #ffffff;
+      font-family: var(--font-serif); font-size: 14px; font-weight: 600; font-style: italic;
+    }
+    .side-nav { margin-top: 4px; display: grid; gap: 3px; align-content: start; }
+    .nav-row {
+      min-height: 30px;
+      display: grid; grid-template-columns: 1fr auto; align-items: center;
+      color: var(--body-c);
+      margin-left: -18px; margin-right: -18px;
+      padding: 0 18px 0 34px;
+      text-decoration: none;
+      font-size: 13px; letter-spacing: -0.005em;
+      transition: background-color var(--motion) var(--easing);
+    }
+    .nav-row:hover { background: var(--hover); color: var(--ink); }
+    .nav-row.active { background: var(--selected); color: var(--ink); font-weight: 600; }
+    .nav-count { font-family: var(--font-serif); font-style: italic; color: var(--muted); font-size: 12px; }
+    .sub-nav {
+      position: relative; margin: 8px 0 14px; padding-left: 40px; display: grid; gap: 9px;
+    }
+    .sub-nav::before { content: ""; position: absolute; left: 16px; top: 0; bottom: 0; width: 1px; background: var(--line); }
+    .sub-row {
+      display: grid; grid-template-columns: 1fr auto; gap: 8px;
+      min-height: 22px; align-items: center;
+      margin-left: -8px; margin-right: -8px; padding: 0 8px;
+      color: var(--muted); font-size: 12px; text-decoration: none;
+      transition: background-color var(--motion) var(--easing);
+    }
+    .sub-row:hover { background: var(--hover); color: var(--ink); }
+    .sub-row[aria-current="true"] { background: var(--selected); color: var(--ink); font-weight: 600; }
+    .sub-row span:last-child { font-family: var(--font-serif); font-style: italic; }
+
+    .service-footer { padding: 18px 6px 0; border-top: 1px solid var(--line); display: grid; gap: 11px; }
+    .service-strip { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+    .service-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.88) 0 2px, transparent 3px), linear-gradient(135deg, #14807a, #0e5e59);
+      box-shadow: inset 0 0 0 1px rgba(38,40,43,.12);
+    }
+    .service-name { min-width: 0; color: var(--ink); font-family: var(--font-serif); font-size: 16px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .icon-button {
+      position: relative; width: 30px; height: 30px;
+      border: 1px solid var(--line-strong); border-radius: 50%;
+      background: var(--surface); color: var(--body-c);
+      display: grid; place-items: center; padding: 0;
+      transition: background-color var(--motion) var(--easing);
+    }
+    .icon-button:hover { background: var(--hover); }
+    .icon-button svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ── 상단바 ── */
+    .topbar {
+      grid-column: 2 / 4; grid-row: 1;
+      display: flex; align-items: center; gap: 22px;
+      border-bottom: 1px solid var(--line);
+      padding: 0 28px;
+      background: var(--bg);
+      position: relative; z-index: 30;
+    }
+    .mail-scope { display: flex; align-items: center; gap: 6px; position: relative; }
+    .scope-control {
+      min-height: 36px; border: 0; border-radius: 8px; background: transparent;
+      display: inline-flex; align-items: center; gap: 9px; padding: 0 10px;
+      color: var(--ink); font-size: 13px; font-weight: 500; letter-spacing: -0.005em; white-space: nowrap;
+      transition: background-color var(--motion) var(--easing);
+    }
+    .scope-control:hover { background: var(--hover); }
+    .scope-control[aria-expanded="true"] { background: var(--selected); }
+    .scope-icon { width: 20px; height: 20px; display: inline-grid; place-items: center; color: var(--body-c); flex: 0 0 auto; }
+    .scope-icon svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .scope-caret { color: var(--muted); font-size: 10px; }
+    .sync-spinner { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--teal-line); border-top-color: var(--teal); animation: spin 900ms linear infinite; margin-left: 2px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .scope-menu {
+      position: absolute; top: calc(100% + 8px); left: 0; width: 312px;
+      background: var(--surface); border: 1px solid var(--line-strong); border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(38,40,43,.10);
+      padding: 8px; display: none; z-index: 40;
+    }
+    .scope-menu[data-open="true"] { display: block; }
+    .scope-menu-label { padding: 8px 12px 6px; font-family: var(--font-serif); font-style: italic; font-size: 12px; color: var(--muted); }
+    .scope-row {
+      width: 100%; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
+      min-height: 36px; border: 0; border-radius: 7px; background: transparent; padding: 0 12px;
+      color: var(--ink); font-size: 13px; text-align: left;
+      transition: background-color var(--motion) var(--easing);
+    }
+    .scope-row:hover { background: var(--hover); }
+    .scope-row[aria-current="true"] { background: var(--selected); font-weight: 600; }
+    .scope-row .row-state { font-size: 11.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; }
+    .scope-row .row-state .ok { color: var(--success); font-weight: 700; }
+    .scope-row .row-state .warn-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--warning); display: inline-block; }
+    .acc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); }
+    .acc-dot.work { background: var(--soft); border: 1px dashed var(--muted); }
+    .acc-dot.school { background: #fff; border: 2px solid var(--muted); }
+    .acc-dot.all { background: var(--ink); }
+    .scope-menu-foot { margin-top: 5px; border-top: 1px solid var(--line); padding: 8px 12px 4px; }
+    .scope-menu-foot a { font-size: 12px; color: var(--muted); text-decoration: none; }
+    .scope-menu-foot a:hover { color: var(--ink); text-decoration: underline; }
+    .notification-button {
+      position: relative; width: 36px; height: 36px; border: 0; border-radius: 8px;
+      background: transparent; color: var(--body-c); display: grid; place-items: center; padding: 0;
+      transition: background-color var(--motion) var(--easing);
+    }
+    .notification-button:hover { background: var(--hover); }
+    .notification-button svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .unread-dot { position: absolute; top: 6px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); border: 2px solid var(--bg); }
+
+    /* ── 목록 ── */
+    .list-pane { grid-column: 2; grid-row: 2; padding: 40px 32px 48px; overflow: auto; scroll-behavior: smooth; background: var(--bg); }
+    .section { margin-bottom: 34px; }
+    .section-head { min-height: 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .section-title { display: flex; align-items: baseline; gap: 11px; min-width: 0; }
+    .section-title h2 { margin: 0; color: var(--ink); font-family: var(--font-serif); font-size: 17px; font-weight: 500; letter-spacing: -0.01em; }
+    .section-title span { color: var(--muted); font-family: var(--font-serif); font-style: italic; font-size: 12.5px; }
+    .section-menu {
+      position: relative; width: 28px; height: 28px; border: 0; border-radius: 7px; background: transparent; color: var(--muted);
+      display: grid; place-items: center; padding: 0; transition: background-color var(--motion) var(--easing);
+    }
+    .section-menu:hover { background: var(--hover); color: var(--ink); }
+    .section-menu::after { content: ""; position: absolute; inset: -8px; }
+    .section-menu svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .account-line { display: flex; align-items: center; gap: 8px; height: 22px; color: var(--muted); font-size: 11.5px; font-weight: 600; letter-spacing: .02em; }
+    .mail-list { display: grid; gap: 0; }
+    .mail-card {
+      width: 588px; min-height: 92px;
+      border: 0; border-bottom: 1px solid var(--line);
+      border-left: 3px solid transparent;
+      background: var(--surface);
+      display: grid; overflow: hidden;
+      transition: background-color var(--motion) var(--easing), border-color var(--motion) var(--easing);
+    }
+    .mail-card:not(.compact) { cursor: pointer; }
+    .mail-card:hover { background: var(--teal-soft); }
+    .mail-card.selected { background: var(--teal-soft); border-left-color: var(--teal); }
+    .mail-card.selected:hover { background: var(--teal-soft); }
+    .mail-card.compact { min-height: 38px; grid-template-columns: 1fr auto; align-items: center; padding: 0 14px; overflow: visible; }
+    .card-content { min-width: 0; padding: 18px 18px 17px 20px; display: grid; gap: 8px; align-content: start; }
+    .card-top { display: flex; align-items: baseline; gap: 11px; min-width: 0; }
+    .card-title { margin: 0; color: var(--ink); font-family: var(--font-serif); font-size: 16px; line-height: 1.3; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card-sender { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+    .card-summary { margin: 0; color: var(--body-c); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .compact-title { min-width: 0; color: var(--ink); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .compact-meta { color: var(--muted); font-family: var(--font-serif); font-style: italic; font-size: 11.5px; white-space: nowrap; }
+    .add-section {
+      width: 588px; height: 36px; margin-top: 8px;
+      border: 1px dashed var(--line-strong); border-radius: 8px; background: transparent;
+      display: grid; place-items: center; color: var(--muted); font-size: 12px;
+      transition: background-color var(--motion) var(--easing);
+    }
+    .add-section:hover { background: var(--hover); }
+    .zone-head {
+      width: 588px; border-top: 1px solid var(--line); margin: 32px 0 16px; padding-top: 16px;
+      color: var(--muted); font-family: var(--font-serif); font-style: italic; font-size: 13px;
+    }
+
+    /* ── 상세 패널 ── */
+    .detail-pane { grid-column: 3; grid-row: 2; background: var(--panel); border-left: 1px solid var(--line); display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+    .detail-head { padding: 34px 32px 22px; display: grid; gap: 12px; }
+    .detail-account { color: var(--muted); font-size: 11.5px; font-weight: 600; letter-spacing: .02em; }
+    .message-header { display: grid; gap: 8px; }
+    .message-title-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; }
+    .detail-title { margin: 0; color: var(--ink); font-family: var(--font-serif); font-size: 26px; line-height: 1.25; font-weight: 500; letter-spacing: -0.01em; }
+    .detail-meta { color: var(--muted); font-size: 11.5px; }
+    .detail-actions-top { align-items: center; display: flex; gap: 12px; }
+    .icon-action, .more-action { position: relative; width: 32px; height: 32px; border: 0; border-radius: 8px; display: grid; place-items: center; padding: 0; transition: background-color var(--motion) var(--easing); }
+    .icon-action::after, .more-action::after { content: ""; position: absolute; inset: -6px; }
+    .icon-action { background: transparent; color: var(--teal); }
+    .icon-action:hover, .icon-action:focus-visible { background: var(--teal); color: #ffffff; }
+    .icon-action .button-icon { width: 16px; height: 16px; stroke-width: 1.6; }
+    .more-action { background: transparent; color: var(--muted); }
+    .more-action:hover { background: var(--hover); color: var(--ink); }
+    .more-action .button-icon { width: 16px; height: 16px; stroke-width: 1.6; }
+    .button-icon { width: 15px; height: 15px; stroke: currentColor; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .detail-body { padding: 6px 32px 32px; overflow: auto; display: grid; gap: 16px; align-content: start; }
+    .summary-quote { margin: 4px 0 0; padding: 2px 0 2px 18px; border-left: 2px solid var(--teal); max-width: 512px; }
+    .summary-quote .q-label { display: block; color: var(--teal-deep); font-family: var(--font-serif); font-style: italic; font-size: 12.5px; margin-bottom: 6px; }
+    .summary-quote p { margin: 0; color: var(--ink); font-family: var(--font-serif); font-size: 17px; line-height: 1.6; font-weight: 400; }
+    .mail-body-copy { display: grid; gap: 13px; max-width: 500px; margin-top: 10px; }
+    .mail-body-copy p { margin: 0; color: var(--body-c); font-size: 15px; line-height: 1.75; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 30px; transform: translate(-50%, 8px);
+      background: var(--ink); color: #ffffff; border-radius: 9px; padding: 12px 16px;
+      font-size: 13px; display: flex; align-items: center; gap: 13px;
+      box-shadow: 0 10px 30px rgba(38,40,43,.24);
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--motion) var(--easing), transform var(--motion) var(--easing);
+      z-index: 90;
+    }
+    .toast[data-show="true"] { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+    .toast button { border: 0; background: transparent; color: #ffffff; font-weight: 600; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; padding: 0; }
+    .toast .toast-close { text-decoration: none; opacity: .7; font-weight: 400; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="메일 브리핑 내비게이션">
+      <div class="identity">
+        <a class="brand-home" href="#" aria-label="Maily 홈으로 이동">
+          <span class="brand-mark">M</span>
+        </a>
+      </div>
+
+      <nav class="side-nav" aria-label="주요 화면">
+        <a class="nav-row active" href="#today-briefing"><span>오늘 브리핑</span><span class="nav-count">8</span></a>
+        <div class="sub-nav" aria-label="오늘 브리핑 섹션">
+          <a class="sub-row" href="#section-important" aria-current="true"><span>새 중요 항목</span><span>4</span></a>
+          <a class="sub-row" href="#section-reply"><span>답장 필요</span><span>1</span></a>
+          <a class="sub-row" href="#section-later"><span>나중에 봐도 됨</span><span>1</span></a>
+          <a class="sub-row" href="#section-organized"><span>정리됨</span><span></span></a>
+          <a class="sub-row" href="#section-approval"><span>승인 필요</span><span>1</span></a>
+        </div>
+        <a class="nav-row" href="#"><span>보관함</span><span class="nav-count"></span></a>
+        <a class="nav-row" href="#"><span>정리 검토</span><span class="nav-count">3</span></a>
+        <a class="nav-row" href="#"><span>활동 로그</span><span></span></a>
+        <a class="nav-row" href="#"><span>설정</span><span></span></a>
+      </nav>
+
+      <div class="service-footer" aria-label="서비스 계정">
+        <div class="service-strip">
+          <span class="service-avatar" aria-hidden="true"></span>
+          <span class="service-name">dongwoo</span>
+          <button class="icon-button" type="button" aria-label="계정 설정">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="19" cy="12" r="1"></circle>
+              <circle cx="5" cy="12" r="1"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <header class="topbar" aria-label="브리핑 대상 계정">
+      <div class="mail-scope">
+        <button class="scope-control" type="button" id="scope-toggle" aria-expanded="false" aria-controls="scope-menu">
+          <span class="scope-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+              <path d="m3 7 9 6 9-6"></path>
+            </svg>
+          </span>
+          <span>전체 메일 계정</span>
+          <span class="sync-spinner" aria-hidden="true" title="업무 계정 동기화 중"></span>
+          <span class="scope-caret" aria-hidden="true">▾</span>
+        </button>
+
+        <div class="scope-menu" id="scope-menu" data-open="false" role="menu" aria-label="브리핑 대상 메일 계정">
+          <div class="scope-menu-label">브리핑 대상 메일 계정</div>
+          <button class="scope-row" type="button" role="menuitemradio" aria-current="true">
+            <span class="acc-dot all" aria-hidden="true"></span>
+            <span>전체 메일 계정</span>
+            <span class="row-state">6개 항목</span>
+          </button>
+          <button class="scope-row" type="button" role="menuitemradio">
+            <span class="acc-dot" aria-hidden="true"></span>
+            <span>개인 계정</span>
+            <span class="row-state"><span class="ok">✓</span> 8분 전 동기화</span>
+          </button>
+          <button class="scope-row" type="button" role="menuitemradio">
+            <span class="acc-dot work" aria-hidden="true"></span>
+            <span>업무 계정</span>
+            <span class="row-state">동기화 중 62%</span>
+          </button>
+          <button class="scope-row" type="button" role="menuitemradio">
+            <span class="acc-dot school" aria-hidden="true"></span>
+            <span>school@gmail.com</span>
+            <span class="row-state"><span class="warn-dot" aria-hidden="true"></span> 권한 필요</span>
+          </button>
+          <div class="scope-menu-foot">
+            <a href="#">계정 연결 관리…</a>
+          </div>
+        </div>
+
+        <button class="notification-button" type="button" aria-label="알림">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+            <path d="M10 21h4"></path>
+          </svg>
+          <span class="unread-dot" aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="list-pane" id="today-briefing" aria-label="오늘 브리핑 목록">
+      <section class="section" aria-labelledby="section-important">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-important">새 중요 항목</h2>
+            <span>4</span>
+          </div>
+          <button class="section-menu" type="button" aria-label="새 중요 항목 섹션 메뉴"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="acc-dot work"></span><span>업무 계정</span></div>
+          <article class="mail-card selected" tabindex="0" aria-label="선택됨: PR 리뷰 요청">
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="card-title">PR 리뷰 요청</h3>
+                <span class="card-sender">김지현 · 오늘 09:12</span>
+              </div>
+              <p class="card-summary">요약: 금요일까지 결제 플로우 PR 리뷰를 요청합니다.</p>
+            </div>
+          </article>
+          <article class="mail-card" tabindex="0">
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="card-title">인보이스 #2024-118</h3>
+                <span class="card-sender">외주사 · 어제 18:44</span>
+              </div>
+              <p class="card-summary">요약: 6월분 인보이스입니다. 금액 확인 부탁드립니다.</p>
+            </div>
+          </article>
+          <article class="mail-card" tabindex="0">
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="card-title">계약서 서명 요청</h3>
+                <span class="card-sender">리걸팀 · 어제 15:02</span>
+              </div>
+              <p class="card-summary">요약: 위탁 계약서 전자서명을 이번 주 내 완료해 주세요.</p>
+            </div>
+          </article>
+
+          <div class="account-line"><span class="acc-dot"></span><span>개인 계정</span></div>
+          <article class="mail-card" tabindex="0">
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="card-title">카드 결제 확인 안내</h3>
+                <span class="card-sender">현대카드 · 오늘 07:55</span>
+              </div>
+              <p class="card-summary">요약: 7월 2일 45,000원 정기 결제가 승인되었습니다.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="section-reply">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-reply">답장 필요</h2>
+            <span>1</span>
+          </div>
+          <button class="section-menu" type="button" aria-label="답장 필요 섹션 메뉴"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="acc-dot work"></span><span>업무 계정</span></div>
+          <article class="mail-card" tabindex="0">
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="card-title">미팅 일정 조율</h3>
+                <span class="card-sender">박서준 · 어제 19:20</span>
+              </div>
+              <p class="card-summary">요약: 다음 주 화/수 중 킥오프 미팅 가능 시간을 요청합니다.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="section-later">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-later">나중에 봐도 됨</h2>
+            <span>1</span>
+          </div>
+          <button class="section-menu" type="button" aria-label="나중에 봐도 됨 섹션 메뉴"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="acc-dot school"></span><span>school@gmail.com</span></div>
+          <article class="mail-card" tabindex="0">
+            <div class="card-content">
+              <div class="card-top">
+                <h3 class="card-title">7월 학사 일반 공지</h3>
+                <span class="card-sender">학사지원팀 · 어제 17:30</span>
+              </div>
+              <p class="card-summary">요약이 꺼진 계정입니다. 필요하면 Gmail에서 원문을 확인합니다.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="section-organized">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-organized">정리됨</h2>
+          </div>
+          <button class="section-menu" type="button" aria-label="정리됨 섹션 메뉴"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="acc-dot"></span><span>개인 계정</span></div>
+          <article class="mail-card compact">
+            <span class="compact-title">뉴스레터 묶음</span>
+            <span class="compact-meta">18개</span>
+          </article>
+          <div class="account-line"><span class="acc-dot work"></span><span>업무 계정</span></div>
+          <article class="mail-card compact">
+            <span class="compact-title">GitHub 알림 묶음</span>
+            <span class="compact-meta">12개</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="section-approval">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-approval">승인 필요</h2>
+            <span>1</span>
+          </div>
+          <button class="section-menu" type="button" aria-label="승인 필요 섹션 메뉴"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="acc-dot work"></span><span>업무 계정</span></div>
+          <article class="mail-card compact">
+            <span class="compact-title">새 라벨 제안: 채용</span>
+            <span class="compact-meta">6개</span>
+          </article>
+        </div>
+      </section>
+
+      <div class="zone-head">내 섹션</div>
+
+      <section class="section" aria-labelledby="section-payments">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-payments">결제</h2>
+          </div>
+          <button class="section-menu" type="button" aria-label="결제 섹션 메뉴"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="acc-dot"></span><span>개인 계정</span></div>
+          <article class="mail-card compact">
+            <span class="compact-title">6월 통신요금 청구서</span>
+            <span class="compact-meta">확인됨</span>
+          </article>
+          <button class="add-section" type="button">섹션 추가</button>
+        </div>
+      </section>
+    </main>
+
+    <aside class="detail-pane" aria-label="선택한 메일">
+      <header class="detail-head">
+        <div class="detail-account">업무 계정</div>
+        <div class="message-header">
+          <div class="message-title-row">
+            <h2 class="detail-title">PR 리뷰 요청</h2>
+            <div class="detail-actions-top" aria-label="주요 처리">
+              <button class="icon-action" type="button" aria-label="Gmail에서 열기" title="Gmail에서 열기">
+                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 7h10v10"></path>
+                  <path d="M7 17 17 7"></path>
+                </svg>
+              </button>
+              <button class="icon-action" type="button" id="mark-read" aria-label="Gmail도 읽음 처리" title="Gmail도 읽음 처리">
+                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m5 12 4 4L19 6"></path>
+                </svg>
+              </button>
+              <button class="more-action" type="button" aria-label="이동 및 아카이브 더보기" title="이동 · 읽음 처리 후 아카이브">
+                <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="5" cy="12" r="1"></circle>
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="19" cy="12" r="1"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="detail-meta">김지현 &lt;jihyun@company.com&gt; · 오늘 09:12</div>
+        </div>
+      </header>
+
+      <section class="detail-body" aria-label="선택한 메일 내용">
+        <div class="summary-quote">
+          <span class="q-label">요약</span>
+          <p>금요일까지 결제 플로우 PR 리뷰를 요청합니다. 관련 이슈 #482 링크가 포함되어 있습니다.</p>
+        </div>
+
+        <div class="mail-body-copy">
+          <p>안녕하세요. 금요일 배포 전에 결제 플로우 PR을 한 번 더 봐주면 좋겠습니다.</p>
+          <p>특히 쿠폰 적용 후 총액 계산과 실패 케이스 메시지를 확인해 주세요. 리뷰가 가능하면 오늘 오후까지 코멘트를 남겨주세요.</p>
+          <p>급한 수정이 있으면 내일 오전 배포 전에 반영하겠습니다.</p>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <div class="toast" id="toast" data-show="false" role="status" aria-live="polite">
+    <span>Gmail에서도 읽음 처리했습니다.</span>
+    <button type="button" id="toast-undo">되돌리기</button>
+    <button type="button" class="toast-close" id="toast-close" aria-label="닫기">✕</button>
+  </div>
+
+  <script>
+    var scopeToggle = document.getElementById('scope-toggle');
+    var scopeMenu = document.getElementById('scope-menu');
+    scopeToggle.addEventListener('click', function () {
+      var open = scopeMenu.getAttribute('data-open') === 'true';
+      scopeMenu.setAttribute('data-open', String(!open));
+      scopeToggle.setAttribute('aria-expanded', String(!open));
+    });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.mail-scope')) {
+        scopeMenu.setAttribute('data-open', 'false');
+        scopeToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        scopeMenu.setAttribute('data-open', 'false');
+        scopeToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    var TOAST_DURATION = 3000;
+    var toast = document.getElementById('toast');
+    var toastTimer = null;
+    function showToast() {
+      clearTimeout(toastTimer);
+      toast.setAttribute('data-show', 'true');
+      toastTimer = setTimeout(hideToast, TOAST_DURATION);
+    }
+    function hideToast() {
+      clearTimeout(toastTimer);
+      toast.setAttribute('data-show', 'false');
+    }
+    document.getElementById('mark-read').addEventListener('click', showToast);
+    document.getElementById('toast-undo').addEventListener('click', hideToast);
+    document.getElementById('toast-close').addEventListener('click', hideToast);
+  </script>
+</body>
+</html>

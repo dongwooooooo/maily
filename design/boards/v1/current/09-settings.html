@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>09 설정 — 서비스 계정 · 연결 메일 계정 (Phase 4c)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* 09 고유: 상세 패널 미노출 2열 레이아웃 + 설정 폼 표면 (텍스트 버튼 티어 허용) */
+    .app { grid-template-columns: 210px 1fr; } /* 상세 패널 미노출 */
+    .topbar { grid-column: 2; }
+    /* ── 09 설정: 폼 표면 — 텍스트 버튼 티어 허용 (시각 문법 규칙) ── */
+    /* 설정 표준 레이아웃: 좌측 설명 칼럼(고정) + 우측 카드 칼럼 — 중앙정렬 없이 폭을 기능으로 사용 */
+    .settings-wrap { max-width: 1040px; display: grid; gap: 34px; padding-top: 22px; }
+    .set-section {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 28px;
+      align-items: start;
+    }
+    .set-info { display: grid; gap: 6px; position: sticky; top: 20px; }
+    .set-info h2 { margin: 0; color: var(--ink); font-size: 15px; font-weight: 750; }
+    .set-info p.hint { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .set-body { display: grid; gap: 10px; min-width: 0; }
+
+    .svc-row {
+      border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+      display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center; gap: 12px; padding: 12px 14px;
+    }
+    .svc-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255,255,255,.88) 0 2px, transparent 3px),
+        linear-gradient(135deg, var(--teal), var(--teal-deep));
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+    .svc-main { display: grid; gap: 1px; min-width: 0; }
+    .svc-name { color: var(--ink); font-size: 13px; font-weight: 750; }
+    .svc-mail { color: var(--muted); font-size: 11px; }
+
+    .btn-t2 {
+      min-height: 28px; padding: 0 12px;
+      border: 1px solid var(--line); border-radius: 7px;
+      background: var(--surface); color: var(--ink);
+      font-size: 12px; font-weight: 700;
+      transition: background-color var(--motion) var(--easing);
+    }
+    .btn-t2:hover { background: var(--hover-ink); }
+    .btn-t3 {
+      min-height: 28px; padding: 0 10px;
+      border: 0; border-radius: 7px;
+      background: transparent; color: var(--muted);
+      font-size: 12px; font-weight: 650;
+      transition: background-color var(--motion) var(--easing);
+    }
+    .btn-t3:hover { background: var(--hover-ink); color: var(--ink); }
+    .btn-t3.danger { color: var(--danger); } /* shared.css --danger 토큰 사용 (기존 #ce2c31 하드코딩 정리) */
+    .btn-t3.danger:hover { background: rgba(206, 44, 49, .08); }
+
+    .acct-card {
+      border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+      display: grid; gap: 0;
+    }
+    .acct-head {
+      display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto;
+      align-items: center; gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .acct-main { display: grid; gap: 1px; min-width: 0; }
+    .acct-name { color: var(--ink); font-size: 13px; font-weight: 750; }
+    .acct-mail { color: var(--muted); font-size: 11px; }
+    .acct-state { color: var(--muted); font-size: 11px; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .acct-state .ok { color: var(--success); font-weight: 700; }
+    .acct-state .warn-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--warning); display: inline-block; }
+
+    .acct-toggles { display: grid; padding: 4px 6px; }
+    .tg-row {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center; gap: 10px;
+      min-height: 40px; padding: 0 8px;
+      border-radius: 7px;
+    }
+    .tg-row:hover { background: var(--hover-ink); }
+    .tg-label { display: grid; gap: 0; }
+    .tg-label b { color: var(--ink); font-size: 12px; font-weight: 650; }
+    .tg-label span { color: var(--muted); font-size: 11px; }
+
+    .toggle { position: relative; display: inline-block; width: 34px; height: 20px; flex: 0 0 auto; }
+    .toggle input { position: absolute; inset: -12px -6px; opacity: 0; margin: 0; cursor: pointer; width: auto; height: auto; } /* 히트 44px 확보 */
+    .toggle .track {
+      position: absolute; inset: 0; border-radius: 999px;
+      background: rgba(38, 40, 43, .24);
+      transition: background-color var(--motion) var(--easing);
+    }
+    .toggle .knob {
+      position: absolute; top: 2px; left: 2px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--surface);
+      box-shadow: 0 1px 2px rgba(38, 40, 43, .3);
+      transition: transform var(--motion) var(--easing);
+    }
+    .toggle input:checked ~ .track { background: var(--teal); }
+    .toggle input:checked ~ .knob { transform: translateX(14px); }
+    .toggle input:focus-visible ~ .track { outline: 2px solid var(--focus-color); outline-offset: 2px; }
+
+    .acct-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 8px 10px; border-top: 1px solid var(--line); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="메일 브리핑 내비게이션">
+      <div class="identity">
+        <a class="brand-home" href="#" aria-label="Maily 홈으로 이동">
+          <span class="brand-mark">M</span>
+        </a>
+      </div>
+
+      <nav class="side-nav" aria-label="주요 화면">
+        <a class="nav-row" href="#"><span>오늘 브리핑</span><span class="nav-count">6</span></a>
+        <a class="nav-row" href="#"><span>보관함</span><span class="nav-count"></span></a>
+        <a class="nav-row" href="#"><span>정리 검토</span><span class="nav-count">3</span></a>
+        <a class="nav-row" href="#"><span>활동 로그</span><span></span></a>
+        <a class="nav-row active" href="#settings"><span>설정</span><span></span></a>
+      </nav>
+
+      <div class="service-footer" aria-label="서비스 계정">
+        <div class="service-strip">
+          <span class="service-avatar" aria-hidden="true"></span>
+          <span class="service-name">dongwoo</span>
+          <button class="icon-button" type="button" aria-label="계정 설정">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 3v2.5M12 18.5V21M21 12h-2.5M5.5 12H3M18.02 5.98l-1.77 1.77M7.75 16.27l-1.77 1.77M18.02 18.02l-1.77-1.77M7.75 7.73 5.98 5.98"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <header class="topbar" aria-label="브리핑 대상 계정">
+      <div class="mail-scope">
+        <button class="scope-control" type="button" id="scope-toggle" aria-expanded="false" aria-controls="scope-menu">
+          <span class="scope-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+              <path d="m3 7 9 6 9-6"></path>
+            </svg>
+          </span>
+          <span>전체 메일 계정</span>
+          <span class="sync-spinner" aria-hidden="true" title="업무 계정 동기화 중"></span>
+          <span class="scope-caret" aria-hidden="true">▾</span>
+        </button>
+
+        <div class="scope-menu" id="scope-menu" data-open="false" role="menu" aria-label="브리핑 대상 메일 계정">
+          <div class="scope-menu-label">브리핑 대상 메일 계정</div>
+          <button class="scope-row" type="button" role="menuitemradio" aria-current="true">
+            <span class="acc-dot all" aria-hidden="true"></span>
+            <span>전체 메일 계정</span>
+            <span class="row-state">6개 항목</span>
+          </button>
+          <button class="scope-row" type="button" role="menuitemradio">
+            <span class="acc-dot" aria-hidden="true"></span>
+            <span>개인 계정</span>
+            <span class="row-state"><span class="ok">✓</span> 8분 전 동기화</span>
+          </button>
+          <button class="scope-row" type="button" role="menuitemradio">
+            <span class="acc-dot work" aria-hidden="true"></span>
+            <span>업무 계정</span>
+            <span class="row-state">동기화 중 62%</span>
+          </button>
+          <button class="scope-row" type="button" role="menuitemradio">
+            <span class="acc-dot school" aria-hidden="true"></span>
+            <span>school@gmail.com</span>
+            <span class="row-state"><span class="warn-dot" aria-hidden="true"></span> 권한 필요</span>
+          </button>
+          <div class="scope-menu-foot">
+            <a href="#">계정 연결 관리…</a>
+          </div>
+        </div>
+
+        <button class="notification-button" type="button" aria-label="알림">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+            <path d="M10 21h4"></path>
+          </svg>
+          <span class="unread-dot" aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="list-pane" id="settings" aria-label="설정">
+      <div class="settings-wrap">
+        <div class="banner banner--warning" data-show="true" role="status" aria-live="polite">
+          <span class="banner-text"><span class="banner-dot" aria-hidden="true"></span>이 계정의 Gmail 권한을 다시 연결해야 합니다.</span>
+          <button class="banner-action" type="button">다시 연결</button>
+        </div>
+
+        <section class="set-section" aria-label="서비스 계정">
+          <div class="set-info">
+            <h2>서비스 계정</h2>
+            
+          </div>
+          <div class="set-body">
+          
+          <div class="svc-row">
+            <span class="svc-avatar" aria-hidden="true"></span>
+            <span class="svc-main">
+              <span class="svc-name">dongwoo</span>
+              <span class="svc-mail">Google로 로그인 · woomacho@gmail.com</span>
+            </span>
+            <button class="btn-t3" type="button">로그아웃</button>
+          </div>
+        
+          </div>
+        </section>
+
+        <section class="set-section" aria-label="연결된 메일 계정">
+          <div class="set-info">
+            <h2>연결된 메일 계정</h2>
+            <p class="hint">연결된 Gmail 계정은 브리핑·분석·알림의 메일 소스입니다. 서비스 로그인 계정과는 별개입니다.</p>
+          </div>
+          <div class="set-body">
+          
+          
+
+          <article class="acct-card">
+            <div class="acct-head">
+              <span class="acc-dot" aria-hidden="true"></span>
+              <span class="acct-main">
+                <span class="acct-name">개인 계정</span>
+                <span class="acct-mail">woomacho@gmail.com</span>
+              </span>
+              <span class="acct-state"><span class="ok">✓</span> 8분 전 동기화</span>
+              <button class="btn-t3" type="button">이름 변경</button>
+            </div>
+            <div class="acct-toggles"><div class="tg-row">
+              <span class="tg-label"><b>AI 요약</b><span>메일 내용을 처리해 짧은 요약을 만듭니다</span></span>
+              <span class="toggle"><input type="checkbox" checked aria-label="AI 요약"><span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span></span>
+            </div><div class="tg-row">
+              <span class="tg-label"><b>브리핑 포함</b><span>오늘 브리핑과 우선순위에 이 계정을 포함합니다</span></span>
+              <span class="toggle"><input type="checkbox" checked aria-label="브리핑 포함"><span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span></span>
+            </div><div class="tg-row">
+              <span class="tg-label"><b>브라우저 알림</b><span>이 계정의 중요 메일을 알림으로 보냅니다</span></span>
+              <span class="toggle"><input type="checkbox" checked aria-label="브라우저 알림"><span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span></span>
+            </div></div>
+            <div class="acct-foot">
+              <button class="btn-t3 danger" type="button">연결 해제</button>
+            </div>
+          </article>
+
+          <article class="acct-card">
+            <div class="acct-head">
+              <span class="acc-dot work" aria-hidden="true"></span>
+              <span class="acct-main">
+                <span class="acct-name">업무 계정</span>
+                <span class="acct-mail">dongwoo@company.com</span>
+              </span>
+              <span class="acct-state">동기화 중 62%</span>
+              <button class="btn-t3" type="button">이름 변경</button>
+            </div>
+            <div class="acct-toggles"><div class="tg-row">
+              <span class="tg-label"><b>AI 요약</b><span>메일 내용을 처리해 짧은 요약을 만듭니다</span></span>
+              <span class="toggle"><input type="checkbox" checked aria-label="AI 요약"><span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span></span>
+            </div><div class="tg-row">
+              <span class="tg-label"><b>브리핑 포함</b><span>오늘 브리핑과 우선순위에 이 계정을 포함합니다</span></span>
+              <span class="toggle"><input type="checkbox" checked aria-label="브리핑 포함"><span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span></span>
+            </div><div class="tg-row">
+              <span class="tg-label"><b>브라우저 알림</b><span>이 계정의 중요 메일을 알림으로 보냅니다</span></span>
+              <span class="toggle"><input type="checkbox"  aria-label="브라우저 알림"><span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span></span>
+            </div></div>
+            <div class="acct-foot">
+              <button class="btn-t3 danger" type="button">연결 해제</button>
+            </div>
+          </article>
+
+          <article class="acct-card">
+            <div class="acct-head">
+              <span class="acc-dot school" aria-hidden="true"></span>
+              <span class="acct-main">
+                <span class="acct-name">school@gmail.com</span>
+                <span class="acct-mail">표시 이름 없음</span>
+              </span>
+              <span class="acct-state"><span class="warn-dot" aria-hidden="true"></span> 권한 필요</span>
+              <button class="btn-t2" type="button">다시 연결</button>
+            </div>
+            <div class="acct-toggles"><div class="tg-row">
+              <span class="tg-label"><b>AI 요약</b><span>요약이 꺼져 있습니다. 카드에는 메타데이터만 표시됩니다</span></span>
+              <span class="toggle"><input type="checkbox"  aria-label="AI 요약"><span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span></span>
+            </div><div class="tg-row">
+              <span class="tg-label"><b>브리핑 포함</b><span>오늘 브리핑과 우선순위에 이 계정을 포함합니다</span></span>
+              <span class="toggle"><input type="checkbox" checked aria-label="브리핑 포함"><span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span></span>
+            </div><div class="tg-row">
+              <span class="tg-label"><b>브라우저 알림</b><span>이 계정의 중요 메일을 알림으로 보냅니다</span></span>
+              <span class="toggle"><input type="checkbox"  aria-label="브라우저 알림"><span class="track" aria-hidden="true"></span><span class="knob" aria-hidden="true"></span></span>
+            </div></div>
+            <div class="acct-foot">
+              <button class="btn-t3 danger" type="button">연결 해제</button>
+            </div>
+          </article>
+
+          <div>
+            <button class="btn-t2" type="button">+ 메일 계정 연결</button>
+          </div>
+        
+          </div>
+        </section>
+
+        <section class="set-section" aria-label="알림">
+          <div class="set-info">
+            <h2>알림</h2>
+            
+          </div>
+          <div class="set-body">
+          
+          <div class="svc-row">
+            <span class="svc-main">
+              <span class="svc-name">브라우저 알림 권한</span>
+              <span class="svc-mail">허용됨 · 중요 메일과 정리 검토 요청만 알립니다</span>
+            </span>
+            <button class="btn-t3" type="button">브라우저 설정 열기</button>
+          </div>
+        
+          </div>
+        </section>
+      </div>
+    </main>
+
+    
+  </div>
+
+  
+
+  <script>
+    // 계정 셀렉터 열림/닫힘 (키스톤 변형 요구사항)
+    var scopeToggle = document.getElementById('scope-toggle');
+    var scopeMenu = document.getElementById('scope-menu');
+    scopeToggle.addEventListener('click', function () {
+      var open = scopeMenu.getAttribute('data-open') === 'true';
+      scopeMenu.setAttribute('data-open', String(!open));
+      scopeToggle.setAttribute('aria-expanded', String(!open));
+    });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.mail-scope')) {
+        scopeMenu.setAttribute('data-open', 'false');
+        scopeToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        scopeMenu.setAttribute('data-open', 'false');
+        scopeToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+
+  </script>
+</body>
+</html>

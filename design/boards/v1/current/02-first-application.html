@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>02 첫 Gmail 적용 확인 (Phase 4c)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* 02 고유: 단일 컬럼 진입 확인 화면 — shared.css 토큰 재사용, 본문 스케일만 13px로 오버라이드 */
+    :root {
+      /* 색상 재검토(2026-07-08): #278a85(확정 토큰 밖 근사값) 정규화.
+         solid CTA 버튼 hover는 어둡게 눌리는 스텝이 필요 — 확정 토큰 중 --teal보다 어두운 --teal-deep이 해당 역할과 일치 */
+      --teal-hover: var(--teal-deep);
+    }
+    body {
+      font-size: 13px; line-height: 1.55;
+    }
+
+    .stage { min-height: 100vh; display: grid; place-items: center; padding: 40px 20px; }
+    .apply { width: 420px; display: grid; gap: 0; }
+
+    .brand-mark {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: grid; place-items: center;
+      background: var(--teal); color: var(--on-color);
+      font-family: var(--font-serif); font-size: 15px; font-weight: 600; font-style: italic;
+    }
+
+    .account-chip {
+      margin-top: 22px;
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--ink); font-size: 13px; font-weight: 700;
+    }
+    .acc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); }
+
+    h1 { margin: 6px 0 0; color: var(--ink); font-family: var(--font-serif); font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
+    .lede { margin: 8px 0 0; color: var(--body); font-size: 13px; }
+
+    .info { margin-top: 22px; display: grid; gap: 14px; }
+    .info-item { display: grid; gap: 3px; padding-left: 14px; border-left: 2px solid var(--line); }
+    .info-item b { color: var(--ink); font-size: 12px; }
+    .info-item p { margin: 0; color: var(--muted); font-size: 12px; }
+
+    .start-btn {
+      margin-top: 28px;
+      min-height: 44px;
+      border: 0; border-radius: 8px;
+      background: var(--teal); color: var(--on-color);
+      font-size: 14px; font-weight: 750;
+      transition: background-color var(--motion) var(--easing);
+    }
+    .start-btn:hover { background: var(--teal-hover); }
+
+    .later-link {
+      margin-top: 14px;
+      justify-self: center;
+      border: 0; background: transparent;
+      color: var(--muted); font-size: 12px;
+      padding: 6px 8px;
+      border-radius: 7px;
+      transition: background-color var(--motion) var(--easing);
+    }
+    .later-link:hover { background: var(--hover-ink); color: var(--ink); }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <div class="apply">
+      <span class="brand-mark" aria-hidden="true">M</span>
+
+      <span class="account-chip"><span class="acc-dot" aria-hidden="true"></span>jiwon@company.com</span>
+      <h1>이 계정에 메일 비서를 적용합니다</h1>
+      <p class="lede">이 계정의 중요한 메일을 선별해 브리핑과 리마인드를 준비합니다.</p>
+
+      <div class="info">
+        <div class="info-item">
+          <b>읽는 것</b>
+          <p>메일 메타데이터와 요약에 필요한 최소 내용만 처리합니다. AI 요약은 설정에서 계정별로 끌 수 있습니다.</p>
+        </div>
+        <div class="info-item">
+          <b>바꾸는 것</b>
+          <p>승인 전에는 Gmail을 변경하지 않습니다. 자동 정리는 활동 로그에 남고 언제든 되돌릴 수 있습니다.</p>
+        </div>
+        <div class="info-item">
+          <b>사용자 통제</b>
+          <p>언제든 이 계정의 연결을 해제할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <button class="start-btn" type="button">적용 시작</button>
+      <button class="later-link" type="button">나중에 설정에서 연결하기</button>
+    </div>
+  </main>
+</body>
+</html>

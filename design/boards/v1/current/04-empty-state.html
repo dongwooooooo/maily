@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>04 오늘 브리핑 — 빈 상태 (Phase 4a)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* 04 고유: 상세 패널 미노출 2열 레이아웃 + 빈 상태 안심 다이제스트(0-5f) */
+    .app { grid-template-columns: 210px 1fr; } /* 선택된 메일이 없으므로 상세 패널 미노출 */
+    .topbar { grid-column: 2; }
+    .section { margin-bottom: 26px; max-width: 566px; /* 전폭 레이아웃에서 헤더의 ···가 우측 끝으로 밀리지 않게 — mail-card 폭(566px)과 정렬 */ }
+
+    .empty-hero { max-width: 566px; padding: 26px 0 6px; }
+    .empty-hero h2 { margin: 0 0 6px; color: var(--ink); font-family: var(--font-serif); font-size: 18px; font-weight: 500; }
+    .empty-hero p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .digest {
+      width: 566px;
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .digest-item { padding: 14px 16px; display: grid; gap: 3px; }
+    .digest-item + .digest-item { border-left: 1px solid var(--line); }
+    .digest-value { color: var(--ink); font-size: 15px; font-weight: 800; }
+    .digest-label { color: var(--muted); font-size: 11px; }
+    .digest-value .warn-dot {
+      display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--warning); vertical-align: 2px; margin-left: 5px;
+    }
+
+    .empty-links { margin-top: 14px; display: flex; gap: 16px; }
+    .empty-links a { color: var(--muted); font-size: 12px; text-decoration: none; }
+    .empty-links a:hover { color: var(--ink); text-decoration: underline; }
+
+    .detail-empty {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 420px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="메일 브리핑 내비게이션">
+      <div class="identity">
+        <a class="brand-home" href="#" aria-label="Maily 홈으로 이동">
+          <span class="brand-mark">M</span>
+        </a>
+      </div>
+
+      <nav class="side-nav" aria-label="주요 화면">
+        <a class="nav-row active" href="#today-briefing"><span>오늘 브리핑</span><span class="nav-count"></span></a>
+        <div class="sub-nav" aria-label="오늘 브리핑 섹션">
+          <a class="sub-row" href="#section-important"><span>새 중요 항목</span><span></span></a>
+          <a class="sub-row" href="#section-reply"><span>답장 필요</span><span></span></a>
+          <a class="sub-row" href="#section-later"><span>나중에 봐도 됨</span><span></span></a>
+          <a class="sub-row" href="#section-organized"><span>정리됨</span><span></span></a>
+          <a class="sub-row" href="#section-approval"><span>승인 필요</span><span></span></a>
+        </div>
+        <a class="nav-row" href="#"><span>보관함</span><span class="nav-count"></span></a>
+        <a class="nav-row" href="#"><span>정리 검토</span><span class="nav-count">3</span></a>
+        <a class="nav-row" href="#"><span>활동 로그</span><span></span></a>
+        <a class="nav-row" href="#"><span>설정</span><span></span></a>
+      </nav>
+
+      <div class="service-footer" aria-label="서비스 계정">
+        <div class="service-strip">
+          <span class="service-avatar" aria-hidden="true"></span>
+          <span class="service-name">dongwoo</span>
+          <button class="icon-button" type="button" aria-label="계정 설정">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 3v2.5M12 18.5V21M21 12h-2.5M5.5 12H3M18.02 5.98l-1.77 1.77M7.75 16.27l-1.77 1.77M18.02 18.02l-1.77-1.77M7.75 7.73 5.98 5.98"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <header class="topbar" aria-label="브리핑 대상 계정">
+      <div class="mail-scope">
+        <button class="scope-control" type="button" id="scope-toggle" aria-expanded="false" aria-controls="scope-menu">
+          <span class="scope-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+              <path d="m3 7 9 6 9-6"></path>
+            </svg>
+          </span>
+          <span>전체 메일 계정</span>
+          <span class="sync-spinner" aria-hidden="true" title="업무 계정 동기화 중"></span>
+          <span class="scope-caret" aria-hidden="true">▾</span>
+        </button>
+
+        <div class="scope-menu" id="scope-menu" data-open="false" role="menu" aria-label="브리핑 대상 메일 계정">
+          <div class="scope-menu-label">브리핑 대상 메일 계정</div>
+          <button class="scope-row" type="button" role="menuitemradio" aria-current="true">
+            <span class="acc-dot all" aria-hidden="true"></span>
+            <span>전체 메일 계정</span>
+            <span class="row-state">6개 항목</span>
+          </button>
+          <button class="scope-row" type="button" role="menuitemradio">
+            <span class="acc-dot" aria-hidden="true"></span>
+            <span>개인 계정</span>
+            <span class="row-state"><span class="ok">✓</span> 8분 전 동기화</span>
+          </button>
+          <button class="scope-row" type="button" role="menuitemradio">
+            <span class="acc-dot work" aria-hidden="true"></span>
+            <span>업무 계정</span>
+            <span class="row-state">동기화 중 62%</span>
+          </button>
+          <button class="scope-row" type="button" role="menuitemradio">
+            <span class="acc-dot school" aria-hidden="true"></span>
+            <span>school@gmail.com</span>
+            <span class="row-state"><span class="warn-dot" aria-hidden="true"></span> 권한 필요</span>
+          </button>
+          <div class="scope-menu-foot">
+            <a href="#">계정 연결 관리…</a>
+          </div>
+        </div>
+
+        <button class="notification-button" type="button" aria-label="알림">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+            <path d="M10 21h4"></path>
+          </svg>
+          <span class="unread-dot" aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="list-pane" id="today-briefing" aria-label="오늘 브리핑 — 빈 상태">
+      <section class="empty-hero">
+        <h2>오늘 급하게 확인할 메일은 없습니다</h2>
+        <p>새 중요한 메일은 이곳에 표시되거나 알림으로 알려드립니다.</p>
+      </section>
+
+      <section class="digest" aria-label="확인 다이제스트">
+        <div class="digest-item">
+          <span class="digest-value">18건</span>
+          <span class="digest-label">오늘 정리됨</span>
+        </div>
+        <div class="digest-item">
+          <span class="digest-value">09:24</span>
+          <span class="digest-label">최근 동기화</span>
+        </div>
+        <div class="digest-item">
+          <span class="digest-value">12:00</span>
+          <span class="digest-label">다음 확인 예정</span>
+        </div>
+        <div class="digest-item">
+          <span class="digest-value">3개<span class="warn-dot" title="school@gmail.com 권한 필요"></span></span>
+          <span class="digest-label">연결 계정 · 권한 필요 1</span>
+        </div>
+      </section>
+
+      <div class="empty-links">
+        <a href="#">보관함 보기</a>
+        <a href="#">알림 설정 확인</a>
+      </div>
+
+      <section class="section" aria-labelledby="section-organized" style="margin-top:30px">
+        <div class="section-head">
+          <div class="section-title">
+            <h2 id="section-organized">정리됨</h2>
+          </div>
+          <button class="section-menu" type="button" aria-label="정리됨 섹션 메뉴"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="mail-list">
+          <div class="account-line"><span class="acc-dot"></span><span>개인 계정</span></div>
+          <article class="mail-card compact">
+            <span class="compact-title">뉴스레터 묶음</span>
+            <span class="compact-meta">18개</span>
+          </article>
+          <div class="account-line"><span class="acc-dot work"></span><span>업무 계정</span></div>
+          <article class="mail-card compact">
+            <span class="compact-title">GitHub 알림 묶음</span>
+            <span class="compact-meta">12개</span>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    
+  </div>
+
+  
+
+  <script>
+    // 계정 셀렉터 열림/닫힘 (키스톤 변형 요구사항)
+    var scopeToggle = document.getElementById('scope-toggle');
+    var scopeMenu = document.getElementById('scope-menu');
+    scopeToggle.addEventListener('click', function () {
+      var open = scopeMenu.getAttribute('data-open') === 'true';
+      scopeMenu.setAttribute('data-open', String(!open));
+      scopeToggle.setAttribute('aria-expanded', String(!open));
+    });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.mail-scope')) {
+        scopeMenu.setAttribute('data-open', 'false');
+        scopeToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        scopeMenu.setAttribute('data-open', 'false');
+        scopeToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+
+  </script>
+</body>
+</html>

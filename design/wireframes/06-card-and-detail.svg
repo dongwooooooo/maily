@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="660" viewBox="0 0 1440 660">
+<rect width="1440" height="660" fill="#fafafa"/>
+<rect x="0.0" y="0.0" width="1440.0" height="900.0" fill="#fafafa"/>
+<text x="60.0" y="46.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">MAIL CARD — AI 요약 ON (Priority 등 단일 리스트 컨텍스트: 계정 배지 표시)</text>
+<rect x="60.0" y="58.0" width="560.0" height="108.0" fill="#ffffff" rx="6" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="60.0" y="58.0" width="4.0" height="108.0" fill="#1a1a1a" rx="2"/>
+<rect x="74.0" y="67.0" width="36.2" height="16.0" fill="#efefef" rx="3" stroke="#c4c4c4" stroke-width="1"/>
+<text x="80.0" y="79.0" font-family="Inter, sans-serif" font-size="10" fill="#555555" font-weight="600">Work</text>
+<text x="118.2" y="80.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="600">PR 리뷰 요청</text>
+<text x="206.3" y="80.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">김지현</text>
+<rect x="573.6" y="66.0" width="34.4" height="16.0" fill="#1e1e1e" rx="8"/>
+<text x="580.6" y="78.0" font-family="Inter, sans-serif" font-size="10" fill="#ffffff">New</text>
+<text x="74.0" y="100.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="700">Reply needed</text>
+<text x="155.5" y="100.0" font-family="Inter, sans-serif" font-size="12" fill="#555555"> · Inbox · Label: PR Review</text>
+<text x="74.0" y="118.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">요약: 금요일까지 결제 플로우 PR 리뷰를 요청합니다.</text>
+<rect x="74.0" y="132.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="84.0" y="148.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Done</text>
+<rect x="126.6" y="132.0" width="50.4" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="136.6" y="148.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Later</text>
+<rect x="183.0" y="132.0" width="56.5" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="193.0" y="148.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Move ▾</text>
+<text x="60.0" y="184.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">① 계정 배지(리스트 뷰) — All accounts 브리핑에서는 계정 소제목으로 대체되어 생략</text>
+<text x="60.0" y="199.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">② 행동 유형 ③ Gmail 상태 ④ 1줄 요약 ⑤ 최소 액션(Done/Later/Move) — Gmail 열기·라벨·아카이브는 상세 패널</text>
+<text x="60.0" y="222.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">MAIL CARD — AI 요약 OFF (메타데이터 전용)</text>
+<rect x="60.0" y="234.0" width="560.0" height="108.0" fill="#ffffff" rx="6" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="74.0" y="243.0" width="50.8" height="16.0" fill="#efefef" rx="3" stroke="#c4c4c4" stroke-width="1"/>
+<text x="80.0" y="255.0" font-family="Inter, sans-serif" font-size="10" fill="#555555" font-weight="600">school@</text>
+<text x="132.8" y="256.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="600">장학금 신청 안내</text>
+<text x="240.6" y="256.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">학생지원처</text>
+<text x="74.0" y="276.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="700">Check needed</text>
+<text x="158.2" y="276.0" font-family="Inter, sans-serif" font-size="12" fill="#555555"> · Inbox</text>
+<text x="74.0" y="294.0" font-family="Inter, sans-serif" font-size="12" fill="#8a8a8a" font-style="italic">AI 요약 꺼짐. Gmail에서 내용을 확인하세요.</text>
+<rect x="74.0" y="308.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="84.0" y="324.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Done</text>
+<rect x="126.6" y="308.0" width="50.4" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="136.6" y="324.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Later</text>
+<rect x="183.0" y="308.0" width="56.5" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="193.0" y="324.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Move ▾</text>
+<text x="60.0" y="360.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">요약 OFF 계정: 제목·발신자·상태만 표시. 원문 확인은 상세 패널의 Open in Gmail로.</text>
+<text x="60.0" y="386.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">MOVE 팝오버 — "다음부터 여기로" (섹션 = 서비스 내 뷰, Gmail 라벨과 별개)</text>
+<rect x="60.0" y="398.0" width="320.0" height="252.0" fill="#ffffff" rx="6" stroke="#c4c4c4" stroke-width="1"/>
+<text x="74.0" y="422.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="700">Move "계약 갱신 안내"</text>
+<text x="74.0" y="440.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">현재: New important items</text>
+<text x="80.0" y="470.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Needs reply</text>
+<rect x="70.0" y="480.0" width="300.0" height="24.0" fill="#efefef" rx="4"/>
+<text x="80.0" y="496.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="600">Payments  ✓</text>
+<text x="80.0" y="522.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Read later</text>
+<text x="80.0" y="548.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">+ New section…</text>
+<line x1="70.0" y1="562.0" x2="370.0" y2="562.0" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="74.0" y="572.0" width="11.0" height="11.0" fill="#ffffff" rx="2" stroke="#555555" stroke-width="1"/>
+<text x="75.5" y="581.5" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a">✓</text>
+<text x="91.0" y="582.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Next time, put similar mail in </text>
+<text x="248.7" y="582.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a" font-weight="700">Payments</text>
+<rect x="74.0" y="594.0" width="46.6" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="84.0" y="610.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Move</text>
+<rect x="126.6" y="594.0" width="56.5" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="136.6" y="610.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Cancel</text>
+<rect x="60.0" y="664.0" width="560.0" height="40.0" fill="#fafafa" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="60.0" y="664.0" width="4.0" height="40.0" fill="#1a1a1a" rx="2"/>
+<text x="74.0" y="688.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">앞으로 이 발신자의 계약·결제 안내 메일은 Payments에 표시됩니다.</text>
+<rect x="550.0" y="672.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="560.0" y="688.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Undo</text>
+<text x="60.0" y="726.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">섹션 이동은 Gmail을 변경하지 않음. Gmail 라벨/아카이브는 카드의 Gmail 상태와 승인 액션으로만 처리.</text>
+<text x="720.0" y="46.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">DETAIL PANEL — 비서가 Gmail을 변경한 경우</text>
+<rect x="720.0" y="58.0" width="380.0" height="470.0" fill="#fafafa" rx="6" stroke="#c4c4c4" stroke-width="1"/>
+<rect x="736.0" y="74.0" width="56.4" height="16.0" fill="#efefef" rx="3" stroke="#c4c4c4" stroke-width="1"/>
+<text x="742.0" y="86.0" font-family="Inter, sans-serif" font-size="10" fill="#555555" font-weight="600">Personal</text>
+<text x="736.0" y="110.0" font-family="Inter, sans-serif" font-size="14" fill="#1a1a1a" font-weight="700">Weekly newsletter</text>
+<text x="736.0" y="126.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">Substack Digest · 어제 21:40</text>
+<rect x="736.0" y="138.0" width="348.0" height="49.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="746.0" y="155.0" font-family="Inter, sans-serif" font-size="9.5" fill="#555555" font-weight="700">SUMMARY</text>
+<text x="746.0" y="171.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">이번 주 프런트엔드 뉴스 요약. 급한 내용 없음.</text>
+<rect x="736.0" y="197.0" width="348.0" height="64.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="746.0" y="214.0" font-family="Inter, sans-serif" font-size="9.5" fill="#555555" font-weight="700">GMAIL HANDLING</text>
+<text x="746.0" y="230.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Current state: Archived</text>
+<text x="746.0" y="245.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Label: Newsletter (assistant-created)</text>
+<rect x="736.0" y="271.0" width="348.0" height="90.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="746.0" y="288.0" font-family="Inter, sans-serif" font-size="9.5" fill="#555555" font-weight="700">ASSISTANT ACTION</text>
+<text x="746.0" y="304.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">8분 전 Gmail에서 Newsletter 라벨 적용 후</text>
+<text x="746.0" y="319.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">아카이브했습니다.</text>
+<rect x="746.0" y="331.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="756.0" y="347.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Undo</text>
+<rect x="798.6" y="331.0" width="129.3" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1" stroke-dasharray="3,2"/>
+<text x="808.6" y="347.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">View in Activity Log</text>
+<rect x="736.0" y="373.0" width="93.9" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="746.0" y="389.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Open in Gmail</text>
+<rect x="835.9" y="373.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="845.9" y="389.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Done</text>
+<rect x="888.5" y="373.0" width="88.2" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="898.5" y="389.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Remind later</text>
+<rect x="982.7" y="373.0" width="56.5" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="992.7" y="389.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Move ▾</text>
+<text x="720.0" y="560.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">비서가 Gmail을 변경한 경우 반드시 명시(시각 + Undo).</text>
+<text x="720.0" y="576.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">변경하지 않은 경우: "브리핑만 생성했습니다. Gmail 변경은 없습니다."</text>
+</svg>

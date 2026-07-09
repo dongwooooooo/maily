@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="760" viewBox="0 0 1440 760">
+<rect width="1440" height="760" fill="#fafafa"/>
+<rect x="520.0" y="240.0" width="400.0" height="270.0" fill="#ffffff" rx="8" stroke="#c4c4c4" stroke-width="1"/>
+<rect x="556.0" y="276.0" width="36.0" height="36.0" fill="#ffffff" rx="8" stroke="#1a1a1a" stroke-width="2"/>
+<text x="574.0" y="300.0" font-family="Inter, sans-serif" font-size="15" fill="#1a1a1a" font-weight="800" text-anchor="middle">M</text>
+<text x="556.0" y="344.0" font-family="Inter, sans-serif" font-size="17" fill="#1a1a1a" font-weight="700">Mail Assistant</text>
+<text x="556.0" y="368.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">여러 Gmail 계정의 중요한 메일을 브리핑합니다.</text>
+<text x="556.0" y="386.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">메일 읽기·답장·발송은 Gmail에서 그대로 합니다.</text>
+<rect x="556.0" y="420.0" width="328.0" height="40.0" fill="#ffffff" rx="5" stroke="#1a1a1a" stroke-width="1.5"/>
+<circle cx="642.0" cy="440.0" r="8" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.5"/>
+<text x="642.0" y="444.0" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" font-weight="800" text-anchor="middle">G</text>
+<text x="658.0" y="445.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="600">Sign in with Google</text>
+</svg>

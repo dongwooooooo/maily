@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720">
+<rect width="1440" height="720" fill="#ffffff"/>
+<rect x="0.0" y="0.0" width="210.0" height="720.0" fill="#fafafa"/>
+<line x1="210.0" y1="0.0" x2="210.0" y2="720.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="16.0" y="30.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">My</text>
+<text x="16.0" y="46.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">woomacho@gmail.com</text>
+<line x1="12.0" y1="58.0" x2="198.0" y2="58.0" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="0.0" y="66.0" width="210.0" height="27.0" fill="#efefef"/>
+<rect x="0.0" y="66.0" width="3.0" height="27.0" fill="#1a1a1a"/>
+<text x="18.0" y="84.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="700">Today's Briefing</text>
+<line x1="26.0" y1="102.0" x2="26.0" y2="250.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="36.0" y="114.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">New important items</text>
+<text x="36.0" y="136.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">Needs reply</text>
+<text x="36.0" y="158.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">Can wait</text>
+<text x="36.0" y="180.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">Organized</text>
+<text x="36.0" y="202.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">Needs approval</text>
+<text x="36.0" y="224.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">Payments</text>
+<text x="36.0" y="246.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a" font-style="italic">+ Add section</text>
+<text x="18.0" y="272.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Priority</text>
+<text x="196.0" y="272.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a" text-anchor="end">14</text>
+<text x="18.0" y="302.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Cleanup Review</text>
+<text x="18.0" y="332.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Activity Log</text>
+<text x="18.0" y="362.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Settings</text>
+<rect x="210.0" y="0.0" width="1230.0" height="56.0" fill="#ffffff"/>
+<line x1="210.0" y1="56.0" x2="1440.0" y2="56.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="230.0" y="35.0" font-family="Inter, sans-serif" font-size="16" fill="#1a1a1a" font-weight="700">Today's Briefing</text>
+<rect x="389.0" y="14.0" width="112.2" height="28.0" fill="#ffffff" rx="5" stroke="#c4c4c4" stroke-width="1"/>
+<text x="401.0" y="32.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a">All accounts</text>
+<text x="483.3" y="32.0" font-family="Inter, sans-serif" font-size="10" fill="#555555">▾</text>
+<rect x="1356.0" y="17.0" width="64.0" height="22.0" fill="#fafafa" rx="11" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1366.0" y="32.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Notif on</text>
+<rect x="1221.1" y="17.0" width="126.9" height="22.0" fill="#fafafa" rx="11" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1231.1" y="32.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Synced · 3 accounts</text>
+<circle cx="825.0" cy="260.0" r="27" fill="none" stroke="#c4c4c4" stroke-width="2" stroke-dasharray="5,4"/>
+<text x="825.0" y="266.0" font-family="Inter, sans-serif" font-size="17" fill="#8a8a8a" text-anchor="middle">✓</text>
+<text x="825.0" y="320.0" font-family="Inter, sans-serif" font-size="15" fill="#1a1a1a" font-weight="700" text-anchor="middle">오늘은 긴급한 브리핑 항목이 없습니다.</text>
+<text x="825.0" y="344.0" font-family="Inter, sans-serif" font-size="12" fill="#555555" text-anchor="middle">답장·일정·결제·중요 발신자·지연 항목을 확인했습니다.</text>
+<text x="825.0" y="362.0" font-family="Inter, sans-serif" font-size="12" fill="#555555" text-anchor="middle">새 중요 메일은 여기에 나타나거나, 알림이 켜져 있으면 브라우저 알림으로 알려드립니다.</text>
+<rect x="668.5" y="386.0" width="141.0" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="678.5" y="402.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">View all priority items</text>
+<rect x="817.5" y="386.0" width="164.1" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="827.5" y="402.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Check notification settings</text>
+</svg>

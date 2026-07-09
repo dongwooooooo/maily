@@ -1,0 +1,193 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1140" viewBox="0 0 1440 1140">
+<rect width="1440" height="1140" fill="#ffffff"/>
+<rect x="0.0" y="0.0" width="210.0" height="1140.0" fill="#fafafa"/>
+<line x1="210.0" y1="0.0" x2="210.0" y2="1140.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="16.0" y="30.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">My</text>
+<text x="16.0" y="46.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a">woomacho@gmail.com</text>
+<line x1="12.0" y1="58.0" x2="198.0" y2="58.0" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="0.0" y="66.0" width="210.0" height="27.0" fill="#efefef"/>
+<rect x="0.0" y="66.0" width="3.0" height="27.0" fill="#1a1a1a"/>
+<text x="18.0" y="84.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="700">Today's Briefing</text>
+<text x="196.0" y="84.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a" text-anchor="end">6</text>
+<line x1="26.0" y1="102.0" x2="26.0" y2="250.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="36.0" y="114.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">New important items</text>
+<text x="196.0" y="114.0" font-family="Inter, sans-serif" font-size="9.5" fill="#8a8a8a" text-anchor="end">2</text>
+<text x="36.0" y="136.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">Needs reply</text>
+<text x="196.0" y="136.0" font-family="Inter, sans-serif" font-size="9.5" fill="#8a8a8a" text-anchor="end">1</text>
+<text x="36.0" y="158.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">Can wait</text>
+<text x="196.0" y="158.0" font-family="Inter, sans-serif" font-size="9.5" fill="#8a8a8a" text-anchor="end">1</text>
+<text x="36.0" y="180.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">Organized</text>
+<text x="36.0" y="202.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">Needs approval</text>
+<text x="196.0" y="202.0" font-family="Inter, sans-serif" font-size="9.5" fill="#8a8a8a" text-anchor="end">1</text>
+<text x="36.0" y="224.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">Payments</text>
+<text x="36.0" y="246.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a" font-style="italic">+ Add section</text>
+<text x="18.0" y="272.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Priority</text>
+<text x="196.0" y="272.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a" text-anchor="end">14</text>
+<text x="18.0" y="302.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Cleanup Review</text>
+<text x="196.0" y="302.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a" text-anchor="end">3</text>
+<text x="18.0" y="332.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Activity Log</text>
+<text x="18.0" y="362.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">Settings</text>
+<rect x="840.0" y="56.0" width="600.0" height="1084.0" fill="#fafafa"/>
+<line x1="840.0" y1="56.0" x2="840.0" y2="1140.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="230.0" y="92.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">New important items</text>
+<text x="367.7" y="92.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">2</text>
+<text x="804.0" y="92.0" font-family="Inter, sans-serif" font-size="12" fill="#8a8a8a">···</text>
+<circle cx="235.0" cy="111.0" r="4" fill="#dddddd" stroke="#8a8a8a" stroke-width="1" stroke-dasharray="2,2"/>
+<text x="246.0" y="115.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">Work</text>
+<rect x="230.0" y="122.0" width="590.0" height="108.0" fill="#ffffff" rx="6" stroke="#1a1a1a" stroke-width="2"/>
+<rect x="230.0" y="122.0" width="4.0" height="108.0" fill="#1a1a1a" rx="2"/>
+<text x="244.0" y="144.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="600">PR 리뷰 요청</text>
+<text x="332.1" y="144.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">김지현</text>
+<rect x="773.6" y="130.0" width="34.4" height="16.0" fill="#1e1e1e" rx="8"/>
+<text x="780.6" y="142.0" font-family="Inter, sans-serif" font-size="10" fill="#ffffff">New</text>
+<text x="244.0" y="164.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="700">Reply needed</text>
+<text x="325.5" y="164.0" font-family="Inter, sans-serif" font-size="12" fill="#555555"> · Inbox · Label: PR Review</text>
+<text x="244.0" y="182.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">요약: 금요일까지 결제 플로우 PR 리뷰를 요청합니다.</text>
+<rect x="244.0" y="196.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="254.0" y="212.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Done</text>
+<rect x="296.6" y="196.0" width="50.4" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="306.6" y="212.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Later</text>
+<rect x="353.0" y="196.0" width="56.5" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="363.0" y="212.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Move ▾</text>
+<circle cx="235.0" cy="247.0" r="4" fill="#7a7a7a"/>
+<text x="246.0" y="251.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">Personal</text>
+<rect x="230.0" y="258.0" width="590.0" height="108.0" fill="#ffffff" rx="6" stroke="#d9d9d9" stroke-width="1"/>
+<rect x="230.0" y="258.0" width="4.0" height="108.0" fill="#1a1a1a" rx="2"/>
+<text x="244.0" y="280.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="600">카드 결제 확인 안내</text>
+<text x="369.3" y="280.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">현대카드</text>
+<rect x="773.6" y="266.0" width="34.4" height="16.0" fill="#1e1e1e" rx="8"/>
+<text x="780.6" y="278.0" font-family="Inter, sans-serif" font-size="10" fill="#ffffff">New</text>
+<text x="244.0" y="300.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="700">Check needed</text>
+<text x="328.2" y="300.0" font-family="Inter, sans-serif" font-size="12" fill="#555555"> · Inbox</text>
+<text x="244.0" y="318.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">요약: 7월 2일 45,000원 정기 결제가 승인되었습니다.</text>
+<rect x="244.0" y="332.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="254.0" y="348.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Done</text>
+<rect x="296.6" y="332.0" width="50.4" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="306.6" y="348.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Later</text>
+<rect x="353.0" y="332.0" width="56.5" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="363.0" y="348.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Move ▾</text>
+<text x="230.0" y="396.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">Needs reply</text>
+<text x="316.7" y="396.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">1</text>
+<text x="804.0" y="396.0" font-family="Inter, sans-serif" font-size="12" fill="#8a8a8a">···</text>
+<circle cx="235.0" cy="415.0" r="4" fill="#dddddd" stroke="#8a8a8a" stroke-width="1" stroke-dasharray="2,2"/>
+<text x="246.0" y="419.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">Work</text>
+<rect x="230.0" y="426.0" width="590.0" height="108.0" fill="#ffffff" rx="6" stroke="#d9d9d9" stroke-width="1"/>
+<text x="244.0" y="448.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="600">미팅 일정 조율</text>
+<text x="338.8" y="448.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">박서준</text>
+<text x="244.0" y="468.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="700">Reply needed</text>
+<text x="325.5" y="468.0" font-family="Inter, sans-serif" font-size="12" fill="#555555"> · Inbox</text>
+<text x="244.0" y="486.0" font-family="Inter, sans-serif" font-size="12" fill="#555555">요약: 다음 주 화/수 중 킥오프 미팅 가능 시간을 요청합니다.</text>
+<rect x="244.0" y="500.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="254.0" y="516.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Done</text>
+<rect x="296.6" y="500.0" width="50.4" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="306.6" y="516.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Later</text>
+<rect x="353.0" y="500.0" width="56.5" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="363.0" y="516.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Move ▾</text>
+<text x="230.0" y="564.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">Can wait</text>
+<text x="294.3" y="564.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">1</text>
+<text x="804.0" y="564.0" font-family="Inter, sans-serif" font-size="12" fill="#8a8a8a">···</text>
+<circle cx="235.0" cy="583.0" r="4" fill="#ffffff" stroke="#444444" stroke-width="1.8"/>
+<text x="246.0" y="587.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">school@gmail.com</text>
+<rect x="230.0" y="594.0" width="590.0" height="108.0" fill="#ffffff" rx="6" stroke="#d9d9d9" stroke-width="1"/>
+<text x="244.0" y="616.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="600">7월 학사 일반 공지</text>
+<text x="363.5" y="616.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">학사지원팀</text>
+<text x="244.0" y="636.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a" font-weight="700">Can wait</text>
+<text x="298.2" y="636.0" font-family="Inter, sans-serif" font-size="12" fill="#555555"> · Inbox</text>
+<text x="244.0" y="654.0" font-family="Inter, sans-serif" font-size="12" fill="#8a8a8a" font-style="italic">AI 요약 꺼짐(이 계정). Gmail에서 내용을 확인하세요.</text>
+<rect x="244.0" y="668.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="254.0" y="684.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Done</text>
+<rect x="296.6" y="668.0" width="50.4" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="306.6" y="684.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Later</text>
+<rect x="353.0" y="668.0" width="56.5" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="363.0" y="684.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Move ▾</text>
+<text x="230.0" y="732.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">Organized by assistant</text>
+<text x="804.0" y="732.0" font-family="Inter, sans-serif" font-size="12" fill="#8a8a8a">···</text>
+<circle cx="235.0" cy="751.0" r="4" fill="#7a7a7a"/>
+<text x="246.0" y="755.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">Personal</text>
+<rect x="230.0" y="762.0" width="590.0" height="32.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="242.0" y="782.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a">Newsletters — Archived · Label: Newsletter</text>
+<text x="808.0" y="782.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a" text-anchor="end">18 mails · Undo</text>
+<circle cx="235.0" cy="809.0" r="4" fill="#dddddd" stroke="#8a8a8a" stroke-width="1" stroke-dasharray="2,2"/>
+<text x="246.0" y="813.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">Work</text>
+<rect x="230.0" y="820.0" width="590.0" height="32.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="242.0" y="840.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a">GitHub notifications — Label: GitHub</text>
+<text x="808.0" y="840.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a" text-anchor="end">12 mails · Undo</text>
+<text x="230.0" y="882.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">Needs approval</text>
+<text x="338.5" y="882.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">1</text>
+<text x="804.0" y="882.0" font-family="Inter, sans-serif" font-size="12" fill="#8a8a8a">···</text>
+<circle cx="235.0" cy="901.0" r="4" fill="#dddddd" stroke="#8a8a8a" stroke-width="1" stroke-dasharray="2,2"/>
+<text x="246.0" y="905.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">Work</text>
+<rect x="230.0" y="912.0" width="590.0" height="32.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="242.0" y="932.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a">새 카테고리 제안: Recruiting — 6 mails</text>
+<rect x="753.5" y="916.0" width="58.5" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="763.5" y="932.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Review</text>
+<text x="230.0" y="974.0" font-family="Inter, sans-serif" font-size="13" fill="#1a1a1a" font-weight="700">Payments</text>
+<text x="300.1" y="974.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a">custom</text>
+<text x="804.0" y="974.0" font-family="Inter, sans-serif" font-size="12" fill="#8a8a8a">···</text>
+<circle cx="235.0" cy="993.0" r="4" fill="#7a7a7a"/>
+<text x="246.0" y="997.0" font-family="Inter, sans-serif" font-size="11" fill="#555555" font-weight="700">Personal</text>
+<rect x="230.0" y="1004.0" width="590.0" height="32.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="242.0" y="1024.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a">6월 통신요금 청구서</text>
+<text x="808.0" y="1024.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a" text-anchor="end">Seen</text>
+<rect x="230.0" y="1050.0" width="590.0" height="32.0" fill="none" rx="6" stroke="#c4c4c4" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="525.0" y="1070.0" font-family="Inter, sans-serif" font-size="11" fill="#8a8a8a" text-anchor="middle">+ Add section  (예: Recruiting · GitHub · School · Read later)</text>
+<text x="864.0" y="84.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a" font-weight="700">DETAIL — 처리 패널</text>
+<rect x="864.0" y="96.0" width="36.2" height="16.0" fill="#efefef" rx="3" stroke="#c4c4c4" stroke-width="1"/>
+<text x="870.0" y="108.0" font-family="Inter, sans-serif" font-size="10" fill="#555555" font-weight="600">Work</text>
+<text x="864.0" y="134.0" font-family="Inter, sans-serif" font-size="15" fill="#1a1a1a" font-weight="700">PR 리뷰 요청</text>
+<text x="864.0" y="150.0" font-family="Inter, sans-serif" font-size="10.5" fill="#8a8a8a">김지현 &lt;jihyun@company.com&gt; · 오늘 09:12</text>
+<rect x="864.0" y="162.0" width="93.9" height="24.0" fill="#1e1e1e" rx="4"/>
+<text x="874.0" y="178.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" font-weight="600">Open in Gmail</text>
+<rect x="963.9" y="162.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="973.9" y="178.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Done</text>
+<rect x="1016.5" y="162.0" width="88.2" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1026.5" y="178.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Remind later</text>
+<rect x="1110.7" y="162.0" width="56.5" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1120.7" y="178.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Move ▾</text>
+<rect x="864.0" y="208.0" width="552.0" height="49.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="874.0" y="225.0" font-family="Inter, sans-serif" font-size="9.5" fill="#555555" font-weight="700">SUMMARY</text>
+<text x="874.0" y="241.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">금요일까지 결제 플로우 PR 리뷰를 요청합니다. 관련 이슈 #482 링크 포함.</text>
+<rect x="864.0" y="269.0" width="552.0" height="90.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="874.0" y="286.0" font-family="Inter, sans-serif" font-size="9.5" fill="#555555" font-weight="700">GMAIL HANDLING</text>
+<text x="874.0" y="302.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Current state: Inbox   ·   Label: PR Review</text>
+<text x="874.0" y="317.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Assistant action: No Gmail changes yet — 브리핑만 생성, Gmail 변경 없음</text>
+<rect x="874.0" y="329.0" width="80.1" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="884.0" y="345.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Apply label</text>
+<rect x="960.1" y="329.0" width="62.7" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="970.1" y="345.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Archive</text>
+<rect x="1028.7" y="329.0" width="46.6" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1" stroke-dasharray="3,2"/>
+<text x="1038.7" y="345.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Undo</text>
+<rect x="864.0" y="371.0" width="552.0" height="90.0" fill="#ffffff" rx="5" stroke="#d9d9d9" stroke-width="1"/>
+<text x="874.0" y="388.0" font-family="Inter, sans-serif" font-size="9.5" fill="#555555" font-weight="700">MOVE / CORRECTION</text>
+<text x="874.0" y="404.0" font-family="Inter, sans-serif" font-size="11" fill="#555555"> </text>
+<text x="874.0" y="419.0" font-family="Inter, sans-serif" font-size="11" fill="#555555"> </text>
+<rect x="874.0" y="431.0" width="80.1" height="24.0" fill="#ffffff" rx="4" stroke="#c4c4c4" stroke-width="1"/>
+<text x="884.0" y="447.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Move to…  ▾</text>
+<rect x="874.0" y="399.0" width="11.0" height="11.0" fill="#ffffff" rx="2" stroke="#555555" stroke-width="1"/>
+<text x="875.5" y="408.5" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a">✓</text>
+<text x="891.0" y="409.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Next time, put similar mail here</text>
+<rect x="210.0" y="0.0" width="1230.0" height="56.0" fill="#ffffff"/>
+<line x1="210.0" y1="56.0" x2="1440.0" y2="56.0" stroke="#d9d9d9" stroke-width="1"/>
+<text x="230.0" y="35.0" font-family="Inter, sans-serif" font-size="16" fill="#1a1a1a" font-weight="700">Today's Briefing</text>
+<rect x="389.0" y="14.0" width="112.2" height="28.0" fill="#ffffff" rx="5" stroke="#c4c4c4" stroke-width="1"/>
+<text x="401.0" y="32.0" font-family="Inter, sans-serif" font-size="12" fill="#1a1a1a">All accounts</text>
+<text x="483.3" y="32.0" font-family="Inter, sans-serif" font-size="10" fill="#555555">▾</text>
+<rect x="1356.0" y="17.0" width="64.0" height="22.0" fill="#fafafa" rx="11" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1366.0" y="32.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Notif on</text>
+<rect x="1277.8" y="17.0" width="70.2" height="22.0" fill="#fafafa" rx="11" stroke="#c4c4c4" stroke-width="1"/>
+<text x="1287.8" y="32.0" font-family="Inter, sans-serif" font-size="11" fill="#555555">Syncing 1</text>
+<rect x="1169.3" y="17.0" width="100.5" height="22.0" fill="#1e1e1e" rx="11"/>
+<text x="1179.3" y="32.0" font-family="Inter, sans-serif" font-size="11" fill="#ffffff">New briefing 2</text>
+<rect x="389.0" y="48.0" width="290.0" height="112.0" fill="#ffffff" rx="6" stroke="#c4c4c4" stroke-width="1"/>
+<circle cx="405.0" cy="61.0" r="4" fill="#7a7a7a"/>
+<text x="417.0" y="65.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">All accounts</text>
+<circle cx="405.0" cy="87.0" r="4" fill="#7a7a7a"/>
+<text x="417.0" y="91.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Personal</text>
+<text x="667.0" y="91.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a" text-anchor="end">synced</text>
+<circle cx="405.0" cy="113.0" r="4" fill="#dddddd" stroke="#8a8a8a" stroke-width="1" stroke-dasharray="2,2"/>
+<text x="417.0" y="117.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">Work · work@company.com</text>
+<text x="667.0" y="117.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a" text-anchor="end">syncing 62%</text>
+<circle cx="405.0" cy="139.0" r="4" fill="#ffffff" stroke="#444444" stroke-width="1.8"/>
+<text x="417.0" y="143.0" font-family="Inter, sans-serif" font-size="11" fill="#1a1a1a">school@gmail.com</text>
+<text x="667.0" y="143.0" font-family="Inter, sans-serif" font-size="10" fill="#8a8a8a" text-anchor="end">permission needed</text>
+</svg>

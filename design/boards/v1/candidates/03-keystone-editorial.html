@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>03 키스톤 — 프리미엄 에디토리얼 후보</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<style>
+  /*
+   * 03 키스톤 — 프리미엄 에디토리얼 후보 (Phase B 비교 보드)
+   * 방향: HEY / Ghost / Stripe docs 계열. 큰 여백, 세리프 포인트, 절제된 색.
+   * 폰트: 영문·숫자 = Newsreader(세리프), 한글·본문 = Pretendard.
+   * 기존 03-keystone.html 대비 변경점은 상단 diff 스트립 참조.
+   */
+  :root {
+    /* 잉크 — 에디토리얼은 대비를 더 세게 */
+    --ink:        #1a1c1e;   /* 헤딩 */
+    --ink-body:   #3d4043;   /* 본문 */
+    --ink-muted:  #6b6f74;   /* 메타 (>= 4.6:1 on white) */
+    --ink-faint:  #6d7075;   /* 카운트·캡션 — AA 통과 (>= 4.5:1 on paper) */
+
+    --bg:         #ffffff;
+    --paper:      #faf9f6;   /* 종이 톤 아이보리 — 사이드바·상세 배경 */
+    --line:       #e9e6df;   /* 헤어라인 */
+    --line-soft:  #f0ede7;
+
+    --teal:       #0f6f69;   /* 절제된 틸 포인트 (vs white 5.1:1) */
+    --teal-deep:  #0b544f;
+    --amber:      #8a5a06;   /* 대비 보정된 warning */
+    --sel:        #f3f0e9;   /* 선택 면색 — 종이 톤, 컬러 바 없음 */
+
+    --serif: "Newsreader", "Pretendard Variable", Pretendard, Georgia, serif;
+    --sans:  "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", system-ui, sans-serif;
+
+    --shadow-detail: 0 1px 2px rgba(26,28,30,0.03), -1px 0 0 var(--line);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: var(--sans);
+    color: var(--ink-body);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  /* ── diff 스트립 (보드 전용, 실제 화면 아님) ────────────────── */
+  .diff-strip {
+    display: flex; gap: 28px; flex-wrap: wrap;
+    padding: 14px 28px;
+    background: var(--ink);
+    color: #eceae4;
+    font-size: 12.5px; letter-spacing: 0.01em;
+  }
+  .diff-strip b { color: #fff; font-weight: 600; }
+  .diff-strip .tag {
+    font-family: var(--serif); font-style: italic;
+    color: #cfe6e3; margin-right: 6px;
+  }
+
+  /* ── 앱 셸 3분할 ──────────────────────────────────────────── */
+  .app {
+    display: grid;
+    grid-template-columns: 248px minmax(360px, 1fr) minmax(400px, 520px);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "sidebar topbar  topbar"
+      "sidebar list    detail";
+    height: calc(100vh - 49px);
+  }
+
+  /* ── 사이드바 ─────────────────────────────────────────────── */
+  .sidebar {
+    grid-area: sidebar;
+    background: var(--paper);
+    border-right: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    padding: 28px 20px 18px;
+  }
+  .brand {
+    font-family: var(--serif);
+    font-size: 26px; font-weight: 500; letter-spacing: -0.01em;
+    color: var(--ink);
+    padding: 0 8px 26px;
+  }
+  .brand em { font-style: italic; color: var(--teal); }
+
+  .side-nav { display: flex; flex-direction: column; gap: 1px; flex: 1; }
+  .nav-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 10px; border-radius: 7px;
+    color: var(--ink-body); text-decoration: none;
+    font-size: 14.5px; font-weight: 500;
+    transition: background 160ms;
+  }
+  .nav-row:hover { background: rgba(26,28,30,0.04); }
+  .nav-row.active { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+  .nav-row .count { font-family: var(--serif); font-size: 14px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+  .nav-row.active .count { color: var(--teal); }
+
+  .sub-nav { display: flex; flex-direction: column; padding: 4px 0 10px 2px; margin-left: 10px; border-left: 1px solid var(--line); }
+  .sub-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 10px; margin-left: 8px;
+    color: var(--ink-muted); text-decoration: none; font-size: 13.5px;
+    border-radius: 6px;
+  }
+  .sub-row:hover { color: var(--ink-body); background: rgba(26,28,30,0.03); }
+  .sub-row[aria-current="true"] { color: var(--ink); font-weight: 600; }
+  .sub-row span:last-child { font-family: var(--serif); font-variant-numeric: tabular-nums; }
+
+  .side-foot {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 8px 0; margin-top: 12px; border-top: 1px solid var(--line);
+    font-size: 13.5px; color: var(--ink-muted);
+  }
+  .side-foot .avatar { width: 26px; height: 26px; border-radius: 999px; background: linear-gradient(135deg,#d8d2c6,#c3bcae); }
+  .side-foot .name { flex: 1; color: var(--ink-body); font-weight: 500; }
+  .icon-btn { border: 0; background: none; color: var(--ink-faint); cursor: pointer; padding: 4px; border-radius: 6px; display: grid; place-items: center; }
+  .icon-btn:hover { color: var(--ink); background: rgba(26,28,30,0.05); }
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  /* ── 상단바 ───────────────────────────────────────────────── */
+  .topbar {
+    grid-area: topbar;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; height: 64px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .scope {
+    display: inline-flex; align-items: center; gap: 9px;
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 8px 15px; background: var(--bg);
+    font-size: 14px; font-weight: 500; color: var(--ink);
+    cursor: pointer;
+  }
+  .scope:hover { background: var(--paper); }
+  .scope svg { width: 17px; height: 17px; stroke: var(--ink-muted); }
+  .scope .caret { color: var(--ink-faint); font-size: 11px; }
+  .bell { position: relative; border: 0; background: none; cursor: pointer; color: var(--ink-muted); padding: 8px; border-radius: 8px; }
+  .bell:hover { background: var(--paper); color: var(--ink); }
+  .bell svg { width: 20px; height: 20px; }
+  .bell .dot { position: absolute; top: 7px; right: 8px; width: 7px; height: 7px; background: var(--teal); border-radius: 999px; border: 1.5px solid var(--bg); }
+
+  /* ── 목록 페인 ────────────────────────────────────────────── */
+  .list-pane { grid-area: list; overflow-y: auto; padding: 8px 0 60px; border-right: 1px solid var(--line); }
+  .section { padding: 20px 28px 6px; }
+  .section + .section { border-top: 1px solid var(--line-soft); }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+  .section-head h2 {
+    margin: 0; font-family: var(--serif); font-weight: 500;
+    font-size: 19px; letter-spacing: -0.01em; color: var(--ink);
+  }
+  .section-head .n { font-family: var(--serif); font-size: 15px; color: var(--ink-faint); margin-left: 8px; font-variant-numeric: tabular-nums; }
+  .section-menu { border: 0; background: none; color: var(--ink-faint); cursor: pointer; padding: 4px; border-radius: 6px; }
+  .section-menu:hover { color: var(--ink); background: rgba(26,28,30,0.05); }
+  .section-menu svg { width: 18px; height: 18px; }
+
+  .acc-line { display: flex; align-items: center; gap: 7px; padding: 12px 0 6px; font-size: 12.5px; color: var(--ink-faint); letter-spacing: 0.02em; }
+  .acc-dot { width: 6px; height: 6px; border-radius: 999px; background: #b9b3a6; }
+  .acc-dot.work { background: #7f9a97; }
+  .acc-dot.school { background: #b0a68e; }
+
+  /* 메일 카드 — 컬러 바 없음, 헤어라인 구분, 큰 타입 */
+  .card {
+    display: block; width: 100%; text-align: left;
+    padding: 15px 16px; margin: 0 -16px;
+    border: 0; background: none; cursor: pointer;
+    border-radius: 9px;
+    transition: background 150ms;
+  }
+  .card + .card { border-top: 1px solid var(--line-soft); }
+  .card:hover { background: var(--paper); }
+  .card.selected { background: var(--sel); }
+  .card.selected + .card { border-top-color: transparent; }
+  .card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+  .card-title { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); letter-spacing: -0.005em; line-height: 1.35; }
+  .card.selected .card-title { font-weight: 700; }
+  .card-sender { flex-shrink: 0; font-size: 13px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+  .card-summary { margin: 5px 0 0; font-size: 14.5px; color: var(--ink-body); line-height: 1.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .card.compact { display: flex; align-items: baseline; justify-content: space-between; padding: 11px 16px; }
+  .card.compact .compact-title { font-size: 14.5px; color: var(--ink-body); }
+  .card.compact .compact-meta { font-family: var(--serif); font-size: 13.5px; color: var(--ink-faint); }
+  .add-section { margin-top: 10px; border: 1px dashed var(--line); background: none; color: var(--ink-muted); font-size: 13px; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+  .add-section:hover { border-color: var(--ink-faint); color: var(--ink-body); }
+
+  .zone-head {
+    font-family: var(--serif); font-style: italic; font-size: 15px;
+    color: var(--ink-muted); padding: 26px 28px 4px;
+    border-top: 1px solid var(--line);
+  }
+
+  /* ── 상세 페인 ────────────────────────────────────────────── */
+  .detail { grid-area: detail; overflow-y: auto; background: var(--paper); padding: 0; }
+  .detail-inner { max-width: 460px; margin: 0 auto; padding: 40px 40px 80px; }
+  .detail-account { font-size: 12.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 18px; }
+  .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+  .detail-title {
+    margin: 0; font-family: var(--serif); font-weight: 500;
+    font-size: 32px; line-height: 1.18; letter-spacing: -0.015em; color: var(--ink);
+  }
+  .detail-actions { display: flex; gap: 6px; flex-shrink: 0; padding-top: 6px; }
+  .act {
+    width: 36px; height: 36px; border-radius: 9px;
+    border: 1px solid var(--line); background: var(--bg);
+    display: grid; place-items: center; cursor: pointer; color: var(--ink-muted);
+    transition: all 160ms;
+  }
+  .act:hover { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .act svg { width: 18px; height: 18px; }
+  .detail-meta { margin-top: 16px; font-size: 13.5px; color: var(--ink-muted); }
+
+  .summary-quote {
+    margin: 30px 0 28px; padding: 4px 0 4px 20px;
+    border-left: 2px solid var(--teal);
+  }
+  .summary-quote .q-label { display: block; font-family: var(--serif); font-style: italic; font-size: 14px; color: var(--teal-deep); margin-bottom: 6px; }
+  .summary-quote p { margin: 0; font-family: var(--serif); font-size: 18px; line-height: 1.5; color: var(--ink); }
+
+  .body-copy p { margin: 0 0 15px; font-size: 15.5px; line-height: 1.65; color: var(--ink-body); }
+  .body-copy p:first-of-type::first-letter {
+    font-family: var(--serif); float: left;
+    font-size: 46px; line-height: 0.82; padding: 4px 8px 0 0; color: var(--ink);
+  }
+
+  /* ── 토스트 ───────────────────────────────────────────────── */
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(10px);
+    display: flex; align-items: center; gap: 16px;
+    background: var(--ink); color: #f2f0ea;
+    padding: 12px 16px 12px 20px; border-radius: 11px;
+    font-size: 14px; opacity: 0; pointer-events: none;
+    transition: opacity 200ms, transform 200ms;
+    box-shadow: 0 8px 24px rgba(26,28,30,0.22);
+  }
+  .toast[data-show="true"] { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .toast button { border: 0; background: none; color: #9fded9; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .toast .toast-close { color: #8a8d90; font-weight: 400; }
+
+  svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+
+  <div class="diff-strip" aria-label="기존 키스톤 대비 변경점">
+    <span><span class="tag">폰트</span><b>Newsreader 세리프</b> + Pretendard 페어링 (기존 단일 Inter/Pretendard 해소)</span>
+    <span><span class="tag">타입</span>본문 15.5px·제목 32px 세리프 (기존 tiny-text 9.5–11.5px 반전)</span>
+    <span><span class="tag">색</span>틸 포인트만, 컬러 바 제거·대비 보정</span>
+    <span><span class="tag">여백</span>상세 좌우 40px·중앙 정렬 컬럼</span>
+  </div>
+
+  <div class="app">
+    <aside class="sidebar" aria-label="메일 브리핑 내비게이션">
+      <div class="brand">M<em>aily</em></div>
+
+      <nav class="side-nav" aria-label="주요 화면">
+        <a class="nav-row active" href="#"><span>오늘 브리핑</span><span class="count">8</span></a>
+        <div class="sub-nav" aria-label="오늘 브리핑 섹션">
+          <a class="sub-row" href="#" aria-current="true"><span>새 중요 항목</span><span>4</span></a>
+          <a class="sub-row" href="#"><span>답장 필요</span><span>1</span></a>
+          <a class="sub-row" href="#"><span>나중에 봐도 됨</span><span>1</span></a>
+          <a class="sub-row" href="#"><span>정리됨</span><span></span></a>
+          <a class="sub-row" href="#"><span>승인 필요</span><span>1</span></a>
+        </div>
+        <a class="nav-row" href="#"><span>보관함</span><span class="count"></span></a>
+        <a class="nav-row" href="#"><span>정리 검토</span><span class="count">3</span></a>
+        <a class="nav-row" href="#"><span>활동 로그</span><span class="count"></span></a>
+        <a class="nav-row" href="#"><span>설정</span><span class="count"></span></a>
+      </nav>
+
+      <div class="side-foot">
+        <span class="avatar" aria-hidden="true"></span>
+        <span class="name">dongwoo</span>
+        <button class="icon-btn" type="button" aria-label="계정 설정">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+        </button>
+      </div>
+    </aside>
+
+    <header class="topbar">
+      <button class="scope" type="button">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+        <span>전체 메일 계정</span>
+        <span class="caret" aria-hidden="true">▾</span>
+      </button>
+      <button class="bell" type="button" aria-label="알림">
+        <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
+        <span class="dot" aria-hidden="true"></span>
+      </button>
+    </header>
+
+    <main class="list-pane" aria-label="오늘 브리핑 목록">
+      <section class="section">
+        <div class="section-head">
+          <div><h2>새 중요 항목<span class="n">4</span></h2></div>
+          <button class="section-menu" type="button" aria-label="섹션 메뉴"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="acc-line"><span class="acc-dot work"></span><span>업무 계정</span></div>
+        <button class="card selected" type="button">
+          <div class="card-top"><h3 class="card-title">PR 리뷰 요청</h3><span class="card-sender">김지현 · 오늘 09:12</span></div>
+          <p class="card-summary">요약: 금요일까지 결제 플로우 PR 리뷰를 요청합니다.</p>
+        </button>
+        <button class="card" type="button">
+          <div class="card-top"><h3 class="card-title">인보이스 #2024-118</h3><span class="card-sender">외주사 · 어제 18:44</span></div>
+          <p class="card-summary">요약: 6월분 인보이스입니다. 금액 확인 부탁드립니다.</p>
+        </button>
+        <button class="card" type="button">
+          <div class="card-top"><h3 class="card-title">계약서 서명 요청</h3><span class="card-sender">리걸팀 · 어제 15:02</span></div>
+          <p class="card-summary">요약: 위탁 계약서 전자서명을 이번 주 내 완료해 주세요.</p>
+        </button>
+        <div class="acc-line"><span class="acc-dot"></span><span>개인 계정</span></div>
+        <button class="card" type="button">
+          <div class="card-top"><h3 class="card-title">카드 결제 확인 안내</h3><span class="card-sender">현대카드 · 오늘 07:55</span></div>
+          <p class="card-summary">요약: 7월 2일 45,000원 정기 결제가 승인되었습니다.</p>
+        </button>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div><h2>답장 필요<span class="n">1</span></h2></div>
+          <button class="section-menu" type="button" aria-label="섹션 메뉴"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="acc-line"><span class="acc-dot work"></span><span>업무 계정</span></div>
+        <button class="card" type="button">
+          <div class="card-top"><h3 class="card-title">미팅 일정 조율</h3><span class="card-sender">박서준 · 어제 19:20</span></div>
+          <p class="card-summary">요약: 다음 주 화/수 중 킥오프 미팅 가능 시간을 요청합니다.</p>
+        </button>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div><h2>나중에 봐도 됨<span class="n">1</span></h2></div>
+          <button class="section-menu" type="button" aria-label="섹션 메뉴"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="acc-line"><span class="acc-dot school"></span><span>school@gmail.com</span></div>
+        <button class="card" type="button">
+          <div class="card-top"><h3 class="card-title">7월 학사 일반 공지</h3><span class="card-sender">학사지원팀 · 어제 17:30</span></div>
+          <p class="card-summary">요약이 꺼진 계정입니다. 필요하면 Gmail에서 원문을 확인합니다.</p>
+        </button>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div><h2>정리됨</h2></div>
+          <button class="section-menu" type="button" aria-label="섹션 메뉴"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="acc-line"><span class="acc-dot"></span><span>개인 계정</span></div>
+        <div class="card compact"><span class="compact-title">뉴스레터 묶음</span><span class="compact-meta">18개</span></div>
+        <div class="acc-line"><span class="acc-dot work"></span><span>업무 계정</span></div>
+        <div class="card compact"><span class="compact-title">GitHub 알림 묶음</span><span class="compact-meta">12개</span></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div><h2>승인 필요<span class="n">1</span></h2></div>
+          <button class="section-menu" type="button" aria-label="섹션 메뉴"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="acc-line"><span class="acc-dot work"></span><span>업무 계정</span></div>
+        <div class="card compact"><span class="compact-title">새 라벨 제안: 채용</span><span class="compact-meta">6개</span></div>
+      </section>
+
+      <div class="zone-head">내 섹션</div>
+      <section class="section">
+        <div class="section-head">
+          <div><h2>결제</h2></div>
+          <button class="section-menu" type="button" aria-label="섹션 메뉴"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+        </div>
+        <div class="acc-line"><span class="acc-dot"></span><span>개인 계정</span></div>
+        <div class="card compact"><span class="compact-title">6월 통신요금 청구서</span><span class="compact-meta">확인됨</span></div>
+        <button class="add-section" type="button">섹션 추가</button>
+      </section>
+    </main>
+
+    <aside class="detail" aria-label="선택한 메일">
+      <div class="detail-inner">
+        <div class="detail-account">업무 계정</div>
+        <div class="title-row">
+          <h2 class="detail-title">PR 리뷰 요청</h2>
+          <div class="detail-actions" aria-label="주요 처리">
+            <button class="act" type="button" aria-label="Gmail에서 열기" title="Gmail에서 열기">
+              <svg viewBox="0 0 24 24"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+            </button>
+            <button class="act" type="button" id="mark-read" aria-label="Gmail도 읽음 처리" title="Gmail도 읽음 처리">
+              <svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg>
+            </button>
+            <button class="act" type="button" aria-label="이동 및 아카이브 더보기" title="이동 · 읽음 처리 후 아카이브">
+              <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg>
+            </button>
+          </div>
+        </div>
+        <div class="detail-meta">김지현 &lt;jihyun@company.com&gt; · 오늘 09:12</div>
+
+        <div class="summary-quote">
+          <span class="q-label">요약</span>
+          <p>금요일까지 결제 플로우 PR 리뷰를 요청합니다. 관련 이슈 #482 링크가 포함되어 있습니다.</p>
+        </div>
+
+        <div class="body-copy">
+          <p>안녕하세요. 금요일 배포 전에 결제 플로우 PR을 한 번 더 봐주면 좋겠습니다.</p>
+          <p>특히 쿠폰 적용 후 총액 계산과 실패 케이스 메시지를 확인해 주세요. 리뷰가 가능하면 오늘 오후까지 코멘트를 남겨주세요.</p>
+          <p>급한 수정이 있으면 내일 오전 배포 전에 반영하겠습니다.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="toast" id="toast" data-show="false" role="status" aria-live="polite">
+    <span>Gmail에서도 읽음 처리했습니다.</span>
+    <button type="button" id="toast-undo">되돌리기</button>
+    <button type="button" class="toast-close" id="toast-close" aria-label="닫기">✕</button>
+  </div>
+
+  <script>
+    var toast = document.getElementById('toast');
+    var timer = null;
+    function show() { clearTimeout(timer); toast.setAttribute('data-show', 'true'); timer = setTimeout(hide, 3000); }
+    function hide() { clearTimeout(timer); toast.setAttribute('data-show', 'false'); }
+    document.getElementById('mark-read').addEventListener('click', show);
+    document.getElementById('toast-undo').addEventListener('click', hide);
+    document.getElementById('toast-close').addEventListener('click', hide);
+  </script>
+</body>
+</html>
