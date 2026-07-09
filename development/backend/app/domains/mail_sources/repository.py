@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.domains.mail_sources.models import (
@@ -99,3 +99,67 @@ async def get_credential(
         )
     ).mappings().first()
     return dict(row) if row is not None else None
+
+
+async def get_connected_account(
+    connection: AsyncConnection, *, connected_account_id: uuid.UUID
+) -> dict | None:
+    row = (
+        await connection.execute(
+            select(connected_gmail_accounts).where(
+                connected_gmail_accounts.c.id == connected_account_id
+            )
+        )
+    ).mappings().first()
+    return dict(row) if row is not None else None
+
+
+async def get_source_settings(
+    connection: AsyncConnection, *, connected_account_id: uuid.UUID
+) -> dict | None:
+    row = (
+        await connection.execute(
+            select(gmail_source_settings).where(
+                gmail_source_settings.c.connected_account_id == connected_account_id
+            )
+        )
+    ).mappings().first()
+    return dict(row) if row is not None else None
+
+
+async def update_connected_account(
+    connection: AsyncConnection,
+    *,
+    account_id: uuid.UUID,
+    display_name: str | None,
+    status: str,
+    version: int,
+) -> None:
+    await connection.execute(
+        update(connected_gmail_accounts)
+        .where(connected_gmail_accounts.c.id == account_id)
+        .values(display_name=display_name, status=status, version=version)
+    )
+
+
+async def update_source_settings(
+    connection: AsyncConnection,
+    *,
+    connected_account_id: uuid.UUID,
+    briefing_enabled: bool,
+    summary_enabled: bool,
+    notification_enabled: bool,
+    paused: bool,
+    updated_at: datetime,
+) -> None:
+    await connection.execute(
+        update(gmail_source_settings)
+        .where(gmail_source_settings.c.connected_account_id == connected_account_id)
+        .values(
+            briefing_enabled=briefing_enabled,
+            summary_enabled=summary_enabled,
+            notification_enabled=notification_enabled,
+            paused=paused,
+            updated_at=updated_at,
+        )
+    )
