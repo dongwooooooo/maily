@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const TOAST_DURATION = 3000
+export const TOAST_DURATION = 3000
 
 /** Undo-toast timer: shows on demand, auto-hides after TOAST_DURATION, cancellable. */
 export function useAutoHideToast() {

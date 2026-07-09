@@ -5,7 +5,8 @@
 ## 포팅 진행
 
 - 색상 토큰(`tokens.css`), 아코디언·아바타·배너·요약 태그 컴포넌트 스타일(`app-shell/App.css`) 반영됨
-- 진입점 `app-shell/MailyApp.tsx` + `app-shell/App.css` — 오늘 브리핑 3-pane 실화면(사이드바·상단 계정 스코프·목록·상세 패널·Undo toast), `design/boards/v1/current/03-keystone.html` 이식 중
+- 라우트 6개 실화면: `/`(오늘 브리핑), `/storage`, `/login`, `/first-application`, `/settings`, `/cleanup-review`. 08(알림 진입)은 UI 화면이 아니라 라우팅 스펙 문서라 보류
+- 유닛테스트 시작(Vitest + React Testing Library) — 순수 로직(`computeHasUrgentItems`, `useAutoHideToast`)만, 컴포넌트 렌더 테스트는 아직 범위 밖. 방침은 `docs/current/technical-foundation.md`의 "테스트 방침" 참조
 
 ## IA 확정 요약 (재논의 금지, 변경 시 `docs/current/product-wireframe-final.md`도 갱신)
 
