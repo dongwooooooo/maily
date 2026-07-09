@@ -10,7 +10,7 @@ async def test_append_event_creates_row_and_returns_id() -> None:
     async with engine.begin() as connection:
         event_id = await append_event(
             connection,
-            event_type="gmail_source_connected",
+            event_type="test_generic_event",
             producer_domain="mail_sources",
             payload={"source_id": "abc"},
             idempotency_key=idempotency_key,
@@ -25,7 +25,7 @@ async def test_append_event_dedupes_on_event_type_and_idempotency_key() -> None:
     async with engine.begin() as connection:
         first_id = await append_event(
             connection,
-            event_type="gmail_source_connected",
+            event_type="test_generic_event",
             producer_domain="mail_sources",
             payload={"source_id": "abc"},
             idempotency_key=idempotency_key,
@@ -34,7 +34,7 @@ async def test_append_event_dedupes_on_event_type_and_idempotency_key() -> None:
     async with engine.begin() as connection:
         second_id = await append_event(
             connection,
-            event_type="gmail_source_connected",
+            event_type="test_generic_event",
             producer_domain="mail_sources",
             payload={"source_id": "abc"},
             idempotency_key=idempotency_key,
@@ -50,7 +50,7 @@ async def test_append_event_allows_same_idempotency_key_for_different_event_type
     async with engine.begin() as connection:
         first_id = await append_event(
             connection,
-            event_type="gmail_source_connected",
+            event_type="test_generic_event",
             producer_domain="mail_sources",
             payload={},
             idempotency_key=idempotency_key,
