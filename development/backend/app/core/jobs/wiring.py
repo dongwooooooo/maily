@@ -38,4 +38,16 @@ ACTIVE_EVENT_CONSUMERS: dict[str, list[str]] = {
     "gmail_action_requested": ["execute_action"],
     "gmail_action_applied": ["build_briefing", "reconcile_action"],
     "gmail_action_undone": ["build_briefing"],
+    # IC5 (labels 이동→action·rule) — tests/integration/test_ic5_labels_move.py.
+    # "move → label apply command" is NOT dispatcher-wired — labels.md §73
+    # is explicit that's a direct synchronous request_gmail_action call
+    # from labels.service.move_message_to_label, not an event/job pair.
+    # Only the rule-suggestion half goes through the dispatcher.
+    "label_correction_recorded": ["create_rule_suggestions"],
+    # IC6 (cleanup 승인→action) is likewise NOT dispatcher-wired —
+    # assistant_decisions.cleanup.approve_cleanup_proposal already calls
+    # gmail_actions.request_gmail_action directly (module-boundaries.md
+    # F10), built and tested against the real gmail_actions module back
+    # in W3 (Task 9 was already merged by the time assistant_decisions'
+    # worktree landed) — no new wiring entry needed here for IC6.
 }

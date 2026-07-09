@@ -6,7 +6,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.core import idempotency
-from app.core.errors import ForbiddenError, NotFoundError, ValidationError
+from app.core.errors import ForbiddenError, MailyError, NotFoundError, ValidationError
+from app.domains.gmail_actions.schemas import RequestGmailActionInput
+from app.domains.gmail_actions.service import request_gmail_action
 from app.domains.labels import repository
 from app.domains.labels.events import record_label_correction_recorded
 from app.domains.labels.schemas import (
@@ -220,14 +222,18 @@ async def list_labels(
 async def move_message_to_label(
     connection: AsyncConnection, data: MoveMessageInput
 ) -> MoveMessageResult:
-    """Record a correction signal for a user-triggered move and emit
-    label_correction_recorded.
+    """Record a correction signal for a user-triggered move, emit
+    label_correction_recorded, and request the Gmail label apply command.
 
-    Scope: labels only validates the target and records the signal.
-    Requesting the actual Gmail label apply (gmail_actions'
-    request_gmail_action command) is explicitly out of scope for this
-    worktree — gmail_actions is being built in a sibling worktree and
-    isn't merged yet. See the task report for this resolved ambiguity.
+    labels.md §정상/§경계: labels never imports GmailMutationPort or calls
+    Gmail directly — it requests the mutation via gmail_actions.
+    request_gmail_action (IC5, docs/goals/backend-plans/_build-schedule.md).
+    This is a direct synchronous call, not event/dispatcher-wired — labels.md
+    §73 is explicit that _integration-contract.md §3 has no
+    label_correction_recorded -> gmail_actions row (deliberate: the event
+    is for create_rule_suggestions only). request_gmail_action's own
+    idempotency (a distinct key, derived from this signal) means a retry
+    of this whole function after a partial failure can't double-apply.
     """
     is_new_key = await idempotency.reserve(
         connection,
@@ -284,6 +290,43 @@ async def move_message_to_label(
         service_label_id=data.label_id,
         version=version,
     )
+
+    # gmail_label_id is null until gmail_actions has actually created the
+    # label in Gmail (models.py "매핑 분리 근거") — label create/rename as
+    # its own gmail_actions action_type is out of this IC's scope, so this
+    # falls back to gmail_label_name (e.g. "Maily/업무") as the mutation
+    # target, which the fake mutator (and this POC's action vocabulary)
+    # treats as an opaque label identifier either way.
+    #
+    # labels.md §61 documents the correction signal as independently
+    # durable ("signal 커밋 후 프로세스 사망해도 재기동 시 재요청") — this
+    # call shares the router's one transaction with the signal insert
+    # above, so a request_gmail_action failure must not abort that
+    # transaction and discard an already-recorded signal. request_gmail_
+    # action's own guard-clause raises (unsupported action_type, account
+    # not found/wrong workspace, account disconnecting — all reads, no
+    # writes before the raise) are caught here for exactly that reason;
+    # anything else (a genuine bug) still propagates.
+    try:
+        await request_gmail_action(
+            connection,
+            RequestGmailActionInput(
+                workspace_id=data.workspace_id,
+                connected_account_id=mapping["connected_account_id"],
+                message_id=data.message_id,
+                action_type="label_apply",
+                gmail_label_id=mapping["gmail_label_id"] or mapping["gmail_label_name"],
+                idempotency_key=f"label-apply:{signal_id}",
+                requested_by=data.actor_id,
+            ),
+        )
+    except MailyError as exc:
+        logger.warning(
+            "라벨 이동 신호는 기록됐지만 Gmail 적용 커맨드 요청 실패 — signal은 유지",
+            signal_id=str(signal_id),
+            message_id=str(data.message_id),
+            reason=str(exc),
+        )
 
     result = MoveMessageResult(
         correction_signal_id=signal_id,
