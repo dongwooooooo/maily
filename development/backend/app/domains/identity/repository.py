@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app.domains.identity.models import users, workspace_members, workspaces
+from app.domains.identity.models import sessions, users, workspace_members, workspaces
 
 
 async def find_user_by_google_subject(
@@ -65,3 +65,38 @@ async def create_user_workspace_membership(
         )
     )
     return user_id, workspace_id
+
+
+async def insert_session(
+    connection: AsyncConnection,
+    *,
+    session_id: uuid.UUID,
+    user_id: uuid.UUID,
+    workspace_id: uuid.UUID,
+    issued_at: datetime,
+    expires_at: datetime,
+) -> None:
+    await connection.execute(
+        insert(sessions).values(
+            id=session_id,
+            user_id=user_id,
+            workspace_id=workspace_id,
+            issued_at=issued_at,
+            expires_at=expires_at,
+        )
+    )
+
+
+async def find_session(connection: AsyncConnection, *, session_id: uuid.UUID) -> dict | None:
+    row = (
+        await connection.execute(select(sessions).where(sessions.c.id == session_id))
+    ).mappings().first()
+    return dict(row) if row is not None else None
+
+
+async def revoke_session(
+    connection: AsyncConnection, *, session_id: uuid.UUID, revoked_at: datetime
+) -> None:
+    await connection.execute(
+        update(sessions).where(sessions.c.id == session_id).values(revoked_at=revoked_at)
+    )
