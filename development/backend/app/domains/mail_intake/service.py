@@ -31,6 +31,7 @@ async def _fail_sync_run_and_emit_recovery(
     *,
     sync_run_id: uuid.UUID,
     connected_account_id: uuid.UUID,
+    workspace_id: uuid.UUID,
     account_version: int,
     reason: str,
 ) -> None:
@@ -43,7 +44,11 @@ async def _fail_sync_run_and_emit_recovery(
         error_reason=reason,
     )
     await events.publish_recovery_needed(
-        connection, connected_account_id=connected_account_id, reason=reason, version=account_version
+        connection,
+        connected_account_id=connected_account_id,
+        workspace_id=workspace_id,
+        reason=reason,
+        version=account_version,
     )
 
 
@@ -76,6 +81,7 @@ async def sync_full(
             connection,
             sync_run_id=sync_run_id,
             connected_account_id=connected_account_id,
+            workspace_id=account["workspace_id"],
             account_version=account["version"],
             reason=exc.reason,
         )
@@ -110,6 +116,7 @@ async def sync_full(
             connection,
             sync_run_id=sync_run_id,
             connected_account_id=connected_account_id,
+            workspace_id=account["workspace_id"],
             account_version=account["version"],
             reason=exc.reason,
         )
@@ -292,6 +299,7 @@ async def sync_delta(
             connection,
             sync_run_id=sync_run_id,
             connected_account_id=connected_account_id,
+            workspace_id=account["workspace_id"],
             account_version=account["version"],
             reason=exc.reason,
         )
@@ -331,6 +339,7 @@ async def sync_delta(
             connection,
             sync_run_id=sync_run_id,
             connected_account_id=connected_account_id,
+            workspace_id=account["workspace_id"],
             account_version=account["version"],
             reason=exc.reason,
         )
@@ -447,6 +456,7 @@ async def register_watch(connection: AsyncConnection, *, connected_account_id: u
         await events.publish_recovery_needed(
             connection,
             connected_account_id=connected_account_id,
+            workspace_id=account["workspace_id"],
             reason=exc.reason,
             version=account["version"],
         )
@@ -558,6 +568,7 @@ async def poll_history(connection: AsyncConnection, *, connected_account_id: uui
         await events.publish_recovery_needed(
             connection,
             connected_account_id=connected_account_id,
+            workspace_id=account["workspace_id"],
             reason=exc.reason,
             version=account["version"],
         )

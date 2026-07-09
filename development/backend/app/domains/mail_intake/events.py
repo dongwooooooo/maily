@@ -62,6 +62,7 @@ async def publish_recovery_needed(
     connection: AsyncConnection,
     *,
     connected_account_id: uuid.UUID,
+    workspace_id: uuid.UUID,
     reason: str,
     version: int,
 ) -> None:
@@ -69,11 +70,18 @@ async def publish_recovery_needed(
     mail_intake.md. `version` is the connected_gmail_accounts.version the
     caller already loaded (mail_sources owns that counter) — used as the
     idempotency disambiguator so a repeated failure at the same account
-    version doesn't re-notify."""
+    version doesn't re-notify. `workspace_id`/`version` are both included
+    in the payload (not just used for the idempotency_key) — IC7's
+    notifications.resolve_route_target requires both."""
     await append_event(
         connection,
         event_type="gmail_source_recovery_needed",
         producer_domain="mail_intake",
-        payload={"source_id": str(connected_account_id), "reason": reason},
+        payload={
+            "source_id": str(connected_account_id),
+            "workspace_id": str(workspace_id),
+            "reason": reason,
+            "version": version,
+        },
         idempotency_key=f"source:{connected_account_id}:recovery:{reason}:{version}",
     )

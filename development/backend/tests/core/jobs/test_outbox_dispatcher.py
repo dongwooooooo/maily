@@ -1,10 +1,11 @@
 import uuid
 
+import pytest
 from sqlalchemy import insert, select, update
 
 from app.core.database import engine
 from app.core.jobs.models import job_runs
-from app.core.jobs.outbox_dispatcher import dispatch_pending_events
+from app.core.jobs.outbox_dispatcher import MissingJobPayloadKeyError, dispatch_pending_events
 from app.core.outbox import append_event, outbox_events
 
 
@@ -124,6 +125,32 @@ async def test_rerunning_dispatch_over_same_pending_row_does_not_double_enqueue(
     # 'pending' row here would otherwise get picked up by any later test's
     # own dispatch_pending_events() call (shared Postgres, no per-test
     # rollback across the suite).
+    async with engine.begin() as connection:
+        await connection.execute(
+            update(outbox_events).where(outbox_events.c.id == event_id).values(status="dispatched")
+        )
+
+
+async def test_emit_notification_wrapped_payload_null_field_fails_loud_at_dispatch() -> None:
+    """[IC7 코드리뷰 Major] emit_notification의 job payload는
+    {"trigger":..., "payload":{...}} wrapper라 top-level _REQUIRED_PAYLOAD_KEYS
+    체크만으론 안쪽 dict를 못 본다 — trigger별 내부 필드 검증이 실제로 동작하는지
+    확인. reminder_reactivated는 message_id가 필수인데 없는 payload로 dispatch."""
+    event_id = await _seed_event(
+        "reminder_reactivated",
+        {"workspace_id": str(uuid.uuid4()), "reminder_id": str(uuid.uuid4())},  # message_id 없음
+    )
+
+    with pytest.raises(MissingJobPayloadKeyError):
+        async with engine.begin() as connection:
+            await dispatch_pending_events(
+                connection, consumers={"reminder_reactivated": ["emit_notification"]}
+            )
+
+    # The raise rolled back dispatch's own transaction, so the seeded event
+    # is still 'pending' — leaving it that way would make any later test's
+    # dispatch_pending_events() call (shared Postgres, no per-test rollback)
+    # re-trigger this same raise unexpectedly. Mark it dispatched directly.
     async with engine.begin() as connection:
         await connection.execute(
             update(outbox_events).where(outbox_events.c.id == event_id).values(status="dispatched")
