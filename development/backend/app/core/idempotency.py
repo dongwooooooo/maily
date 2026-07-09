@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, String, Table, UniqueConstraint
+from sqlalchemy import Column, DateTime, String, Table, UniqueConstraint, select, update
 from sqlalchemy.dialects.postgresql import JSONB, UUID, insert
 from sqlalchemy.ext.asyncio import AsyncConnection
 
@@ -48,3 +48,31 @@ async def reserve(
     )
     result = await connection.execute(stmt)
     return result.first() is not None
+
+
+async def store_response(
+    connection: AsyncConnection, *, scope: str, key: str, response_snapshot: dict
+) -> None:
+    """Persist the outcome of a reserve()d (scope, key) pair.
+
+    Called once, right after the caller finishes the work reserve()
+    granted exclusive access to — a later retry with the same
+    (scope, key) can then read it back via get_response() instead of
+    reprocessing and returning a fabricated/different result.
+    """
+    await connection.execute(
+        update(idempotency_keys)
+        .where(idempotency_keys.c.scope == scope, idempotency_keys.c.key == key)
+        .values(response_snapshot=response_snapshot)
+    )
+
+
+async def get_response(connection: AsyncConnection, *, scope: str, key: str) -> dict | None:
+    row = (
+        await connection.execute(
+            select(idempotency_keys.c.response_snapshot).where(
+                idempotency_keys.c.scope == scope, idempotency_keys.c.key == key
+            )
+        )
+    ).first()
+    return row[0] if row is not None and row[0] is not None else None

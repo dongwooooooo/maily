@@ -11,6 +11,7 @@ import app.core.idempotency  # noqa: F401 — registers table with metadata
 import app.core.jobs.models  # noqa: F401 — registers table with metadata
 import app.core.outbox  # noqa: F401 — registers table with metadata
 import app.domains.identity.models  # noqa: F401 — registers table with metadata
+import app.domains.labels.models  # noqa: F401 — registers table with metadata
 import app.domains.mail_intake.models  # noqa: F401 — registers table with metadata
 import app.domains.mail_sources.models  # noqa: F401 — registers table with metadata
 from app.core.config import settings
