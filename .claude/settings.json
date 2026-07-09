@@ -1,0 +1,59 @@
+{
+  "description": "Maily project harness: dev/doc permissions + verification/doc-guard hooks.",
+  "permissions": {
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/secrets/**)",
+      "Edit(**/.env)",
+      "Edit(**/.env.*)",
+      "Edit(**/secrets/**)",
+      "Edit(**/migrations/**)",
+      "Edit(**/alembic/versions/**)",
+      "Bash(rm -rf:*)"
+    ],
+    "ask": [
+      "Edit(design/wireframes/**)",
+      "Bash(git push:*)"
+    ],
+    "allow": [
+      "Bash(pytest:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm build:*)",
+      "Bash(ruff:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR/development/frontend\" && OUT=$(pnpm lint 2>&1); CODE=$?; if [ $CODE -ne 0 ]; then jq -n --arg reason \"pnpm lint failed, fix before committing:\n\n$OUT\" '{hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:$reason}}'; else echo '{}'; fi",
+            "if": "Bash(git commit*)",
+            "timeout": 60,
+            "statusMessage": "Running pnpm lint before commit"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/doc-guard.mjs\"",
+            "timeout": 10,
+            "statusMessage": "Checking doc governance"
+          }
+        ]
+      }
+    ]
+  }
+}
