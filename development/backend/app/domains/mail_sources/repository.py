@@ -101,6 +101,20 @@ async def get_credential(
     return dict(row) if row is not None else None
 
 
+async def list_active_sources(
+    connection: AsyncConnection, *, workspace_id: uuid.UUID
+) -> list[dict]:
+    rows = (
+        await connection.execute(
+            select(connected_gmail_accounts).where(
+                connected_gmail_accounts.c.workspace_id == workspace_id,
+                connected_gmail_accounts.c.status != "disconnected",
+            )
+        )
+    ).mappings().all()
+    return [dict(row) for row in rows]
+
+
 async def get_connected_account(
     connection: AsyncConnection, *, connected_account_id: uuid.UUID
 ) -> dict | None:

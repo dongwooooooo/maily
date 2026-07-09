@@ -1,16 +1,15 @@
 import uuid
 
 import structlog
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from app.api.deps import get_db_connection
-from app.core import security
-from app.core.errors import UnauthorizedError
+from app.api.deps import get_db_connection, get_request_context
 from app.domains.identity import repository
 from app.domains.identity.oauth import verify_google_id_token
-from app.domains.identity.service import google_login, issue_session, resolve_request_context
+from app.domains.identity.schemas import RequestContext
+from app.domains.identity.service import google_login, issue_session
 
 router = APIRouter()
 
@@ -38,12 +37,6 @@ def get_google_profile_verifier():
     return verify_google_id_token
 
 
-async def get_bearer_token(authorization: str = Header(default="")) -> str:
-    if not authorization.startswith("Bearer "):
-        raise UnauthorizedError("missing bearer token")
-    return authorization.removeprefix("Bearer ")
-
-
 @router.post("/google/callback", response_model=GoogleCallbackResponse)
 async def google_callback(
     body: GoogleCallbackRequest,
@@ -65,14 +58,9 @@ async def google_callback(
 
 @router.get("/session", response_model=SessionSummaryResponse)
 async def get_session(
-    token: str = Depends(get_bearer_token),
+    context: RequestContext = Depends(get_request_context),
     connection: AsyncConnection = Depends(get_db_connection),
 ) -> SessionSummaryResponse:
-    try:
-        context = await resolve_request_context(connection, token)
-    except security.InvalidSessionTokenError as exc:
-        raise UnauthorizedError("invalid session") from exc
-
     structlog.contextvars.bind_contextvars(
         workspace_id=str(context.workspace_id), user_id=str(context.user_id)
     )
