@@ -1,12 +1,22 @@
 from fastapi import APIRouter
 
-from app.domains import gmail_actions, identity, labels, mail_intake, mail_sources
+from app.core.discovery import collect_routers, discover_domain_modules
+
+# Router prefixes per docs/goals/backend-plans/_integration-contract.md §3 —
+# this table is the one piece of per-domain config that still needs a manual
+# entry when a new domain is added (prefixes aren't derivable from domain
+# code). Everything else (which domains exist, their router object, their
+# job handlers) is discovered automatically — see app/core/discovery.py.
+_PREFIX_BY_DOMAIN = {
+    "identity": "/auth",
+    "mail_sources": "/sources",
+    "mail_intake": "/intake",
+    # labels.router declares full paths itself (/labels, /messages/{id}/move) —
+    # see app/domains/labels/router.py for why a blanket prefix doesn't fit.
+    "labels": "",
+    "gmail_actions": "/actions",
+}
 
 api_router = APIRouter()
-api_router.include_router(identity.router, prefix="/auth", tags=["auth"])
-api_router.include_router(mail_sources.router, prefix="/sources", tags=["sources"])
-api_router.include_router(mail_intake.router, prefix="/intake", tags=["intake"])
-# No prefix: labels.router declares full paths (/labels, /messages/{id}/move) —
-# see app/domains/labels/router.py for why a single blanket prefix doesn't fit.
-api_router.include_router(labels.router, tags=["labels"])
-api_router.include_router(gmail_actions.router, prefix="/actions", tags=["actions"])
+for domain, router in collect_routers(discover_domain_modules()).items():
+    api_router.include_router(router, prefix=_PREFIX_BY_DOMAIN.get(domain, ""), tags=[domain])
