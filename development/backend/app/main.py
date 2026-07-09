@@ -4,9 +4,17 @@ from fastapi.responses import JSONResponse
 from app.api.deps import get_database_check, get_redis_check
 from app.api.router import api_router
 from app.core.config import settings
+from app.core.error_handlers import maily_error_handler, unhandled_exception_handler
+from app.core.errors import MailyError
+from app.core.logging import RequestContextMiddleware, configure_logging
+
+configure_logging()
 
 app = FastAPI(title=settings.app_name)
+app.add_middleware(RequestContextMiddleware)
 app.include_router(api_router)
+app.add_exception_handler(MailyError, maily_error_handler)
+app.add_exception_handler(Exception, unhandled_exception_handler)
 
 
 @app.get("/health")
