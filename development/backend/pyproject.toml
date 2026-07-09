@@ -11,6 +11,7 @@ dependencies = [
   "SQLAlchemy==2.0.51",
   "alembic==1.18.5",
   "asyncpg==0.31.0",
+  "greenlet==3.2.4",
   "redis==8.0.1",
   "PyJWT==2.13.0",
   "Authlib==1.7.2",
