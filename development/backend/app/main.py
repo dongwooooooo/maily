@@ -6,6 +6,7 @@ from fastapi.routing import APIRoute
 from pydantic import BaseModel
 
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.deps import get_database_check, get_redis_check
 from app.api.router import api_router
@@ -46,6 +47,15 @@ app = FastAPI(
     generate_unique_id_function=_operation_id_from_route_name,
 )
 app.add_middleware(RequestContextMiddleware)
+# 인증이 Authorization 헤더 기반(쿠키 없음)이라 credentials 없이 origin 허용만
+# 으로 충분하다 — Next rewrites 프록시는 병행하지 않는다(_integration-contract §6).
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_allow_origins,
+    allow_methods=["*"],
+    allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "X-Request-Id"],
+    expose_headers=["X-Request-Id"],
+)
 # 에러 봉투는 API 라우트 전체에 중앙 1곳에서 문서화한다 — 엔드포인트 26개에
 # responses=를 개별로 다는 대신 include 시점 일괄 부여 (/health,/ready 제외).
 app.include_router(

@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.core.config import settings
 from app.core.errors import MailyError
 from app.core.logging import REQUEST_ID_HEADER
 
@@ -75,9 +76,18 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     logger.error("처리되지 않은 예외 발생", request_id=request_id, exc_info=exc)
 
     # Exception(500) 핸들러는 Starlette ServerErrorMiddleware(사용자 미들웨어
-    # 스택 바깥)에서 실행되므로 RequestContextMiddleware의 헤더 부착 라인이
-    # 돌지 않는다 — 유일하게 여기서만 X-Request-Id를 직접 붙여야 한다.
-    headers = {REQUEST_ID_HEADER: request_id} if request_id else None
+    # 스택 바깥)에서 실행되므로 RequestContextMiddleware·CORSMiddleware를 모두
+    # 건너뛴다 — X-Request-Id와 CORS 헤더를 유일하게 여기서 직접 붙여야 한다.
+    # CORS 헤더가 없으면 브라우저 fetch는 진짜 500을 CORS 에러로 오인해
+    # 상태 코드·본문을 읽지 못한다.
+    headers: dict[str, str] = {}
+    if request_id:
+        headers[REQUEST_ID_HEADER] = request_id
+    origin = request.headers.get("origin")
+    if origin and origin in settings.cors_allow_origins:
+        headers["Access-Control-Allow-Origin"] = origin
+        headers["Vary"] = "Origin"
+        headers["Access-Control-Expose-Headers"] = REQUEST_ID_HEADER
     return JSONResponse(
         status_code=500,
         headers=headers,
