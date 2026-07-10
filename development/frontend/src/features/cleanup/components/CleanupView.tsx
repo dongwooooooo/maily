@@ -5,11 +5,13 @@ import { useEffect, useState } from 'react'
 import type { AppliedItem, Proposal, ProposalColumn } from '@/features/cleanup/data/cleanup.mock'
 import {
   approveCleanupProposal,
+  approveRuleSuggestion,
   fetchActivityLog,
   fetchCleanupQueue,
+  fetchRules,
   undoActivity,
 } from '@/features/cleanup/api'
-import { toAppliedItems, toProposalColumns } from '@/features/cleanup/adapters'
+import { toAppliedItems, toProposalColumns, toRuleProposals } from '@/features/cleanup/adapters'
 import { fetchMessageDetail } from '@/features/briefing/api'
 import { fetchSources } from '@/shared/api/sources'
 import type { ApiError } from '@/shared/api/errors'
@@ -20,11 +22,14 @@ function accDotClassName(kind: ProposalColumn['accountKind']) {
 }
 
 interface ProposalCardProps {
+  kind: 'cleanup' | 'rule'
   proposal: Proposal
   onApprove: (proposalId: string) => void
 }
 
-function ProposalCard({ proposal, onApprove }: ProposalCardProps) {
+function ProposalCard({ kind, proposal, onApprove }: ProposalCardProps) {
+  const isRule = kind === 'rule'
+
   return (
     <article className="proposal">
       <div className="prop-top">
@@ -42,7 +47,7 @@ function ProposalCard({ proposal, onApprove }: ProposalCardProps) {
             className="icon-action"
             type="button"
             aria-label="승인"
-            title="승인 — Gmail에 적용합니다"
+            title={isRule ? '승인 — 자동 정리 규칙을 만듭니다' : '승인 — Gmail에 적용합니다'}
             onClick={() => onApprove(proposal.id)}
           >
             <svg className="button-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -54,7 +59,9 @@ function ProposalCard({ proposal, onApprove }: ProposalCardProps) {
             className="more-action"
             type="button"
             aria-label="제외"
-            title="제외 — 이 제안을 적용하지 않습니다"
+            title={
+              isRule ? '제외 — 계속 개별 승인으로 둡니다' : '제외 — 이 제안을 적용하지 않습니다'
+            }
             disabled
           >
             <svg className="button-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -75,12 +82,22 @@ interface CleanupViewProps {
 /** 10 정리 검토 — 계정별 제안 칼럼 + 개별 승인 게이트, ported from 10-cleanup-review.html. */
 function CleanupView({ onUndoApplied }: CleanupViewProps) {
   const [columns, setColumns] = useState<ProposalColumn[] | null>(null)
+  const [ruleProposals, setRuleProposals] = useState<Proposal[]>([])
   const [applied, setApplied] = useState<AppliedItem[]>([])
   const [loadError, setLoadError] = useState<ApiError | null>(null)
   const [actionError, setActionError] = useState<ApiError | null>(null)
 
   useEffect(() => {
     let cancelled = false
+
+    fetchRules()
+      .then((rules) => {
+        if (!cancelled) setRuleProposals(toRuleProposals(rules.suggestions))
+      })
+      .catch((error: ApiError) => {
+        if (!cancelled) setLoadError(error)
+      })
+
     Promise.all([fetchCleanupQueue(), fetchActivityLog(), fetchSources()])
       .then(async ([proposals, activity, sources]) => {
         const accountBysource = new Map(
@@ -138,6 +155,18 @@ function CleanupView({ onUndoApplied }: CleanupViewProps) {
       })
   }
 
+  function handleApproveRule(suggestionId: string) {
+    approveRuleSuggestion(suggestionId)
+      .then(() => {
+        setActionError(null)
+        setRuleProposals((current) => current.filter((item) => item.id !== suggestionId))
+      })
+      .catch((error: ApiError) => {
+        console.error('규칙 제안 승인 실패', error)
+        setActionError(error)
+      })
+  }
+
   function handleUndo(activityId: string) {
     undoActivity(activityId)
       .then(() => {
@@ -151,7 +180,9 @@ function CleanupView({ onUndoApplied }: CleanupViewProps) {
       })
   }
 
-  const totalCount = (columns ?? []).reduce((sum, column) => sum + column.proposals.length, 0)
+  const totalCount =
+    (columns ?? []).reduce((sum, column) => sum + column.proposals.length, 0) +
+    ruleProposals.length
 
   return (
     <main className="list-pane" id="cleanup" aria-label="정리 검토">
@@ -175,10 +206,34 @@ function CleanupView({ onUndoApplied }: CleanupViewProps) {
               <span className="cnt">제안 {column.proposals.length}건</span>
             </div>
             {column.proposals.map((proposal) => (
-              <ProposalCard key={proposal.id} proposal={proposal} onApprove={handleApprove} />
+              <ProposalCard
+                key={proposal.id}
+                kind="cleanup"
+                proposal={proposal}
+                onApprove={handleApprove}
+              />
             ))}
           </section>
         ))}
+
+        {/* RuleSuggestion에 계정 필드가 없어 보드처럼 계정 칼럼에 섞지 못하고
+            별도 칼럼으로 묶는다 — adapters.toRuleProposals 참조. */}
+        {ruleProposals.length > 0 && (
+          <section className="acc-col" aria-label="규칙 제안">
+            <div className="col-head">
+              규칙 제안
+              <span className="cnt">제안 {ruleProposals.length}건</span>
+            </div>
+            {ruleProposals.map((proposal) => (
+              <ProposalCard
+                key={proposal.id}
+                kind="rule"
+                proposal={proposal}
+                onApprove={handleApproveRule}
+              />
+            ))}
+          </section>
+        )}
       </div>
 
       <section className="section" style={{ marginTop: 30, maxWidth: 'none' }}>
