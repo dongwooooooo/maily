@@ -97,9 +97,8 @@ async def test_rerunning_dispatch_over_same_pending_row_does_not_double_enqueue(
             )
         )
 
-    # Simulate two overlapping dispatch passes both seeing the row as
-    # pending before either has marked it dispatched, by calling the
-    # enqueue step twice with the same idempotency_key directly.
+    # 두 overlapping dispatch pass가 둘 중 어느 쪽도 dispatched로 표시하기 전에 같은 row를
+    # pending으로 본 상황을 흉내낸다. 같은 idempotency_key로 enqueue step을 직접 두 번 호출한다.
     from app.core.jobs.outbox_dispatcher import _enqueue_job
 
     async with engine.begin() as connection:
@@ -121,10 +120,9 @@ async def test_rerunning_dispatch_over_same_pending_row_does_not_double_enqueue(
     assert first is not None
     assert second is None
 
-    # Leave the outbox row in a realistic post-dispatch state — a leftover
-    # 'pending' row here would otherwise get picked up by any later test's
-    # own dispatch_pending_events() call (shared Postgres, no per-test
-    # rollback across the suite).
+    # outbox row를 현실적인 post-dispatch state로 남긴다. 여기서 'pending' row가 남으면
+    # 이후 test의 dispatch_pending_events() call이 이를 주워갈 수 있다(shared Postgres,
+    # suite 전체에서 per-test rollback 없음).
     async with engine.begin() as connection:
         await connection.execute(
             update(outbox_events).where(outbox_events.c.id == event_id).values(status="dispatched")
@@ -147,10 +145,10 @@ async def test_emit_notification_wrapped_payload_null_field_fails_loud_at_dispat
                 connection, consumers={"reminder_reactivated": ["emit_notification"]}
             )
 
-    # The raise rolled back dispatch's own transaction, so the seeded event
-    # is still 'pending' — leaving it that way would make any later test's
-    # dispatch_pending_events() call (shared Postgres, no per-test rollback)
-    # re-trigger this same raise unexpectedly. Mark it dispatched directly.
+    # raise 때문에 dispatch 자체 transaction이 rollback되어 seeded event는 여전히
+    # 'pending'이다. 그대로 두면 이후 test의 dispatch_pending_events() call(shared Postgres,
+    # per-test rollback 없음)이 같은 raise를 예기치 않게 다시 trigger할 수 있다.
+    # 직접 dispatched로 표시한다.
     async with engine.begin() as connection:
         await connection.execute(
             update(outbox_events).where(outbox_events.c.id == event_id).values(status="dispatched")

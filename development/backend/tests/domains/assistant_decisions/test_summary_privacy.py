@@ -11,8 +11,8 @@ _FORBIDDEN_SUBSTRINGS = ("body", "prompt", "raw_")
 
 
 async def test_raw_body_and_prompt_never_persisted() -> None:
-    """G6 structural check: neither summary_jobs nor message_summaries has
-    a column that could hold a raw email body or a raw LLM prompt."""
+    """G6 구조 검증: summary_jobs와 message_summaries에는 raw email body나
+    raw LLM prompt를 담을 수 있는 column이 없다."""
     async with engine.connect() as connection:
         summary_job_columns = await connection.run_sync(
             lambda sync_conn: [c["name"] for c in inspect(sync_conn).get_columns("summary_jobs")]
@@ -29,8 +29,8 @@ async def test_raw_body_and_prompt_never_persisted() -> None:
 
 
 async def test_summary_off_makes_no_job() -> None:
-    """[선행조건] summary_enabled=False -> no summary_jobs row is created at
-    all (not just skipped-with-a-row)."""
+    """[선행조건] summary_enabled=False -> summary_jobs row가 전혀 생성되지
+    않는다(skipped-with-a-row가 아님)."""
     _, _, account_id = await seed_scope(summary_enabled=False)
     message_id = await seed_message(account_id, snippet="분기 실적 요약을 첨부드립니다.")
 
@@ -50,9 +50,9 @@ async def test_summary_off_makes_no_job() -> None:
 
 
 async def test_metadata_only_fallback() -> None:
-    """summary_enabled=True but no snippet to summarize from -> job still
-    succeeds, but is_metadata_only=True and summary_text falls back to the
-    subject line (LLM 없이 subject 기반 요약 대체) instead of failing."""
+    """summary_enabled=True지만 summarize할 snippet이 없으면 job은 계속 성공한다.
+    다만 실패하는 대신 is_metadata_only=True가 되고 summary_text는 subject line으로
+    fallback한다(LLM 없이 subject 기반 요약 대체)."""
     _, _, account_id = await seed_scope(summary_enabled=True)
     message_id = await seed_message(account_id, subject="공지: 정기 점검 안내", snippet=None)
 

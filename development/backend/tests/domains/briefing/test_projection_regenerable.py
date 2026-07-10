@@ -5,10 +5,10 @@ from tests.domains.briefing.conftest import seed_message, seed_scope
 
 
 async def test_drop_and_rebuild_matches_source() -> None:
-    """briefing_items is a regenerable projection — dropping every row for
-    a workspace and rebuilding from gmail_messages must reproduce the same
-    set of (connected_account_id, message_id) pairs (briefing.md 강제
-    invariant: "언제든 drop-and-rebuild 가능해야 한다")."""
+    """briefing_items는 재생성 가능한 projection이다. workspace의 모든 row를 drop하고
+    gmail_messages에서 rebuild하면 같은 (connected_account_id, message_id) pair set이
+    재현되어야 한다(briefing.md 강제 invariant:
+    "언제든 drop-and-rebuild 가능해야 한다")."""
     workspace_id, _user_id, account_id = await seed_scope()
     m1 = await seed_message(account_id, subject="m1")
     m2 = await seed_message(account_id, subject="m2")

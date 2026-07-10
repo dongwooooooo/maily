@@ -1,12 +1,10 @@
 """W4/IC8 (docs/goals/backend-plans/_build-schedule.md) — disconnect→purge.
 
-Real chain, through the actual dispatcher (not calling the orchestration
-function directly — that's already covered in depth by
-tests/domains/mail_sources/test_purge_disconnected_source_job.py):
-mail_sources.disconnect_gmail_source (real producer) emits
-gmail_source_disconnected -> dispatch queues purge_disconnected_source
-(source-locked) -> running it purges the account's content across every
-domain via the real PURGE_HANDLER chain.
+실제 dispatcher를 통과하는 real chain이다(orchestration function 직접 호출 아님. 그 부분은
+tests/domains/mail_sources/test_purge_disconnected_source_job.py에서 이미 깊게 다룬다).
+mail_sources.disconnect_gmail_source(real producer)가 gmail_source_disconnected를 emit한다
+-> dispatch가 purge_disconnected_source(source-locked)를 queue한다 -> 이를 실행하면 실제
+PURGE_HANDLER chain을 통해 모든 domain에서 해당 account의 content가 purge된다.
 """
 
 import uuid

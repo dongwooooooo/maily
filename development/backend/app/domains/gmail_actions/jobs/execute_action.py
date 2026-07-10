@@ -1,10 +1,9 @@
 """`execute_action` job — docs/goals/backend-plans/gmail_actions.md "Job: execute_action".
 
-Triggered (conceptually) by `gmail_action_requested`; payload
-`{command_id}`, lock_key `command:{command_id}` (see
-_integration-contract.md §2). Task 9 only wires the handler function and
-tests it directly — the outbox->job_runs dispatch wiring for this event is a
-later integration step (see caller instructions), not part of this task.
+개념적으로 `gmail_action_requested`가 trigger한다. payload는 `{command_id}`, lock_key는
+`command:{command_id}`다(_integration-contract.md §2 참고). Task 9는 handler function만
+wire하고 직접 test한다. 이 event의 outbox->job_runs dispatch wiring은 이후 integration
+step이며(caller instructions 참고), 이 task 범위가 아니다.
 """
 
 import uuid
@@ -20,12 +19,11 @@ from app.domains.gmail_actions.gmail_mutator import GmailMutationPort
 
 logger = structlog.get_logger()
 
-# Module-level mutator singleton. Defaults to the fake port (this domain's
-# POC gate G4 only requires the fake contract — see module-boundaries.md
-# "모듈별 차단 조건: gmail_actions"). Task 14 swaps this for
-# LiveGmailMutationPort via set_mutator() during real app startup; tests call
-# set_mutator() with a fresh FakeGmailMutationPort() per test to avoid
-# cross-test state bleed.
+# module-level mutator singleton. 기본값은 fake port다(이 domain의 POC gate G4는 fake
+# contract만 요구 — module-boundaries.md "모듈별 차단 조건: gmail_actions" 참고).
+# Task 14는 real app startup 중 set_mutator()로 이를 LiveGmailMutationPort로 교체한다.
+# test는 cross-test state bleed를 피하려고 test마다 fresh FakeGmailMutationPort()로
+# set_mutator()를 호출한다.
 _mutator: GmailMutationPort = FakeGmailMutationPort()
 
 
@@ -39,9 +37,10 @@ def get_mutator() -> GmailMutationPort:
 
 
 async def _finalize_undo_if_reverse(connection, *, command_id: uuid.UUID) -> None:
-    """If this just-applied command is the reverse of an in-flight undo,
-    close out the original command (compensating -> undone) — see
-    gmail_actions.md "Command: undo_gmail_action" §정상.
+    """방금 applied된 command가 in-flight undo의 reverse라면 original command를 마감한다.
+
+    transition은 compensating -> undone이다. gmail_actions.md
+    "Command: undo_gmail_action" §정상 참고.
     """
     reverse_link = await repository.get_undo_action_by_reverse_command(
         connection, reverse_command_id=command_id
@@ -67,14 +66,12 @@ async def _finalize_undo_if_reverse(connection, *, command_id: uuid.UUID) -> Non
         connection, connected_account_id=original["connected_account_id"]
     )
     if scope is None:
-        # Ledger transition above still stands regardless — only the
-        # derived event is skipped. No PURGE_HANDLER exists yet
-        # (mail_sources/__init__.py) so connected_gmail_accounts rows are
-        # never hard-deleted today; this guards the day one does, so a
-        # purged account's undo doesn't emit a workspace_id: null event
-        # that build_briefing would fail on (real bug, code review
-        # caught it: uuid.UUID("None") raises, exhausts retries, job
-        # lands `failed` with no visible error to the user).
+        # 위 ledger transition은 그대로 유효하고 derived event만 건너뛴다. 아직 PURGE_HANDLER가
+        # 없어서(mail_sources/__init__.py) connected_gmail_accounts row는 현재 hard-delete되지
+        # 않는다. 그래도 나중에 hard-delete가 생기는 날을 대비해, purged account의 undo가
+        # build_briefing에서 실패할 workspace_id: null event를 emit하지 않게 막는다
+        # (code review가 잡은 실제 bug: uuid.UUID("None")이 raise하고 retry를 소진한 뒤,
+        # user에게 보이는 error 없이 job이 `failed`가 됨).
         logger.warning(
             "undo 대상 계정이 사라져 gmail_action_undone 발행 생략",
             command_id=str(original["id"]),
@@ -104,8 +101,8 @@ async def run_execute_action(connection, *, command_id: uuid.UUID) -> None:
             connection, connected_account_id=command["connected_account_id"]
         )
         if scope is None or scope["status"] in ("disconnecting", "disconnected"):
-            # [선행조건] account disconnecting/disconnected -> stop, leave
-            # status as pending; purge owns cleanup for this source.
+            # [선행조건] account가 disconnecting/disconnected면 중단하고 status는 pending으로 둔다.
+            # 이 source의 cleanup은 purge가 소유한다.
             logger.info(
                 "계정 연결 해제 중이라 액션 실행 보류",
                 command_id=str(command_id),
@@ -170,13 +167,13 @@ async def run_execute_action(connection, *, command_id: uuid.UUID) -> None:
         )
         logger.info("Gmail 액션 적용 완료", command_id=str(command_id), changed=result.changed)
     elif command["status"] != "applied":
-        # failed/compensating/undone are terminal or owned by a different
-        # in-flight path — [선행조건] guard against re-execution.
+        # failed/compensating/undone은 terminal이거나 다른 in-flight path가 소유한다.
+        # [선행조건] re-execution guard.
         return
 
-    # command is applied (freshly, or already was — at-least-once redelivery)
-    # -> ensure activity_log/undo_actions exist, backfilling from the ledger
-    # if a prior attempt applied Gmail but crashed before committing them.
+    # command는 applied 상태다(fresh하게 또는 이미 applied — at-least-once redelivery).
+    # activity_log/undo_actions 존재를 보장하고, 이전 attempt가 Gmail을 적용한 뒤 commit 전에
+    # crash났다면 ledger에서 backfill한다.
     scope = await repository.get_connected_account_scope(
         connection, connected_account_id=command["connected_account_id"]
     )
@@ -192,7 +189,7 @@ async def run_execute_action(connection, *, command_id: uuid.UUID) -> None:
 
 
 async def execute_action_job(payload: dict) -> None:
-    """JOB_HANDLERS["execute_action"] entry point — see __init__.py."""
+    """JOB_HANDLERS["execute_action"] entry point — __init__.py 참고."""
     from app.core.database import engine
 
     command_id = uuid.UUID(str(payload["command_id"]))

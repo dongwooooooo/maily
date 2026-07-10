@@ -1,10 +1,9 @@
-"""mail_intake-owned outbox events.
+"""mail_intake-owned outbox event.
 
 module-boundaries.md Event Catalog: `gmail_snapshot_changed`,
-`gmail_notification_received`, and the mail_intake side of the jointly
-owned `gmail_source_recovery_needed`. mail_intake appends these and never
-calls another domain directly — consumers pick them up via the outbox
-dispatcher (out of this task's scope, see _integration-contract.md §3).
+`gmail_notification_received`, 그리고 jointly owned `gmail_source_recovery_needed`의
+mail_intake 쪽. mail_intake는 이를 append하고 다른 domain을 직접 호출하지 않는다. consumer는
+outbox dispatcher를 통해 이를 집는다(이 task 범위 밖, _integration-contract.md §3 참고).
 """
 
 import uuid
@@ -22,14 +21,15 @@ async def publish_snapshot_changed(
     sync_run_id: uuid.UUID,
     message_ids: list[uuid.UUID],
 ) -> None:
-    """A sync_run with an empty message_ids set does not publish — an empty
-    event would just wake every consumer for nothing (mail_intake.md
+    """message_ids가 빈 sync_run은 publish하지 않는다.
+
+    빈 event는 모든 consumer를 불필요하게 깨울 뿐이다(mail_intake.md
     "메시지_ids가 빈 sync_run은 event를 발행하지 않는다").
 
-    `workspace_id` is included so consumers (build_briefing, IC2/IC3) can
-    scope their write without a cross-domain lookup of their own — the
-    caller already has this on the account row it loaded to run the sync,
-    so there's no extra query here."""
+    consumer(build_briefing, IC2/IC3)가 자체 cross-domain lookup 없이 write scope를 잡을 수
+    있도록 `workspace_id`를 포함한다. caller는 sync 실행을 위해 load한 account row에서 이미
+    이 값을 갖고 있으므로 여기서 추가 query는 없다.
+    """
     if not message_ids:
         return
     await append_event(
@@ -66,13 +66,14 @@ async def publish_recovery_needed(
     reason: str,
     version: int,
 ) -> None:
-    """`reason` in {"auth_error", "scope_reduced", "watch_failed"} per
-    mail_intake.md. `version` is the connected_gmail_accounts.version the
-    caller already loaded (mail_sources owns that counter) — used as the
-    idempotency disambiguator so a repeated failure at the same account
-    version doesn't re-notify. `workspace_id`/`version` are both included
-    in the payload (not just used for the idempotency_key) — IC7's
-    notifications.resolve_route_target requires both."""
+    """mail_intake.md 기준 `reason`은 {"auth_error", "scope_reduced", "watch_failed"}.
+
+    `version`은 caller가 이미 load한 connected_gmail_accounts.version이다(mail_sources가 이
+    counter를 소유). 같은 account version에서 반복되는 failure가 다시 notify하지 않도록
+    idempotency disambiguator로 사용한다. `workspace_id`/`version`은 idempotency_key에만 쓰는
+    것이 아니라 payload에도 모두 포함한다. IC7의 notifications.resolve_route_target이 둘 다
+    필요로 한다.
+    """
     await append_event(
         connection,
         event_type="gmail_source_recovery_needed",

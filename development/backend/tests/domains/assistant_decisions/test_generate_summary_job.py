@@ -54,9 +54,9 @@ async def test_rerun_upserts_single_row_not_duplicate() -> None:
 
 
 async def test_llm_payload_allows_only_metadata_fields() -> None:
-    """[데이터경계] The payload handed to the LLM port is built exclusively
-    from SummaryInput's fixed field set — subject/sender/snippet/labels/
-    excerpt. There is no code path here that could add a body/prompt key."""
+    """[데이터경계] LLM port에 넘기는 payload는 SummaryInput의 고정 field set
+    subject/sender/snippet/labels/excerpt에서만 만든다. 여기에는 body/prompt key를
+    추가할 수 있는 code path가 없다."""
     assert set(SummaryInput.__annotations__.keys()) == {
         "subject",
         "sender",
@@ -82,8 +82,8 @@ async def test_llm_payload_allows_only_metadata_fields() -> None:
 
 
 async def test_llm_failure_marks_job_failed_without_writing_summary(_fresh_fake_llm) -> None:
-    """[부분실패] LLM 호출 실패 -> job failed, attempt_count+1, no
-    message_summaries row written, no event emitted."""
+    """[부분실패] LLM 호출 실패 -> job failed, attempt_count+1,
+    message_summaries row 미작성, event 미발행."""
     _, _, account_id = await seed_scope(summary_enabled=True)
     message_id = await seed_message(account_id, snippet="본문 스니펫")
     _fresh_fake_llm.fail_next_summarize()

@@ -17,10 +17,10 @@ from app.domains.labels.models import label_correction_signals, service_labels
 from app.domains.mail_intake.models import gmail_message_labels, gmail_messages, message_excerpts
 from app.domains.mail_sources.models import connected_gmail_accounts, gmail_source_settings
 
-# ---- cross-domain reads ----------------------------------------------------
-# assistant_decisions owns no message/account/label data itself — every
-# helper below is a plain read of another domain's table (same pattern as
-# labels.repository.get_connected_account_status), never a write.
+# ---- cross-domain read 조회 ------------------------------------------------
+# assistant_decisions는 message/account/label data를 직접 소유하지 않는다. 아래 helper는
+# 모두 다른 domain table에 대한 단순 read이며(labels.repository.get_connected_account_status와
+# 같은 패턴), write는 절대 하지 않는다.
 
 
 async def get_message(connection: AsyncConnection, *, message_id: uuid.UUID) -> dict | None:
@@ -83,8 +83,8 @@ async def get_summary_enabled(
             )
         )
     ).first()
-    # No settings row yet -> treat as default-on (matches column's
-    # server_default="true" in mail_sources' 0003_mail_sources migration).
+    # 아직 settings row가 없으면 default-on으로 취급한다(mail_sources의
+    # 0003_mail_sources migration에 있는 column server_default="true"와 일치).
     return True if row is None else bool(row[0])
 
 
@@ -110,7 +110,7 @@ async def get_service_label(
     return dict(row) if row is not None else None
 
 
-# ---- summary_jobs / message_summaries --------------------------------------
+# ---- summary_jobs / message_summaries 관리 ---------------------------------
 
 
 async def insert_summary_job(
@@ -205,7 +205,7 @@ async def upsert_message_summary(
     return await get_message_summary(connection, message_id=message_id)
 
 
-# ---- importance_jobs / message_importance_classifications ------------------
+# ---- importance_jobs / message_importance_classifications 관리 --------------
 
 
 async def insert_importance_job(
@@ -295,7 +295,7 @@ async def upsert_message_importance_classification(
     return await get_message_importance_classification(connection, message_id=message_id)
 
 
-# ---- classification_rules / rule_suggestions --------------------------------
+# ---- classification_rules / rule_suggestions 관리 ---------------------------
 
 
 async def get_pending_rule_suggestion_for_signal(
@@ -403,7 +403,7 @@ async def list_active_classification_rules(
     return [dict(row) for row in rows]
 
 
-# ---- cleanup_proposals -------------------------------------------------------
+# ---- cleanup_proposals 관리 -------------------------------------------------
 
 
 async def get_pending_cleanup_proposal_for_message_action(
@@ -493,8 +493,10 @@ async def mark_cleanup_proposal_decided(
 async def list_cleanup_review_queue(
     connection: AsyncConnection, *, workspace_id: uuid.UUID
 ) -> list[dict]:
-    """approval-required band + pending status only — the approve-one-only
-    review queue (assistant_decisions.md "GET /cleanup")."""
+    """approval-required band + pending status만 포함한다.
+
+    approve-one-only review queue다(assistant_decisions.md "GET /cleanup").
+    """
     from app.domains.assistant_decisions.fake_llm import FAKE_CONFIDENCE_APPROVAL_REQUIRED
 
     rows = (

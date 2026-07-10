@@ -127,7 +127,7 @@ async def test_approve_one_requests_command_not_gmail() -> None:
             connection, workspace_id=workspace_id, message_ids=[message_id], requested_by=user_id
         )
     proposal_id = proposals[0]["id"]
-    assert proposals[0]["status"] == "pending"  # approval-required, not yet decided
+    assert proposals[0]["status"] == "pending"  # approval-required, 아직 결정 전
 
     async with engine.begin() as connection:
         approved = await approve_cleanup_proposal(
@@ -148,7 +148,7 @@ async def test_approve_one_requests_command_not_gmail() -> None:
             )
         ).mappings().first()
     assert command_row is not None
-    assert command_row["status"] == "pending"  # not applied — no Gmail call happened
+    assert command_row["status"] == "pending"  # applied 아님 — Gmail call 없음
 
 
 async def test_no_approve_all_endpoint() -> None:

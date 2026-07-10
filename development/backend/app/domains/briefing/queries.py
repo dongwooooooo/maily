@@ -1,9 +1,8 @@
 """Read API service layer — docs/goals/backend-plans/briefing.md "Read API".
 
-`GET /briefing/today`, `GET /messages/{id}`, `GET /storage/upcoming`. Kept
-separate from service.py (which only owns the `rebuild_briefing` write
-command) because this module is pure read/projection-shaping — no writes,
-no events.
+`GET /briefing/today`, `GET /messages/{id}`, `GET /storage/upcoming`. 이 module은
+pure read/projection-shaping만 담당하고 write/event가 없으므로, `rebuild_briefing` write
+command만 소유하는 service.py와 분리한다.
 """
 
 import uuid
@@ -47,10 +46,9 @@ async def get_today_briefing(
 ) -> list[AccountBriefingGroup]:
     """`GET /briefing/today?scope=all|{source_id}`.
 
-    briefing_enabled=false accounts are excluded from the response
-    entirely (briefing.md §필터). seen items are still included — seen is
-    a flag on the card, not a filter (§필터: "제외가 아니라 seen 플래그로
-    전달").
+    briefing_enabled=false account는 response에서 완전히 제외한다(briefing.md §필터).
+    seen item은 계속 포함한다. seen은 filter가 아니라 card의 flag다(§필터:
+    "제외가 아니라 seen 플래그로 전달").
     """
     source_id = None
     if scope != "all":
@@ -84,9 +82,11 @@ async def get_today_briefing(
 async def get_message_detail(
     connection: AsyncConnection, *, message_id: uuid.UUID, workspace_id: uuid.UUID
 ) -> MessageDetail:
-    """`GET /messages/{id}` — readonly, no mutation action, no reason by
-    default (briefing.md §negative). Cross-workspace lookups return 404,
-    not 403, so existence isn't revealed (§권한)."""
+    """`GET /messages/{id}` — readonly, mutation action 없음, reason은 기본 제외.
+
+    briefing.md §negative 기준이다. cross-workspace lookup은 403이 아니라 404를 반환해
+    존재 여부를 드러내지 않는다(§권한).
+    """
     message = await repository.get_message(connection, message_id=message_id)
     if message is None:
         raise NotFoundError("message not found")
@@ -119,11 +119,12 @@ async def get_message_detail(
 
 
 def _week_bounds(now: datetime) -> tuple[datetime, datetime]:
-    """Monday 00:00 .. next Monday 00:00 in `now`'s tzinfo — "이번주"
-    boundary. briefing.md says this should be the user's timezone; no
-    per-user timezone field exists yet anywhere in the schema, so this
-    worktree uses the server/request tz passed in as `now` (UTC by
-    default) — flagged as an open question for the coordinator."""
+    """`now`의 tzinfo 기준 Monday 00:00 .. next Monday 00:00인 "이번주" boundary.
+
+    briefing.md는 user timezone을 써야 한다고 말하지만 schema 어디에도 아직 per-user
+    timezone field가 없다. 따라서 이 worktree는 `now`로 전달된 server/request tz(기본 UTC)를
+    사용하며, coordinator open question으로 표시한다.
+    """
     start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
     monday = start_of_day - timedelta(days=start_of_day.weekday())
     next_monday = monday + timedelta(days=7)
@@ -133,10 +134,12 @@ def _week_bounds(now: datetime) -> tuple[datetime, datetime]:
 async def get_storage_upcoming(
     connection: AsyncConnection, *, workspace_id: uuid.UUID, now: datetime | None = None
 ) -> UpcomingStorage:
-    """`GET /storage/upcoming` — pending reminders only (§필터), grouped
-    into today/tomorrow/this_week ascending by remind_at. A reactivated
-    reminder is never returned here — repository.list_pending_reminders_for_workspace
-    already filters to status='pending' (§negative)."""
+    """`GET /storage/upcoming` — pending reminder만 대상으로 한다(§필터).
+
+    remind_at 오름차순으로 today/tomorrow/this_week에 group한다. reactivated reminder는 여기서
+    절대 반환하지 않는다. repository.list_pending_reminders_for_workspace가 이미
+    status='pending'으로 filter한다(§negative).
+    """
     now = now or datetime.now(timezone.utc)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     tomorrow_start = today_start + timedelta(days=1)
@@ -161,10 +164,9 @@ async def get_storage_upcoming(
         elif day_after_tomorrow <= entry.remind_at < week_end:
             this_week.append(entry)
         else:
-            # beyond this calendar week — still "앞으로 다시 볼 예정"
-            # (§negative rules out only *past* reactivated reminders, not
-            # far-future ones), so it still belongs in storage. No further
-            # bucket is specified, so it's folded into this_week.
+            # 이번 calendar week 이후다. 그래도 "앞으로 다시 볼 예정"에 속한다(§negative는
+            # *past* reactivated reminder만 제외하고 far-future 항목은 제외하지 않음).
+            # 추가 bucket이 지정되지 않았으므로 this_week에 접는다.
             this_week.append(entry)
 
     return UpcomingStorage(today=today, tomorrow=tomorrow, this_week=this_week)

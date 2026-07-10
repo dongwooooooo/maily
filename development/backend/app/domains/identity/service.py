@@ -13,12 +13,11 @@ DEFAULT_SESSION_TTL = timedelta(hours=12)
 async def google_login(
     connection: AsyncConnection, profile: GoogleProfile
 ) -> GoogleLoginResult:
-    """Resolve a Google OAuth callback profile to a user/workspace.
+    """Google OAuth callback profile을 user/workspace로 resolve한다.
 
-    A new google_subject creates one user, one workspace, and one
-    owner membership. A known google_subject reuses its existing
-    workspace and only touches last_login_at — it never creates a
-    second workspace for the same person.
+    새 google_subject는 user 하나, workspace 하나, owner membership 하나를 만든다.
+    알려진 google_subject는 기존 workspace를 재사용하고 last_login_at만 갱신한다. 같은 사람에게
+    두 번째 workspace를 만들지 않는다.
     """
     now = datetime.now(timezone.utc)
     existing = await repository.find_user_by_google_subject(
@@ -73,11 +72,10 @@ async def issue_session(
 
 
 async def resolve_request_context(connection: AsyncConnection, token: str) -> RequestContext:
-    """Verify a session token and resolve it to its owning user/workspace.
+    """session token을 verify하고 그 소유 user/workspace로 resolve한다.
 
-    workspace_id always comes from the session row the token points
-    at — never from a caller-supplied parameter — so a valid token
-    can only ever resolve to the workspace it was issued for.
+    workspace_id는 항상 token이 가리키는 session row에서 오며, caller-supplied parameter에서
+    오지 않는다. 따라서 valid token은 발급 대상 workspace로만 resolve될 수 있다.
     """
     claims = security.verify_session_token(token)
     session_id = uuid.UUID(claims["session_id"])

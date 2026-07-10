@@ -69,7 +69,7 @@ async def seed_connected_account(
 async def seed_scope(
     *, status: str = "connected", briefing_enabled: bool = True
 ) -> tuple[uuid.UUID, uuid.UUID, uuid.UUID]:
-    """Returns (workspace_id, user_id, connected_account_id)."""
+    """(workspace_id, user_id, connected_account_id)를 반환한다."""
     workspace_id, user_id = await seed_workspace_and_user()
     account_id = await seed_connected_account(
         workspace_id, status=status, briefing_enabled=briefing_enabled

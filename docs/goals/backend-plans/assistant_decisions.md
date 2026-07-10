@@ -65,7 +65,7 @@
 - **[부분실패]** LLM 실패 → job `failed`, `attempt_count+1`, classification row 미기록. **generate_summary 영향 없음**. 재시도는 이 job만. row 없는 상태가 곧 "판단 전"이라 실패와 미착수가 UI상 같게 보임(의도 — 아이템 단위 대기 표시 안 함).
 - **[권한]** N/A(내부 job). workspace 스코프는 message→account→workspace.
 - **[데이터경계]** raw body/prompt 미저장(job·result 테이블 모두 LLM payload 컬럼 없음). `reason`은 저장하되 API 응답 기본값에서 제외(최상위 원칙 "AI 판단 이유는 기본으로 노출하지 않는다") — 필요 시에만 노출. importance_band 값 집합 `[미정]`이라 실제 band 문자열은 `fake_llm` 계약 상수로 검증.
-- 검증: `tests/domains/assistant_decisions/test_classify_importance_job.py::{test_importance_independent_of_summary, test_pending_is_absent_row_not_flag, test_band_and_reason_persisted, test_reason_hidden_by_default}`.
+- 검증: `tests/domains/assistant_decisions/test_importance_classification.py::{test_importance_independent_of_summary, test_pending_is_absent_row_not_flag, test_band_and_reason_persisted, test_reason_hidden_by_default}`, `test_classify_importance_job.py::{test_classify_importance_independent_of_generate_summary_job_failure, test_llm_payload_allows_only_metadata_fields, test_llm_failure_marks_job_failed_without_writing_classification}`. 테스트 부재 — `importance_classified` outbox 발행 전용 단위 테스트(summary의 `test_summary_completed_emitted_with_version` 대응, 통합 테스트에서 간접 검증만 존재).
 
 ## Command: `create_rule_suggestion` (job `create_rule_suggestions`)
 

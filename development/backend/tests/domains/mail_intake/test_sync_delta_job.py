@@ -69,8 +69,8 @@ async def test_delta_idempotent_on_replay() -> None:
         first = await service.sync_delta(
             connection, connected_account_id=account_id, start_history_id=10, trigger="notification"
         )
-    # Replay: the same notification (same start_history_id) arrives again
-    # after the cursor has already advanced past it.
+    # Replay: cursor가 이미 지나간 뒤 같은 notification(같은 start_history_id)이
+    # 다시 도착한다.
     async with engine.begin() as connection:
         second = await service.sync_delta(
             connection, connected_account_id=account_id, start_history_id=10, trigger="notification"
@@ -86,7 +86,7 @@ async def test_delta_idempotent_on_replay() -> None:
                 select(gmail_messages).where(gmail_messages.c.connected_account_id == account_id)
             )
         ).mappings().all()
-    assert len(rows) == 2  # msg-1 (full) + msg-2 (delta) — not duplicated by the replay
+    assert len(rows) == 2  # msg-1(full) + msg-2(delta) — replay로 중복되지 않음
 
 
 async def test_invalid_cursor_schedules_full() -> None:

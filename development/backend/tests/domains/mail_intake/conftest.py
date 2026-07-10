@@ -13,9 +13,8 @@ from app.domains.mail_sources.models import connected_gmail_accounts, gmail_sour
 
 @pytest.fixture(autouse=True)
 def _reset_active_reader():
-    """gmail_reader.get_reader() falls back to a module-level singleton —
-    reset it between tests so one test's seeded FakeGmailReader never leaks
-    into the next."""
+    """gmail_reader.get_reader()는 module-level singleton으로 fallback한다.
+    한 test에서 seed한 FakeGmailReader가 다음 test로 새지 않도록 test 사이에 reset한다."""
     yield
     set_reader(None)
 

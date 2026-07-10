@@ -1,6 +1,6 @@
 """job_type=classify_importance, payload={message_id} —
-_integration-contract.md §2. Triggered by gmail_snapshot_changed
-unconditionally (dispatcher wiring is a later integration step)."""
+_integration-contract.md §2. gmail_snapshot_changed가 unconditional하게 trigger한다
+(dispatcher wiring은 이후 integration step)."""
 
 import uuid
 

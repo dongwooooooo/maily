@@ -3,6 +3,12 @@
 기준: `backend-implementation-plan.md`(Task·Gate), `_integration-contract.md`(충돌 규약·event wiring), 도메인별 세부 플랜(`<domain>.md`).
 정리일: 2026-07-09
 
+## 진행 현황 (2026-07-10)
+
+- W0–W4 전 웨이브 코딩 완료. IC1–IC8 통합 통과(전체 321 passed). 상세 갭은 `backend-implementation-plan.md` "구현 상태" 참조.
+- IC6은 dispatcher 배선 대신 직접 동기 호출(module-boundaries F10 설계) — 전용 `test_ic6_*.py` 없이 `test_cleanup_review.py`로 커버.
+- 잔여: Task 14(Live Gmail Watch, IG1), Task 15(Operations Handoff), `ACTIVE_EVENT_CONSUMERS` 누락 배선 2건(`gmail_snapshot_changed→prepare_cleanup_proposals`, `cleanup_proposal_created→build_briefing`), 런타임 dispatcher 폴러.
+
 ## 문서 역할
 
 `backend-implementation-plan.md`는 Task를 번호순으로 나열하지만, 실제 선후관계는 두 축으로 갈린다. 이 문서는 **어디서 병렬로 치고 어디서 순차로 배선·검증하는지**를 고정한다. 세부 동작·엣지는 `<domain>.md`가 소유하고, 여기서는 실행 순서만 다룬다.

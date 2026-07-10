@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.base import metadata
 
-# --- 0008_briefing_items ---
+# --- 0008_briefing_items migration 영역 ---
 
 briefing_items = Table(
     "briefing_items",
@@ -28,7 +28,7 @@ briefing_items = Table(
     ),
 )
 
-# --- 0009_briefing_state ---
+# --- 0009_briefing_state migration 영역 ---
 
 briefing_item_states = Table(
     "briefing_item_states",
@@ -45,9 +45,9 @@ briefing_item_states = Table(
     Column("seen", Boolean, nullable=False, server_default="false"),
     Column("seen_at", DateTime(timezone=True), nullable=True),
     Column("remind_later_at", DateTime(timezone=True), nullable=True),
-    # docs/areas/backend/db-schema.md documents this column — monotonic
-    # version for the `item:{id}:state:{version}` outbox idempotency key
-    # and no-op-update detection ([멱등] checklist entries).
+    # docs/areas/backend/db-schema.md가 이 column을 문서화한다.
+    # `item:{id}:state:{version}` outbox idempotency key와 no-op-update 감지를 위한
+    # monotonic version이다([멱등] checklist entry).
     Column("version", Integer, nullable=False, server_default="0"),
     Column("updated_at", DateTime(timezone=True), nullable=False),
 )

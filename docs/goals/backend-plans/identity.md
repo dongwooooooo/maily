@@ -53,7 +53,7 @@ valid
 - **[부분실패]** user insert 성공·workspace insert 실패 → 전체 롤백(user+workspace+membership 한 트랜잭션). membership 없이 user만 남거나 workspace 없이 membership만 남는 상태 불가.
 - **[권한]** N/A — 로그인은 인증 진입점이라 선행 세션이 없다. 다만 workspace 배정은 이 user 전용이며, 다른 user의 workspace에 membership을 붙이지 않는다.
 - **[데이터경계]** 재로그인이 절대 다른 user의 workspace를 재사용하지 않음 — `google_subject`로만 매칭한다. `email`이 같아도 `google_subject`가 다르면 별개 user(Google 계정 교체 대비). 1 user=1 workspace 유지.
-- 검증: `tests/domains/identity/test_google_login.py::{test_new_subject_creates_user_workspace_membership, test_relogin_reuses_workspace, test_concurrent_login_single_user, test_email_match_different_subject_is_new_user}`.
+- 검증: `tests/domains/identity/test_google_login.py::{test_new_subject_creates_user_workspace_membership, test_relogin_reuses_existing_workspace, test_same_email_different_subject_is_a_new_user}`. 테스트 부재 — `test_concurrent_login_single_user`([동시] google_subject 동시 insert 방어).
 
 ## 동작: `issue_session` / `verify_session`
 
@@ -70,7 +70,7 @@ valid
 - **[부분실패]** `sessions` insert 성공·JWT 서명 실패(`MAILY_JWT_SECRET` 미설정) → 500, 세션 발급 자체 롤백(토큰 없이 세션 row만 남는 상태 방지). verify 중 DB 조회 실패 → 500, 요청 거부(fail-closed — 인증을 통과시키지 않는다).
 - **[권한]** verify가 인증 게이트 그 자체. 유효 토큰 없으면 인증 API 접근 불가. `issuer` claim으로 타 시스템 발급 토큰을 거부한다.
 - **[데이터경계]** JWT의 `workspace_id`는 세션 발급 시점 workspace로 고정 — 요청자가 claim을 바꿔도 서명 검증에서 걸린다. `revoked_at`은 `expires_at` 미경과보다 우선 적용.
-- 검증: `tests/domains/identity/test_workspace_resolution.py::{test_session_claims_contain_user_workspace_issuer, test_expired_session_rejected, test_revoked_session_rejected, test_foreign_issuer_rejected}`.
+- 검증: `tests/domains/identity/test_workspace_resolution.py::{test_session_claims_contain_user_workspace_issuer, test_expired_session_rejected, test_revoked_session_rejected}`, `tests/core/test_security.py::test_verify_rejects_foreign_issuer`.
 
 ## 동작: `resolve_request_context`
 
@@ -87,7 +87,7 @@ valid
 - **[부분실패]** context 해석 중 DB 오류 → 500, fail-closed(핸들러 진입 금지). user만 있고 workspace 없는 부분 context 반환 금지.
 - **[권한]** 핵심 — workspace isolation. 유저 A 세션으로 유저 B workspace 리소스를 요청해도, 모든 도메인 쿼리가 `context.workspace_id`(=A)로 스코프되므로 B 리소스는 결과에서 빠진다. `context.workspace_id`는 세션 claim이 유일 근거이며 요청 파라미터로 덮어쓸 수 없다(Task 2 isolation test).
 - **[데이터경계]** `context.workspace_id` ≠ 조회 대상 리소스의 `workspace_id` → 빈 결과 또는 404(존재 노출 방지). URL/body의 `workspace_id` 파라미터는 무시 — 항상 세션 claim 우선.
-- 검증: `tests/domains/identity/test_workspace_isolation.py::{test_user_a_cannot_read_user_b_workspace, test_workspace_id_not_overridable_by_param}`, `tests/domains/identity/test_workspace_resolution.py::test_context_scopes_to_session_workspace`.
+- 검증: `tests/domains/identity/test_workspace_isolation.py::test_user_a_session_never_resolves_to_user_b_workspace`, `tests/domains/identity/test_workspace_resolution.py::test_context_scopes_to_session_workspace`. 테스트 부재 — `test_workspace_id_not_overridable_by_param`(요청 파라미터의 workspace_id를 세션 claim이 무시하는지 검증).
 
 ## Event / Job (N/A)
 
@@ -103,7 +103,7 @@ valid
 - **[필터]** N/A — 목록이 아니라 현재 세션 단건 조회.
 - **[빈상태]** 유효 세션 없음 → 401(빈 바디 아님 — 미인증은 에러로 응답).
 - **[권한]** 자기 세션만 — 다른 user 세션을 조회하는 경로 없음. JWT claim 외 파라미터로 대상을 지정할 수 없다.
-- 검증: `tests/domains/identity/test_workspace_resolution.py::test_get_session_returns_current_context`.
+- 검증: `tests/domains/identity/test_router.py::{test_google_callback_creates_session_and_get_session_returns_summary, test_get_session_without_token_returns_401}`.
 
 ---
 

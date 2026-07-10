@@ -70,11 +70,10 @@ async def test_activity_excludes_message_body() -> None:
 
 
 async def test_activity_reconstructable_from_ledger() -> None:
-    """[부분실패] Gmail mutation succeeds but the activity_log insert never
-    happened (simulated crash between the two). The ledger (command row,
-    status=applied/changed) is still the source of truth, so re-running the
-    ensure/backfill path must recreate the activity_log deterministically —
-    without calling the mutation port again."""
+    """[부분실패] Gmail mutation은 성공했지만 activity_log insert는 일어나지 않았다
+    (둘 사이의 crash를 simulate). ledger(command row, status=applied/changed)가
+    여전히 source of truth이므로 ensure/backfill path를 재실행하면 mutation port를
+    다시 호출하지 않고 activity_log를 결정적으로 복원해야 한다."""
     from app.domains.gmail_actions.activity import ensure_activity_and_undo
 
     workspace_id, user_id, account_id = await seed_scope()
@@ -90,8 +89,8 @@ async def test_activity_reconstructable_from_ledger() -> None:
     async with engine.begin() as connection:
         command, _ = await request_gmail_action(connection, data)
 
-    # Simulate: Gmail succeeded and the command was marked applied, but the
-    # process died before the activity_log insert committed.
+    # Gmail은 성공했고 command도 applied로 표시됐지만, activity_log insert가 commit되기
+    # 전에 process가 죽은 상황을 흉내낸다.
     async with engine.begin() as connection:
         await repository.mark_command_applied(
             connection,
@@ -104,7 +103,7 @@ async def test_activity_reconstructable_from_ledger() -> None:
     async with engine.connect() as connection:
         assert await repository.get_activity_log_by_command(connection, command_id=command.id) is None
 
-    # Recovery: re-run the backfill against the now-applied ledger row.
+    # Recovery: 이제 applied 상태인 ledger row에 대해 backfill을 재실행한다.
     async with engine.begin() as connection:
         applied_command = await repository.get_command(connection, command_id=command.id)
         scope = await repository.get_connected_account_scope(
@@ -122,7 +121,7 @@ async def test_activity_reconstructable_from_ledger() -> None:
     assert undo_row is not None
     assert undo_row["undo_available"] is True
 
-    # Re-running again must not create a second activity_log row.
+    # 다시 실행해도 두 번째 activity_log row를 만들면 안 된다.
     async with engine.begin() as connection:
         applied_command = await repository.get_command(connection, command_id=command.id)
         scope = await repository.get_connected_account_scope(

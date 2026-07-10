@@ -46,7 +46,7 @@ async def _get_owned_account(
 ) -> dict:
     account = await repository.get_connected_account(connection, connected_account_id=source_id)
     if account is None or account["workspace_id"] != workspace_id:
-        # 404 either way — existence of another workspace's source is not revealed.
+        # 어느 경우든 404다. 다른 workspace source의 존재를 드러내지 않는다.
         raise NotFoundError("gmail source not found")
     return account
 

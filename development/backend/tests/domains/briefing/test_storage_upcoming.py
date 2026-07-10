@@ -31,29 +31,26 @@ async def _seed_item(workspace_id, account_id):
 
 
 async def test_grouped_today_tomorrow_week() -> None:
-    """Bucket boundaries are calendar-day UTC (queries.get_storage_upcoming
-    today_start/tomorrow_start/day_after_tomorrow/week_end). Two
-    constraints fight each other for a naive "now + fixed offset" test:
-    remind_at must be strictly in the future in *real* wall-clock time
-    (reminders.schedule_reminder §선행조건), but the this_week window
-    [day_after_tomorrow, week_end) is empty/degenerate whenever the suite
-    happens to run on a Saturday or Sunday UTC (week_end is always the
-    *next* Monday, so it can fall before or at day_after_tomorrow).
+    """Bucket boundary는 calendar-day UTC다(queries.get_storage_upcoming의
+    today_start/tomorrow_start/day_after_tomorrow/week_end). 단순한 "now + fixed offset"
+    test에서는 두 제약이 충돌한다. remind_at은 *real* wall-clock time 기준으로 반드시
+    미래여야 하지만(reminders.schedule_reminder §선행조건), suite가 UTC 기준 토요일이나
+    일요일에 실행되면 this_week window [day_after_tomorrow, week_end)가 비거나
+    degenerate해진다(week_end는 항상 *next* Monday라서 day_after_tomorrow보다
+    앞서거나 같을 수 있음).
 
-    Resolved by decoupling "when remind_at is scheduled for" from "what
-    `now` the bucketing is evaluated against": schedule real, future
-    reminders (any offset satisfies reminders.py's future-check), then
-    call get_storage_upcoming directly (bypassing the HTTP layer, which
-    always uses real wall-clock) with an explicit `now` pinned to a
-    synthetic Tuesday noon — always mid-week, so today/tomorrow/this_week
-    are all non-empty regardless of which real weekday the suite runs on.
+    해결 방식은 "remind_at이 schedule되는 시점"과 "bucketing을 평가할 `now`"를
+    분리하는 것이다. 실제 미래 reminder를 schedule하고(어떤 offset이든 reminders.py의
+    future-check를 만족), 항상 real wall-clock을 쓰는 HTTP layer를 우회해
+    get_storage_upcoming을 직접 호출하면서 `now`를 synthetic Tuesday noon으로 고정한다.
+    그러면 suite가 실제 어떤 요일에 실행되든 today/tomorrow/this_week가 모두 비지 않는다.
     """
     workspace_id, user_id, account_id = await seed_scope()
     real_now = datetime.now(timezone.utc)
 
-    # Tuesday noon, at or after real_now — guarantees every remind_at
-    # below (all >= query_now) is also > real_now.
-    days_until_tuesday = (1 - real_now.weekday()) % 7  # Monday=0 ... Tuesday=1
+    # Tuesday noon이며 real_now 이후다. 아래 모든 remind_at(all >= query_now)이
+    # real_now보다 크다는 것을 보장한다.
+    days_until_tuesday = (1 - real_now.weekday()) % 7  # Monday=0 ... Tuesday=1 기준
     query_now = (real_now + timedelta(days=days_until_tuesday)).replace(
         hour=12, minute=0, second=0, microsecond=0
     )

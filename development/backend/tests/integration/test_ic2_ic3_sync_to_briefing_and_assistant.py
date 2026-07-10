@@ -1,17 +1,15 @@
 """IC2+IC3 (docs/goals/backend-plans/_build-schedule.md) — sync -> briefing,
-sync -> assistant -> briefing 부분재생성. Both share gmail_snapshot_changed
-as producer, wired together per the schedule's "함께 배선" note.
+sync -> assistant -> briefing 부분재생성. 둘 다 gmail_snapshot_changed를 producer로
+공유하며 schedule의 "함께 배선" note에 따라 함께 wired된다.
 
-Real chain, no seeded shortcuts: mail_sources.connect_gmail_source ->
-mail_intake.sync_full (fake reader) emits gmail_snapshot_changed
-(workspace_id + message_ids) -> dispatch fans that out to one
-build_briefing job (whole list) plus one generate_summary/
-classify_importance job per message -> running those produces real
-message_summaries/message_importance_classifications rows -> those two
-jobs' own summary_completed/importance_classified events dispatch a
-second round of (message_id-scoped) build_briefing jobs -> the final
-briefing_items projection reflects both, regardless of which trigger
-path got there first (briefing.md Job §동시).
+Real chain이며 seeded shortcut은 없다. mail_sources.connect_gmail_source ->
+mail_intake.sync_full(fake reader)이 gmail_snapshot_changed(workspace_id + message_ids)를
+emit한다 -> dispatch가 이를 전체 list를 담은 build_briefing job 하나와 message별
+generate_summary/classify_importance job으로 fan-out한다 -> 이 job들을 실행하면 실제
+message_summaries/message_importance_classifications row가 생긴다 -> 두 job 자체의
+summary_completed/importance_classified event가 두 번째 round의 message_id-scoped
+build_briefing job을 dispatch한다 -> 최종 briefing_items projection은 어떤 trigger path가
+먼저 도착했는지와 무관하게 둘 다 반영한다(briefing.md Job §동시).
 """
 
 import uuid
@@ -101,7 +99,7 @@ async def test_snapshot_changed_fans_out_to_briefing_and_assistant_and_converges
     message_ids = set(result["message_ids"])
     assert len(message_ids) == 2
 
-    # Round 1: gmail_snapshot_changed fans out.
+    # 1차: gmail_snapshot_changed fan-out.
     async with engine.begin() as connection:
         round1_ids = await dispatch_pending_events(connection, consumers=ACTIVE_EVENT_CONSUMERS)
     async with engine.connect() as connection:
@@ -110,13 +108,11 @@ async def test_snapshot_changed_fans_out_to_briefing_and_assistant_and_converges
             .mappings()
             .all()
         )
-    # This dispatch call also processes: connect_gmail_source's own
-    # gmail_source_connected event (register_watch/sync_full, IC1's own
-    # test), and — since this Postgres is shared across the whole suite
-    # with no per-test rollback — any leftover pending gmail_snapshot_
-    # changed/summary_completed/importance_classified events other tests
-    # left behind. Scope strictly to rows that reference this test's own
-    # message_ids.
+    # 이 dispatch call은 connect_gmail_source 자체의 gmail_source_connected event
+    # (register_watch/sync_full, IC1 자체 test)도 처리한다. 또한 이 Postgres는 suite 전체에서
+    # 공유되고 per-test rollback이 없으므로, 다른 test가 남긴 pending
+    # gmail_snapshot_changed/summary_completed/importance_classified event도 처리될 수 있다.
+    # 이 test의 message_ids를 참조하는 row로 엄격히 scope를 좁힌다.
     str_message_ids = {str(m) for m in message_ids}
 
     def _for_this_test(row: dict) -> bool:
@@ -132,12 +128,11 @@ async def test_snapshot_changed_fans_out_to_briefing_and_assistant_and_converges
     )
     await _run_all_queued([r["id"] for r in round1_this_source])
 
-    # Round 1's build_briefing job is enqueued (and so runs, in this test's
-    # sequential loop) before generate_summary/classify_importance's own
-    # jobs — this is the "[선행조건] importance 결과가 아직 없는 상태" case
-    # from briefing.md, not a bug: the projection row exists with null
-    # summary/importance, re-derived fresh (not stale/overridden) once
-    # round 2's message_id-scoped rebuild runs after the real data lands.
+    # 1차의 build_briefing job은 generate_summary/classify_importance 자체 job보다
+    # 먼저 enqueue되고(따라서 이 test의 sequential loop에서도 먼저 실행됨), 이는 bug가 아니라
+    # briefing.md의 "[선행조건] importance 결과가 아직 없는 상태" case다. projection row는
+    # null summary/importance로 존재하고, 실제 data가 들어온 뒤 round 2의 message_id-scoped
+    # rebuild가 실행되면 fresh하게 다시 파생된다(stale/overridden 아님).
     async with engine.connect() as connection:
         for message_id in message_ids:
             item = await briefing_repository.get_briefing_item_by_account_message(
@@ -145,9 +140,9 @@ async def test_snapshot_changed_fans_out_to_briefing_and_assistant_and_converges
             )
             assert item is not None
 
-    # Round 2: generate_summary/classify_importance's own summary_completed/
-    # importance_classified events each queue a message_id-scoped
-    # build_briefing job (IC3's "부분재생성").
+    # 2차: generate_summary/classify_importance 자체의 summary_completed/
+    # importance_classified event가 각각 message_id-scoped build_briefing job을 queue한다
+    # (IC3의 "부분재생성").
     async with engine.begin() as connection:
         round2_ids = await dispatch_pending_events(connection, consumers=ACTIVE_EVENT_CONSUMERS)
     async with engine.connect() as connection:
@@ -162,7 +157,7 @@ async def test_snapshot_changed_fans_out_to_briefing_and_assistant_and_converges
         if r["job_type"] == "build_briefing"
         and set(r["payload"].get("message_ids", [])) & {str(m) for m in message_ids}
     ]
-    assert len(round2_this_test) == 4  # 2 messages x (summary_completed + importance_classified)
+    assert len(round2_this_test) == 4  # 2 messages x (summary_completed + importance_classified) 조합
     await _run_all_queued([r["id"] for r in round2_this_test])
 
     async with engine.connect() as connection:

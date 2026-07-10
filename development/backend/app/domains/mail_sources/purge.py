@@ -1,21 +1,18 @@
 """PURGE_HANDLER(source_id) — _integration-contract.md §4, Task 13.
 
-Runs last in the orchestration job's call order — every other domain's
-message-scoped content is gone by this point (mail_intake's purge_source
-just ran, deleting gmail_messages itself), so this only needs to finish
-mail_sources' own two disconnect-time-deferred steps: fully remove the
-◆ content-bearing credential ciphertext (disconnect_gmail_source only
-set revoked_at as a fast synchronous marker — this is the actual purge),
-and flip the account to its terminal `disconnected` status.
-`connected_gmail_accounts` itself is kept (not deleted) — module-
-boundaries.md §8's "최소 audit 보존" (minimal audit retention).
+orchestration job의 call order에서 마지막으로 실행된다. 이 시점에는 다른 모든 domain의
+message-scoped content가 사라져 있다(mail_intake의 purge_source가 방금 실행되어 gmail_messages
+자체를 delete). 따라서 mail_sources 자체의 disconnect-time-deferred step 두 개만 끝내면 된다.
+◆ content-bearing credential ciphertext를 완전히 제거하고(disconnect_gmail_source는 빠른
+synchronous marker로 revoked_at만 설정했고, 이것이 실제 purge), account를 terminal
+`disconnected` status로 전환한다. `connected_gmail_accounts` 자체는 유지한다(delete하지 않음).
+module-boundaries.md §8의 "최소 audit 보존"(minimal audit retention)이다.
 
-[멱등] `connected_gmail_accounts` rows are never deleted, so `account is
-None` only guards a nonexistent/already-hard-deleted source_id, not a
-retried purge — the real idempotency guard is the explicit
-`status == "disconnected"` check below (a retried run stops before
-touching credential/version at all, instead of relying on
-delete_credential's no-op-on-zero-rows and re-bumping version forever).
+[멱등] `connected_gmail_accounts` row는 절대 delete되지 않으므로 `account is None`은
+retried purge가 아니라 존재하지 않거나 이미 hard-delete된 source_id만 guard한다. 실제 idempotency
+guard는 아래의 명시적 `status == "disconnected"` check다(retried run은
+delete_credential의 zero-row no-op에 의존하고 version을 계속 bump하는 대신, credential/version을
+건드리기 전에 멈춘다).
 """
 
 import uuid

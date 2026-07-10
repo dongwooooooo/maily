@@ -52,7 +52,7 @@ async def _fail_sync_run_and_emit_recovery(
     )
 
 
-# --- sync_gmail_full -------------------------------------------------------
+# --- sync_gmail_full 처리 --------------------------------------------------
 
 
 async def sync_full(
@@ -163,7 +163,7 @@ async def sync_full(
     return {"sync_run_id": sync_run_id, "message_ids": changed_message_ids}
 
 
-# --- sync_gmail_delta -------------------------------------------------------
+# --- sync_gmail_delta 처리 -------------------------------------------------
 
 
 async def _apply_history_record(
@@ -203,7 +203,7 @@ async def _apply_history_record(
         connection, connected_account_id=connected_account_id, gmail_message_id=gmail_message_id
     )
     if existing is None:
-        # Not in our snapshot (e.g. never synced) — nothing to reconcile.
+        # 우리 snapshot에 없다(예: never synced). reconcile할 것이 없다.
         return None
 
     if record_type == "message_deleted":
@@ -275,8 +275,7 @@ async def sync_delta(
         and cursor["last_history_id"] is not None
         and start_history_id < cursor["last_history_id"]
     ):
-        # Already-applied region — the caller (e.g. a re-delivered
-        # notification) is behind the current cursor.
+        # already-applied region이다. caller(예: 재전달된 notification)가 현재 cursor보다 뒤에 있다.
         return {"noop": True, "message_ids": []}
 
     reader = get_reader()
@@ -379,7 +378,7 @@ async def sync_delta(
     return {"sync_run_id": sync_run_id, "message_ids": changed_message_ids}
 
 
-# --- process_gmail_notification ---------------------------------------------
+# --- process_gmail_notification 처리 ----------------------------------------
 
 
 async def process_notification(
@@ -436,7 +435,7 @@ async def process_notification(
     return {"deduped": False, "queued_source_ids": queued_source_ids}
 
 
-# --- register_watch / renew_watch -------------------------------------------
+# --- register_watch / renew_watch 처리 --------------------------------------
 
 
 async def register_watch(connection: AsyncConnection, *, connected_account_id: uuid.UUID) -> dict:
@@ -498,10 +497,9 @@ async def register_watch(connection: AsyncConnection, *, connected_account_id: u
         )
 
     if existing_registration is None:
-        # First-ever registration for this source — queue the initial full
-        # resync (mail_intake.md "register_watch: watch 등록 + 초기
-        # sync_full 큐잉"). A renewal (existing_registration present)
-        # never re-triggers this.
+        # 이 source의 최초 registration이다. initial full resync를 queue한다
+        # (mail_intake.md "register_watch: watch 등록 + 초기 sync_full 큐잉").
+        # renewal(existing_registration 있음)은 이를 다시 trigger하지 않는다.
         await repository.enqueue_job(
             connection,
             job_type="sync_full",
@@ -526,7 +524,7 @@ async def renew_watch(connection: AsyncConnection, *, connected_account_id: uuid
     return await register_watch(connection, connected_account_id=connected_account_id)
 
 
-# --- poll_history (fallback) -------------------------------------------------
+# --- poll_history(fallback) 처리 --------------------------------------------
 
 
 async def poll_history(connection: AsyncConnection, *, connected_account_id: uuid.UUID) -> dict:
@@ -609,16 +607,21 @@ async def poll_history(connection: AsyncConnection, *, connected_account_id: uui
 
 
 def default_polling_staleness_threshold() -> datetime:
-    """POC default: sources not successfully synced in the last 10 minutes
-    are polling targets. No operational tuning data exists yet — this is a
-    conservative placeholder, not a product-confirmed SLA."""
+    """POC default.
+
+    최근 10분 안에 successful sync가 없었던 source를 polling target으로 본다. 아직 operational
+    tuning data가 없으므로 product-confirmed SLA가 아니라 conservative placeholder다.
+    """
     return datetime.now(timezone.utc) - timedelta(minutes=10)
 
 
 def default_watch_renewal_threshold() -> datetime:
-    """POC default: watches expiring within 24h are renewal targets — well
-    inside Gmail's 7-day watch lifetime, matching mail_intake.md "watch
-    만료 임박(7일 이내)" with margin for a daily renewal scheduler."""
+    """POC default.
+
+    24시간 안에 expiring되는 watch를 renewal target으로 본다. Gmail의 7-day watch lifetime보다
+    충분히 안쪽이며, daily renewal scheduler margin을 두고 mail_intake.md
+    "watch 만료 임박(7일 이내)"와 맞춘다.
+    """
     return datetime.now(timezone.utc) + timedelta(hours=24)
 
 
@@ -629,21 +632,20 @@ async def reconcile_action_labels(
     add_label_ids: list[str],
     remove_label_ids: list[str],
 ) -> None:
-    """IC4 (_build-schedule.md) — "mail_intake snapshot reconcile": a
-    gmail_actions command mutates label state on the fake/live Gmail side
-    only (gmail_actions owns no local message snapshot). Without this,
-    the local snapshot (is_read/is_archived, gmail_message_labels) stays
-    stale until the next sync_delta/sync_full history walk. Reuses the
-    same UNREAD/INBOX -> is_read/is_archived derivation
-    _apply_history_record uses for a real Gmail-side change — the
-    difference here is provenance (our own action, not an observed
-    history record) and that there is no history_id to advance the
-    cursor with, so last_history_id is left untouched.
+    """IC4(_build-schedule.md) — "mail_intake snapshot reconcile".
+
+    gmail_actions command는 fake/live Gmail side의 label state만 mutate한다(gmail_actions는 local
+    message snapshot을 소유하지 않음). 이것이 없으면 local snapshot(is_read/is_archived,
+    gmail_message_labels)은 다음 sync_delta/sync_full history walk까지 stale 상태로 남는다.
+    실제 Gmail-side change에 대해 _apply_history_record가 사용하는 것과 같은 UNREAD/INBOX ->
+    is_read/is_archived derivation을 재사용한다. 여기서의 차이는 provenance가 observed history
+    record가 아니라 우리 own action이라는 점과, cursor를 전진시킬 history_id가 없어서
+    last_history_id를 그대로 둔다는 점이다.
     """
     existing = await repository.get_message(connection, message_id=message_id)
     if existing is None:
-        # Not in our snapshot (e.g. purged, or never synced) — nothing to
-        # reconcile. Mirrors _apply_history_record's same guard.
+        # 우리 snapshot에 없다(예: purged 또는 never synced). reconcile할 것이 없다.
+        # _apply_history_record의 같은 guard를 mirror한다.
         return
 
     for label_id in add_label_ids:

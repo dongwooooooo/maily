@@ -9,7 +9,7 @@ from app.domains.assistant_decisions.jobs.prepare_cleanup_proposals import (
 from app.domains.assistant_decisions.purge import purge_source
 from app.domains.assistant_decisions.router import router as router
 
-# _integration-contract.md §2 job_type -> handler contract.
+# _integration-contract.md §2 job_type -> handler contract 선언.
 JOB_HANDLERS: dict = {
     "generate_summary": generate_summary_job,
     "classify_importance": classify_importance_job,
@@ -17,13 +17,12 @@ JOB_HANDLERS: dict = {
     "prepare_cleanup_proposals": prepare_cleanup_proposals_job,
 }
 
-# _integration-contract.md §3 event -> consumer job_type mapping. Actual
-# outbox->job_runs dispatch wiring for these event types is a later
-# integration step (this task only builds+tests the handler functions
-# directly) — see task report.
+# _integration-contract.md §3 event -> consumer job_type mapping. 이 event type들의
+# 실제 outbox->job_runs dispatch wiring은 이후 integration step이다(이 task는 handler
+# 함수만 직접 build+test). task report 참고.
 EVENT_CONSUMERS: dict = {
     "gmail_snapshot_changed": [
-        "generate_summary",  # only queued when summary_enabled — see summaries.py
+        "generate_summary",  # summary_enabled일 때만 queued — summaries.py 참고
         "classify_importance",
         "prepare_cleanup_proposals",
     ],

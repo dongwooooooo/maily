@@ -59,8 +59,8 @@ async def test_snapshot_upsert_keyed_by_account_and_message() -> None:
     assert rows[0]["snapshot_version"] == 0
     assert len(result["message_ids"]) == 1
 
-    # Re-run with identical upstream data: idempotent — no duplicate row,
-    # no version bump, no new changed message_ids.
+    # 같은 upstream data로 재실행: idempotent — 중복 row, version bump,
+    # 새 changed message_ids가 없다.
     async with engine.begin() as connection:
         second_result = await service.sync_full(
             connection, connected_account_id=account_id, reason="manual"
@@ -111,8 +111,8 @@ async def test_excerpt_rejects_raw_body() -> None:
 
     assert excerpt_row is not None
     assert excerpt_row["excerpt_text"] == "Short preview only, not the full message body"
-    # message_excerpts is a separate table entirely — gmail_messages keeps
-    # only Gmail's own short `snippet` field, never a body/excerpt column.
+    # message_excerpts는 완전히 별도 table이다. gmail_messages는 Gmail 자체의 짧은
+    # `snippet` field만 보관하고 body/excerpt column은 절대 두지 않는다.
     assert message_row["snippet"] == "Short preview only, not the full message body"
 
 

@@ -28,11 +28,10 @@ async def reserve(
     expires_at: datetime,
     request_hash: str | None = None,
 ) -> bool:
-    """Reserve an idempotency key, deduped on (scope, key).
+    """idempotency key를 reserve하고 (scope, key)로 dedupe한다.
 
-    Returns True on first use of this (scope, key) pair, False if it
-    was already reserved — callers should treat False as a retry and
-    return the previously stored response instead of reprocessing.
+    이 (scope, key) pair의 첫 사용이면 True, 이미 reserved라면 False를 반환한다.
+    caller는 False를 retry로 보고 재처리 대신 이전에 저장된 response를 반환해야 한다.
     """
     stmt = (
         insert(idempotency_keys)
@@ -53,12 +52,11 @@ async def reserve(
 async def store_response(
     connection: AsyncConnection, *, scope: str, key: str, response_snapshot: dict
 ) -> None:
-    """Persist the outcome of a reserve()d (scope, key) pair.
+    """reserve()된 (scope, key) pair의 outcome을 persist한다.
 
-    Called once, right after the caller finishes the work reserve()
-    granted exclusive access to — a later retry with the same
-    (scope, key) can then read it back via get_response() instead of
-    reprocessing and returning a fabricated/different result.
+    reserve()가 exclusive access를 부여한 작업을 caller가 끝낸 직후 한 번 호출한다.
+    이후 같은 (scope, key)의 retry는 재처리 후 조작되거나 다른 result를 반환하는 대신
+    get_response()로 이것을 다시 읽을 수 있다.
     """
     await connection.execute(
         update(idempotency_keys)

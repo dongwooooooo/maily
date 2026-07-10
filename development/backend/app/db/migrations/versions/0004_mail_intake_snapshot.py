@@ -1,4 +1,4 @@
-"""mail_intake: gmail_messages, message_excerpts, gmail_message_labels
+"""mail_intake 테이블: gmail_messages, message_excerpts, gmail_message_labels
 
 Revision ID: 0004_mail_intake_snapshot
 Revises: 0003_mail_sources
@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
+# Alembic이 사용하는 revision 식별자.
 revision = "0004_mail_intake_snapshot"
 down_revision = "0003_mail_sources"
 branch_labels = None

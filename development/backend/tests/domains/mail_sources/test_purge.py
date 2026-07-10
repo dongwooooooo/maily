@@ -62,4 +62,4 @@ async def test_purge_deletes_credential_and_marks_disconnected() -> None:
 async def test_purge_unknown_source_is_noop() -> None:
     async with engine.begin() as connection:
         await purge_source(connection, source_id=uuid.uuid4())
-    # No exception — that's the assertion.
+    # exception이 없는 것이 assertion이다.

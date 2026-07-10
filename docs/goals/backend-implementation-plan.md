@@ -18,6 +18,29 @@ PostgreSQL 18, Redis 8.8, Authlib, google-auth-oauthlib, PyJWT, httpx, pytest.
 
 ---
 
+## 구현 상태 (2026-07-10 검증)
+
+원격 main `70869ce` 기준. 전체 테스트 321 passed(`pytest -q`), 통합 테스트 6종 green, 마이그레이션 체인 `0001_core`→`0012_notifications` 선형 완결. **Task 1–13 완료, Task 14·15 미착수.**
+
+| 구분 | 상태 |
+|---|---|
+| Task 1–13 (G0–G8) | 완료 — Steps 체크박스 반영, 파일·테스트·마이그레이션 검증됨 |
+| Task 14 (IG1, Live Gmail Watch) | 미착수 — `live_reader.py`는 `NotImplementedError` 스텁, `test_live_reader_contract.py`·runbook 부재 |
+| Task 15 (Operations Handoff) | 미착수 — `development/infra/README.md`만 존재, `test_config`/`test_rate_limit`/`test_retry_idempotency` 및 rate limit 구현 부재 |
+
+### 남은 갭 (Task 1–13 범위, 기능 결손 아님·후속 결정 대상)
+
+1. **core idempotency** — 클라이언트 키 response replay(`store_response`/`get_response`는 구현, 테스트 없음)·`request_hash` 불일치 감지(409) 로직·동시성 테스트 부재. 서버 키 `reserve()` dedupe만 검증됨.
+2. **core job 실행기** — lock timeout/죽은 워커 재획득 미구현, retry backoff(`scheduled_at` 미래 스케줄) 미구현(`should_retry` 불린만). outbox 트랜잭션 원자성·재기동 생존 명시 테스트 부재.
+3. **런타임 dispatcher 폴러 부재** — `dispatch_pending_events(ACTIVE_EVENT_CONSUMERS)`를 주기 호출하는 워커가 앱 런타임에 없음(테스트에서만 구동). POC 특성이나 live 전 필수.
+4. **활성 배선 누락 2건** — `gmail_snapshot_changed→prepare_cleanup_proposals`, `cleanup_proposal_created→build_briefing`이 도메인 `EVENT_CONSUMERS` 선언에만 있고 `ACTIVE_EVENT_CONSUMERS` 미등록 → 실제 큐잉 안 됨.
+5. **manual sync 경로 계약 불일치** — `_integration-contract.md §3`은 `POST /sources/{id}/sync`, 실제는 `/intake` prefix로 `POST /intake/sources/{id}/sync` 노출(라우터 주석에 인지됨).
+6. **identity 엣지 테스트 2건 부재** — 동시 로그인(google_subject 동시 insert), workspace_id 파라미터 오버라이드 방어.
+7. **mail_sources status 부분 검증** — `syncing`/`synced`/`permission_needed`/`error` 전이 직접 테스트 없음(전이 주체가 mail_intake라 Task 3 범위 밖으로 위임된 상태).
+8. **Task 13 purge 마커 step 미이행** — 마이그레이션 파일에 content-bearing/purge 마커 없음(db-schema.md ◆ 표기만 존재).
+9. **IC6 전용 통합 테스트 없음** — cleanup 승인→command는 직접 동기 호출 설계라 dispatcher 배선 없음, `test_cleanup_review.py` 도메인 테스트로만 커버.
+10. **importance_classified outbox 전용 단위 테스트 부재** — 통합 테스트에서 간접 검증만.
+
 ## 기준 문서
 
 1. `docs/current/product-wireframe-final.md`  
@@ -169,15 +192,15 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/tests/core/jobs/test_dispatcher.py`
 
 **Steps:**
-- [ ] Write tests for `GET /health` returning `{"status": "ok"}`.
-- [ ] Write readiness tests for DB/Redis success and failure JSON bodies.
-- [ ] Write outbox dedupe tests keyed by `(event_type, idempotency_key)`.
-- [ ] Write job lock tests that prevent two workers from running the same job concurrently.
-- [ ] Write exception hierarchy tests mapping each `MailyError` subclass to its status code/body, and confirming an unhandled exception returns a generic 500 without leaking details (`docs/areas/backend/error-handling-and-logging.md`).
-- [ ] Write request-id middleware tests (generated when absent, echoed back when client-supplied).
-- [ ] Add FastAPI app factory, root router, request id logging context, async SQLAlchemy session, Redis dependency.
-- [ ] Add baseline Alembic migration for `outbox_events`, `job_runs`, `idempotency_keys`.
-- [ ] Run `cd development/backend && python -m pytest tests/core/test_health.py tests/core/test_ready.py tests/core/test_outbox.py tests/core/test_idempotency.py tests/core/test_errors.py tests/core/test_logging.py tests/core/jobs/test_dispatcher.py -q`.
+- [x] Write tests for `GET /health` returning `{"status": "ok"}`.
+- [x] Write readiness tests for DB/Redis success and failure JSON bodies.
+- [x] Write outbox dedupe tests keyed by `(event_type, idempotency_key)`.
+- [x] Write job lock tests that prevent two workers from running the same job concurrently.
+- [x] Write exception hierarchy tests mapping each `MailyError` subclass to its status code/body, and confirming an unhandled exception returns a generic 500 without leaking details (`docs/areas/backend/error-handling-and-logging.md`).
+- [x] Write request-id middleware tests (generated when absent, echoed back when client-supplied).
+- [x] Add FastAPI app factory, root router, request id logging context, async SQLAlchemy session, Redis dependency.
+- [x] Add baseline Alembic migration for `outbox_events`, `job_runs`, `idempotency_keys`.
+- [x] Run `cd development/backend && python -m pytest tests/core/test_health.py tests/core/test_ready.py tests/core/test_outbox.py tests/core/test_idempotency.py tests/core/test_errors.py tests/core/test_logging.py tests/core/jobs/test_dispatcher.py -q`.
 
 **Gate:** G0 passes.
 
@@ -198,13 +221,13 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/tests/domains/identity/test_workspace_isolation.py`
 
 **Steps:**
-- [ ] Write mocked Google profile test that creates one user, one workspace, and one membership.
-- [ ] Write relogin test where the same Google subject reuses the existing workspace.
-- [ ] Write JWT/session test for `user_id`, `workspace_id`, issuer `maily`, and expiration.
-- [ ] Write workspace isolation test where user A cannot resolve user B workspace resources.
-- [ ] Add migrations for `users`, `workspaces`, `workspace_members`, `sessions`.
-- [ ] Implement OAuth callback service, session issue/verify, and request context dependency.
-- [ ] Run `cd development/backend && python -m pytest tests/domains/identity -q`.
+- [x] Write mocked Google profile test that creates one user, one workspace, and one membership.
+- [x] Write relogin test where the same Google subject reuses the existing workspace.
+- [x] Write JWT/session test for `user_id`, `workspace_id`, issuer `maily`, and expiration.
+- [x] Write workspace isolation test where user A cannot resolve user B workspace resources.
+- [x] Add migrations for `users`, `workspaces`, `workspace_members`, `sessions`.
+- [x] Implement OAuth callback service, session issue/verify, and request context dependency.
+- [x] Run `cd development/backend && python -m pytest tests/domains/identity -q`.
 
 **Gate:** identity request context is available to every authenticated API.
 
@@ -219,23 +242,23 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/app/domains/mail_sources/repository.py`
 - Create: `development/backend/app/domains/mail_sources/service.py`
 - Create: `development/backend/app/domains/mail_sources/router.py`
-- Create: `development/backend/app/domains/mail_sources/credentials.py`
+- Create: `development/backend/app/domains/mail_sources/credentials.py` (미분리 — service.py에 통합 구현)
 - Create: `development/backend/app/core/crypto.py`
-- Create: `development/backend/app/domains/mail_sources/oauth.py`
-- Create: `development/backend/app/domains/mail_sources/events.py`
+- Create: `development/backend/app/domains/mail_sources/oauth.py` (미분리 — service.py에 통합 구현)
+- Create: `development/backend/app/domains/mail_sources/events.py` (미분리 — service.py가 `app.core.outbox.append_event` 직접 호출)
 - Create: `development/backend/tests/domains/mail_sources/test_connection.py`
 - Create: `development/backend/tests/domains/mail_sources/test_credentials.py`
 - Create: `development/backend/tests/domains/mail_sources/test_source_settings.py`
 
 **Steps:**
-- [ ] Write token storage test that fails if access token or refresh token plaintext is persisted.
-- [ ] Write duplicate constraint test for same Gmail address in one workspace.
-- [ ] Write status tests for `connected`, `syncing`, `synced`, `permission_needed`, `error`, `paused`, `disconnecting`.
-- [ ] Write account setting tests for display name fallback, briefing toggle, summary toggle, notification toggle, pause.
-- [ ] Write outbox test for `gmail_source_connected` and `gmail_source_settings_changed`.
-- [ ] Add migrations for `connected_gmail_accounts`, `gmail_oauth_credentials`, `gmail_source_settings`.
-- [ ] Implement account connect/list/update APIs.
-- [ ] Run `cd development/backend && python -m pytest tests/domains/mail_sources -q`.
+- [x] Write token storage test that fails if access token or refresh token plaintext is persisted.
+- [x] Write duplicate constraint test for same Gmail address in one workspace.
+- [x] Write status tests for `connected`, `syncing`, `synced`, `permission_needed`, `error`, `paused`, `disconnecting`.
+- [x] Write account setting tests for display name fallback, briefing toggle, summary toggle, notification toggle, pause.
+- [x] Write outbox test for `gmail_source_connected` and `gmail_source_settings_changed`.
+- [x] Add migrations for `connected_gmail_accounts`, `gmail_oauth_credentials`, `gmail_source_settings`.
+- [x] Implement account connect/list/update APIs.
+- [x] Run `cd development/backend && python -m pytest tests/domains/mail_sources -q`.
 
 **Gate:** G1 account separation and encrypted credential contract pass.
 
@@ -256,15 +279,15 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/tests/domains/mail_intake/test_message_snapshot.py`
 
 **Steps:**
-- [ ] Define `GmailReaderPort` methods for watch registration, history delta, message metadata read, and limited excerpt read.
-- [ ] Write fake reader tests for deterministic history pages and Gmail state snapshots.
-- [ ] Write snapshot upsert test keyed by `(source_id, gmail_message_id)`.
-- [ ] Write limited excerpt test that rejects raw body storage.
-- [ ] Write label/read/archive state update tests for message added, deleted, label added, label removed.
-- [ ] Write `gmail_snapshot_changed` event test with source id, sync run id, and message ids.
-- [ ] Add migrations for `gmail_messages`, `message_excerpts`, `gmail_message_labels`.
-- [ ] Implement fake reader and snapshot repository.
-- [ ] Run `cd development/backend && python -m pytest tests/domains/mail_intake/test_fake_reader.py tests/domains/mail_intake/test_message_snapshot.py -q`.
+- [x] Define `GmailReaderPort` methods for watch registration, history delta, message metadata read, and limited excerpt read.
+- [x] Write fake reader tests for deterministic history pages and Gmail state snapshots.
+- [x] Write snapshot upsert test keyed by `(source_id, gmail_message_id)`.
+- [x] Write limited excerpt test that rejects raw body storage.
+- [x] Write label/read/archive state update tests for message added, deleted, label added, label removed.
+- [x] Write `gmail_snapshot_changed` event test with source id, sync run id, and message ids.
+- [x] Add migrations for `gmail_messages`, `message_excerpts`, `gmail_message_labels`.
+- [x] Implement fake reader and snapshot repository.
+- [x] Run `cd development/backend && python -m pytest tests/domains/mail_intake/test_fake_reader.py tests/domains/mail_intake/test_message_snapshot.py -q`.
 
 **Gate:** Snapshot can be built without live Gmail credentials and without any Gmail write port.
 
@@ -292,15 +315,15 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/tests/domains/mail_intake/test_sync_full_job.py`
 
 **Steps:**
-- [ ] Write cursor tests for `last_history_id`, `watch_expiration_at`, `last_successful_sync_at`.
-- [ ] Write watch renewal target selection test.
-- [ ] Write Pub/Sub fan-out test from `emailAddress` and `historyId` to every active connected source.
-- [ ] Write notification dedupe test keyed by email and history id.
-- [ ] Write fallback polling target selection test.
-- [ ] Write invalid cursor test that schedules full resync.
-- [ ] Add migrations for `gmail_sync_cursors`, `gmail_watch_registrations`, `gmail_notification_events`, `sync_runs`.
-- [ ] Implement notification processing, polling scheduler, delta sync, full sync.
-- [ ] Run `cd development/backend && python -m pytest tests/domains/mail_intake -q`.
+- [x] Write cursor tests for `last_history_id`, `watch_expiration_at`, `last_successful_sync_at`.
+- [x] Write watch renewal target selection test.
+- [x] Write Pub/Sub fan-out test from `emailAddress` and `historyId` to every active connected source.
+- [x] Write notification dedupe test keyed by email and history id.
+- [x] Write fallback polling target selection test.
+- [x] Write invalid cursor test that schedules full resync.
+- [x] Add migrations for `gmail_sync_cursors`, `gmail_watch_registrations`, `gmail_notification_events`, `sync_runs`.
+- [x] Implement notification processing, polling scheduler, delta sync, full sync.
+- [x] Run `cd development/backend && python -m pytest tests/domains/mail_intake -q`.
 
 **Gate:** G2 passes without live Gmail.
 
@@ -318,21 +341,21 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/app/domains/briefing/events.py`
 - Create: `development/backend/app/domains/briefing/jobs/build_briefing.py`
 - Create: `development/backend/tests/domains/briefing/test_today_briefing.py`
-- Create: `development/backend/tests/domains/briefing/test_briefing_projection.py`
+- Create: `development/backend/tests/domains/briefing/test_projection_regenerable.py`
 - Create: `development/backend/tests/domains/briefing/test_partial_rebuild.py`
-- Create: `development/backend/tests/domains/briefing/test_message_detail_readonly.py`
+- Create: `development/backend/tests/domains/briefing/test_message_detail.py`
 
 **Steps:**
-- [ ] Write `GET /briefing/today?scope=all` contract test with account groups and sections.
-- [ ] Write account scope filter test.
-- [ ] Write card response negative test for action field, AI reason, raw body.
-- [ ] Write `GET /messages/{message_id}` readonly detail test with Gmail URL, metadata, excerpt, summary, Gmail handling fact.
-- [ ] Write projection rebuild idempotency test for repeated `gmail_snapshot_changed`.
-- [ ] Write partial rebuild test where `summary_completed` and `importance_classified` each rebuild only their own `message_id`, not the full projection.
-- [ ] Write negative test that a message pending importance classification does not get its own item-level pending state, and that account-level `syncing` status is the only signal used.
-- [ ] Add migration for `briefing_items`.
-- [ ] Implement section placement, account grouping, and detail read model.
-- [ ] Run `cd development/backend && python -m pytest tests/domains/briefing -q`.
+- [x] Write `GET /briefing/today?scope=all` contract test with account groups and sections.
+- [x] Write account scope filter test.
+- [x] Write card response negative test for action field, AI reason, raw body.
+- [x] Write `GET /messages/{message_id}` readonly detail test with Gmail URL, metadata, excerpt, summary, Gmail handling fact.
+- [x] Write projection rebuild idempotency test for repeated `gmail_snapshot_changed`.
+- [x] Write partial rebuild test where `summary_completed` and `importance_classified` each rebuild only their own `message_id`, not the full projection.
+- [x] Write negative test that a message pending importance classification does not get its own item-level pending state, and that account-level `syncing` status is the only signal used.
+- [x] Add migration for `briefing_items`.
+- [x] Implement section placement, account grouping, and detail read model.
+- [x] Run `cd development/backend && python -m pytest tests/domains/briefing -q`.
 
 **Gate:** G3 briefing/detail read shape is stable.
 
@@ -356,14 +379,14 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/tests/domains/briefing/test_reactivate_reminders_job.py`
 
 **Steps:**
-- [ ] Write seen state test that survives briefing projection rebuild.
-- [ ] Write reminder creation test for a briefing item.
-- [ ] Write `GET /storage/upcoming` test for today, tomorrow, this week grouping.
-- [ ] Write negative test that past briefing history is not returned as storage.
-- [ ] Write reminder reactivation test that emits reminder event and re-enters briefing/notification candidates.
-- [ ] Add migrations for `briefing_item_states`, `reminders`.
-- [ ] Implement item state APIs and reactivation worker.
-- [ ] Run `cd development/backend && python -m pytest tests/domains/briefing -q`.
+- [x] Write seen state test that survives briefing projection rebuild.
+- [x] Write reminder creation test for a briefing item.
+- [x] Write `GET /storage/upcoming` test for today, tomorrow, this week grouping.
+- [x] Write negative test that past briefing history is not returned as storage.
+- [x] Write reminder reactivation test that emits reminder event and re-enters briefing/notification candidates.
+- [x] Add migrations for `briefing_item_states`, `reminders`.
+- [x] Implement item state APIs and reactivation worker.
+- [x] Run `cd development/backend && python -m pytest tests/domains/briefing -q`.
 
 **Gate:** Durable item state is independent from regenerable briefing view.
 
@@ -383,13 +406,13 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/tests/domains/labels/test_label_move_signal.py`
 
 **Steps:**
-- [ ] Write user label creation test that creates stable Gmail `Maily/{label_name}` mapping intent.
-- [ ] Write rename/hide/reorder tests that do not create duplicate Gmail mappings.
-- [ ] Write negative test that messages cannot be moved directly to default briefing sections.
-- [ ] Write message move test that records correction signal and requests gmail_actions label apply command.
-- [ ] Add migrations for `service_labels`, `gmail_label_mappings`, `label_correction_signals`.
-- [ ] Implement labels API and move-to-label service.
-- [ ] Run `cd development/backend && python -m pytest tests/domains/labels -q`.
+- [x] Write user label creation test that creates stable Gmail `Maily/{label_name}` mapping intent.
+- [x] Write rename/hide/reorder tests that do not create duplicate Gmail mappings.
+- [x] Write negative test that messages cannot be moved directly to default briefing sections.
+- [x] Write message move test that records correction signal and requests gmail_actions label apply command.
+- [x] Add migrations for `service_labels`, `gmail_label_mappings`, `label_correction_signals`.
+- [x] Implement labels API and move-to-label service.
+- [x] Run `cd development/backend && python -m pytest tests/domains/labels -q`.
 
 **Gate:** User classification targets are labels, not default sections.
 
@@ -418,19 +441,19 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/tests/domains/gmail_actions/test_execute_action_job.py`
 
 **Steps:**
-- [ ] Write pending command creation test for mark read, archive, read-and-archive, label apply.
-- [ ] Write command idempotency test using request idempotency key.
-- [ ] Write negative test that no Gmail mutation occurs without a command row.
-- [ ] Define `GmailMutationPort` methods for mark read, archive, apply label, remove label, and reverse mutation when supported.
-- [ ] Write fake mutator tests for changed/not changed result and reversible mutation state.
-- [ ] Write boundary test that gmail_actions uses `GmailMutationPort` and never reads OAuth token directly.
-- [ ] Write negative boundary test that gmail_actions does not import `mail_intake.gmail_reader`.
-- [ ] Write command transition tests for `pending`, `applied`, `failed`, `compensating`, `undone`.
-- [ ] Write activity recovery test where Gmail succeeds but activity creation fails and ledger can rebuild activity.
-- [ ] Write undo availability tests per action type.
-- [ ] Add migrations for `gmail_action_commands`, `activity_logs`, `undo_actions`.
-- [ ] Implement action command APIs and worker.
-- [ ] Run `cd development/backend && python -m pytest tests/domains/gmail_actions -q`.
+- [x] Write pending command creation test for mark read, archive, read-and-archive, label apply.
+- [x] Write command idempotency test using request idempotency key.
+- [x] Write negative test that no Gmail mutation occurs without a command row.
+- [x] Define `GmailMutationPort` methods for mark read, archive, apply label, remove label, and reverse mutation when supported. (구현은 `gmail_actions.md` 계약대로 단일 `apply(command_id) -> MutationResult`로 통일 — action_type은 add/remove 배열로 정규화, 역연산은 ledger 계층 `undo.py` 담당)
+- [x] Write fake mutator tests for changed/not changed result and reversible mutation state.
+- [x] Write boundary test that gmail_actions uses `GmailMutationPort` and never reads OAuth token directly.
+- [x] Write negative boundary test that gmail_actions does not import `mail_intake.gmail_reader`.
+- [x] Write command transition tests for `pending`, `applied`, `failed`, `compensating`, `undone`.
+- [x] Write activity recovery test where Gmail succeeds but activity creation fails and ledger can rebuild activity.
+- [x] Write undo availability tests per action type.
+- [x] Add migrations for `gmail_action_commands`, `activity_logs`, `undo_actions`.
+- [x] Implement action command APIs and worker.
+- [x] Run `cd development/backend && python -m pytest tests/domains/gmail_actions -q`.
 
 **Gate:** G4 passes with fake GmailMutationPort.
 
@@ -459,17 +482,17 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/tests/domains/assistant_decisions/test_classify_importance_job.py`
 
 **Steps:**
-- [ ] Write summary toggle off test where no summary job is created.
-- [ ] Write LLM payload test allowing subject, sender, snippet, labels, limited excerpt only.
-- [ ] Write negative persistence test for raw body and raw prompt.
-- [ ] Write metadata-only fallback test for briefing/detail response.
-- [ ] Write `classify_importance` job test producing an importance band and reason per message.
-- [ ] Write test that `classify_importance` runs independently of `generate_summary` — one can fail or retry without blocking the other.
-- [ ] Write `importance_classified` event test carrying band and reason as payload fields, not as separate event types per band.
-- [ ] Write negative persistence test for raw body/raw prompt in the importance job, matching the summary privacy contract.
-- [ ] Add migrations for `summary_jobs`, `message_summaries`, `importance_jobs`, `message_importance_classifications`.
-- [ ] Implement fake LLM client, summary worker, and importance classification worker.
-- [ ] Run `cd development/backend && python -m pytest tests/domains/assistant_decisions/test_summary_privacy.py tests/domains/assistant_decisions/test_generate_summary_job.py tests/domains/assistant_decisions/test_importance_classification.py tests/domains/assistant_decisions/test_classify_importance_job.py -q`.
+- [x] Write summary toggle off test where no summary job is created.
+- [x] Write LLM payload test allowing subject, sender, snippet, labels, limited excerpt only.
+- [x] Write negative persistence test for raw body and raw prompt.
+- [x] Write metadata-only fallback test for briefing/detail response.
+- [x] Write `classify_importance` job test producing an importance band and reason per message.
+- [x] Write test that `classify_importance` runs independently of `generate_summary` — one can fail or retry without blocking the other.
+- [x] Write `importance_classified` event test carrying band and reason as payload fields, not as separate event types per band.
+- [x] Write negative persistence test for raw body/raw prompt in the importance job, matching the summary privacy contract.
+- [x] Add migrations for `summary_jobs`, `message_summaries`, `importance_jobs`, `message_importance_classifications`.
+- [x] Implement fake LLM client, summary worker, and importance classification worker.
+- [x] Run `cd development/backend && python -m pytest tests/domains/assistant_decisions/test_summary_privacy.py tests/domains/assistant_decisions/test_generate_summary_job.py tests/domains/assistant_decisions/test_importance_classification.py tests/domains/assistant_decisions/test_classify_importance_job.py -q`.
 
 **Gate:** G6 privacy contract passes for both summary and importance classification.
 
@@ -493,17 +516,17 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/tests/domains/assistant_decisions/test_prepare_cleanup_proposals_job.py`
 
 **Steps:**
-- [ ] Write correction signal test that creates a pending rule suggestion.
-- [ ] Write approval test where only approved rule suggestions become active rules.
-- [ ] Write confidence band tests for auto-apply, approval-required, silent no-proposal.
-- [ ] Write review queue test containing approval-required proposals only.
-- [ ] Write approve/reject tests that process one proposal at a time.
-- [ ] Write route negative test proving no approve-all endpoint exists.
-- [ ] Write before/after Gmail state response test.
-- [ ] Write approval test that requests gmail_actions command and does not call Gmail directly.
-- [ ] Add migrations for `classification_rules`, `rule_suggestions`, `cleanup_proposals`.
-- [ ] Implement rules, cleanup APIs, and proposal workers.
-- [ ] Run `cd development/backend && python -m pytest tests/domains/assistant_decisions/test_rule_suggestions.py tests/domains/assistant_decisions/test_cleanup_review.py tests/domains/assistant_decisions/test_prepare_cleanup_proposals_job.py -q`.
+- [x] Write correction signal test that creates a pending rule suggestion.
+- [x] Write approval test where only approved rule suggestions become active rules.
+- [x] Write confidence band tests for auto-apply, approval-required, silent no-proposal.
+- [x] Write review queue test containing approval-required proposals only.
+- [x] Write approve/reject tests that process one proposal at a time.
+- [x] Write route negative test proving no approve-all endpoint exists.
+- [x] Write before/after Gmail state response test.
+- [x] Write approval test that requests gmail_actions command and does not call Gmail directly.
+- [x] Add migrations for `classification_rules`, `rule_suggestions`, `cleanup_proposals`.
+- [x] Implement rules, cleanup APIs, and proposal workers.
+- [x] Run `cd development/backend && python -m pytest tests/domains/assistant_decisions/test_rule_suggestions.py tests/domains/assistant_decisions/test_cleanup_review.py tests/domains/assistant_decisions/test_prepare_cleanup_proposals_job.py -q`.
 
 **Gate:** G5 assistant decision contract passes.
 
@@ -525,13 +548,13 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/tests/domains/notifications/test_emit_notification_job.py`
 
 **Steps:**
-- [ ] Write route target tests for important mail, reminder, full briefing, cleanup review, permission error.
-- [ ] Write negative test that no generic notification landing route is produced.
-- [ ] Write recovery view test where account/sync source state comes from mail_sources/mail_intake and notifications stores view data only.
-- [ ] Write browser push subscription and permission state tests.
-- [ ] Add migrations for `notification_subscriptions`, `notification_events`.
-- [ ] Implement notification event API, read state, route target builder, and emit worker.
-- [ ] Run `cd development/backend && python -m pytest tests/domains/notifications -q`.
+- [x] Write route target tests for important mail, reminder, full briefing, cleanup review, permission error.
+- [x] Write negative test that no generic notification landing route is produced.
+- [x] Write recovery view test where account/sync source state comes from mail_sources/mail_intake and notifications stores view data only.
+- [x] Write browser push subscription and permission state tests.
+- [x] Add migrations for `notification_subscriptions`, `notification_events`.
+- [x] Implement notification event API, read state, route target builder, and emit worker.
+- [x] Run `cd development/backend && python -m pytest tests/domains/notifications -q`.
 
 **Gate:** G7 notification and recovery route contract passes.
 
@@ -547,17 +570,19 @@ idempotency, job dispatch, test runner 기준을 고정한다.
 - Create: `development/backend/app/domains/assistant_decisions/purge.py`
 - Create: `development/backend/app/domains/gmail_actions/purge.py`
 - Create: `development/backend/app/domains/mail_sources/jobs/purge_disconnected_source.py`
-- Create: `development/backend/tests/domains/mail_sources/test_disconnect_purge.py`
+- Create: `development/backend/app/domains/labels/purge.py` (FK-safe 순서상 `label_correction_signals` 삭제에 필요해 추가)
+- Create: `development/backend/tests/domains/mail_sources/test_disconnect.py`
+- Create: `development/backend/tests/domains/mail_sources/test_purge.py`
 - Create: `development/backend/tests/domains/mail_sources/test_purge_disconnected_source_job.py`
 
 **Steps:**
-- [ ] Write disconnect test that revokes credential, marks source `disconnecting`, and blocks new sync/action.
-- [ ] Write purge test that removes message/excerpt/summary/cleanup proposal content tied to the source.
-- [ ] Write audit residue test that keeps minimal activity facts without message body or summary text.
-- [ ] Write idempotency test where purge job can run twice without deleting unrelated workspace data.
-- [ ] Add purge markers to affected migrations where needed.
-- [ ] Implement domain-specific purge handlers and orchestration job.
-- [ ] Run `cd development/backend && python -m pytest tests/domains/mail_sources/test_disconnect_purge.py tests/domains/mail_sources/test_purge_disconnected_source_job.py -q`.
+- [x] Write disconnect test that revokes credential, marks source `disconnecting`, and blocks new sync/action.
+- [x] Write purge test that removes message/excerpt/summary/cleanup proposal content tied to the source.
+- [x] Write audit residue test that keeps minimal activity facts without message body or summary text.
+- [x] Write idempotency test where purge job can run twice without deleting unrelated workspace data.
+- [x] Add purge markers to affected migrations where needed.
+- [x] Implement domain-specific purge handlers and orchestration job.
+- [x] Run `cd development/backend && python -m pytest tests/domains/mail_sources/test_disconnect.py tests/domains/mail_sources/test_purge.py tests/domains/mail_sources/test_purge_disconnected_source_job.py -q`.
 
 **Gate:** G8 disconnect/purge contract passes.
 

@@ -164,8 +164,10 @@ async def mark_account_status(
     version: int,
     disconnected_at: datetime | None = None,
 ) -> None:
-    """Status-only transition (disconnecting/disconnected) — unlike
-    update_connected_account, never touches display_name."""
+    """status-only transition(disconnecting/disconnected).
+
+    update_connected_account와 달리 display_name은 절대 건드리지 않는다.
+    """
     values = {"status": status, "version": version}
     if disconnected_at is not None:
         values["disconnected_at"] = disconnected_at
@@ -183,9 +185,11 @@ async def revoke_credential(connection: AsyncConnection, *, connected_account_id
 
 
 async def delete_credential(connection: AsyncConnection, *, connected_account_id: uuid.UUID) -> None:
-    """Purge-time (not disconnect-time) full removal of the ◆ content-bearing
-    ciphertext row — disconnect only sets revoked_at (fast, synchronous
-    marker); this is the async purge job's final cleanup."""
+    """purge-time(disconnect-time 아님)에 ◆ content-bearing ciphertext row를 완전히 제거한다.
+
+    disconnect는 revoked_at만 설정한다(빠른 synchronous marker). 이것은 async purge job의
+    final cleanup이다.
+    """
     await connection.execute(
         delete(gmail_oauth_credentials).where(
             gmail_oauth_credentials.c.connected_account_id == connected_account_id

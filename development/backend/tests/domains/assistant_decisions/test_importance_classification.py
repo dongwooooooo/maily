@@ -69,9 +69,8 @@ async def test_reason_hidden_by_default() -> None:
 
 
 async def test_importance_independent_of_summary() -> None:
-    """summary_enabled=False (no summary job created at all) -> importance
-    classification still runs and succeeds — the two jobs never gate each
-    other."""
+    """summary_enabled=False(summary job 자체가 만들어지지 않음)여도 importance
+    classification은 계속 실행되어 성공한다. 두 job은 서로 gate하지 않는다."""
     _, _, account_id = await seed_scope(summary_enabled=False)
     message_id = await seed_message(account_id, snippet="본문 스니펫")
 
@@ -80,6 +79,6 @@ async def test_importance_independent_of_summary() -> None:
     async with engine.begin() as connection:
         importance_result = await run_classify_importance(connection, message_id=message_id)
 
-    assert summary_result is None  # no job created, per privacy contract
+    assert summary_result is None  # privacy contract에 따라 job 생성 없음
     assert importance_result is not None
     assert importance_result["importance_band"] in {"urgent", "normal", "low"}

@@ -1,4 +1,4 @@
-"""identity: users, workspaces, workspace_members, sessions
+"""identity 테이블: users, workspaces, workspace_members, sessions
 
 Revision ID: 0002_identity
 Revises: 0001_core
@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
+# Alembic이 사용하는 revision 식별자.
 revision = "0002_identity"
 down_revision = "0001_core"
 branch_labels = None

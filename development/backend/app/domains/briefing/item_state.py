@@ -28,16 +28,14 @@ def _to_schema(state: dict) -> ItemStateResult:
 async def resolve_owned_briefing_item(
     connection: AsyncConnection, *, briefing_item_id: uuid.UUID, workspace_id: uuid.UUID
 ) -> dict:
-    """briefing_item_id (a card id the client saw in GET /briefing/today) ->
-    the message it currently identifies, plus a workspace ownership check.
+    """briefing_item_id(client가 GET /briefing/today에서 본 card id)가 현재 가리키는
+    message를 resolve하고 workspace ownership을 확인한다.
 
-    Durable state (briefing_item_states) is keyed by message_id, not by
-    this projection id — see repository.upsert_item_state. Resolving
-    through the *current* projection row is only how the API accepts a
-    client-facing card id; once resolved, the write below always lands on
-    the message_id-keyed durable row, which is what makes
-    test_seen_survives_rebuild pass even when a later drop-and-rebuild
-    assigns the same message a brand-new briefing_items.id.
+    durable state(briefing_item_states)는 이 projection id가 아니라 message_id로 key된다.
+    repository.upsert_item_state 참고. *현재* projection row를 통해 resolve하는 것은 API가
+    client-facing card id를 받는 방법일 뿐이다. resolve된 뒤 아래 write는 항상 message_id-keyed
+    durable row에 기록된다. 그래서 이후 drop-and-rebuild가 같은 message에 새
+    briefing_items.id를 부여해도 test_seen_survives_rebuild가 통과한다.
     """
     item = await repository.get_briefing_item(connection, item_id=briefing_item_id)
     if item is None:
@@ -56,8 +54,8 @@ async def set_item_seen(
 ) -> tuple[ItemStateResult, bool]:
     """Command `set_item_seen` — docs/goals/backend-plans/briefing.md.
 
-    Returns (state, is_new) where is_new is False for the no-op repeat of
-    an already-seen item (§멱등 — no version bump, no event).
+    (state, is_new)를 반환한다. 이미 seen인 item의 no-op repeat이면 is_new는 False다
+    (§멱등 — no version bump, no event).
     """
     item = await resolve_owned_briefing_item(
         connection, briefing_item_id=briefing_item_id, workspace_id=workspace_id

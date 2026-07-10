@@ -14,7 +14,7 @@ from tests.domains.labels.conftest import seed_connected_account, seed_message, 
 
 
 async def _seed_signal() -> tuple[uuid.UUID, uuid.UUID]:
-    """Returns (source_id, message_id) with one real label_correction_signals row."""
+    """실제 label_correction_signals row 하나와 함께 (source_id, message_id)를 반환한다."""
     execute_action.set_mutator(FakeGmailMutationPort())
     workspace_id = await seed_workspace()
     account_id = await seed_connected_account(workspace_id)
@@ -59,7 +59,7 @@ async def test_purge_no_signals_is_noop() -> None:
     account_id = await seed_connected_account(workspace_id)
     async with engine.begin() as connection:
         await purge_source(connection, source_id=account_id)
-    # No exception — that's the assertion.
+    # exception이 없는 것이 assertion이다.
 
 
 async def test_purge_only_affects_target_account() -> None:
@@ -99,4 +99,4 @@ async def test_purge_unblocks_mail_intake_message_delete() -> None:
         await purge_gmail_actions(connection, source_id=account_id)
         await purge_source(connection, source_id=account_id)
         await purge_mail_intake(connection, source_id=account_id)
-    # No FK violation raised — that's the assertion.
+    # FK violation이 발생하지 않는 것이 assertion이다.

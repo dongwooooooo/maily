@@ -1,8 +1,7 @@
 """job_type=create_rule_suggestions, payload={correction_signal_id} —
-_integration-contract.md §2. Triggered by label_correction_recorded (labels
-domain). This task only wires and tests the handler function directly —
-the outbox->job_runs dispatch wiring for label_correction_recorded is a
-later integration step, per caller instructions."""
+_integration-contract.md §2. label_correction_recorded(labels domain)가 trigger한다.
+caller 지시에 따라 이 task는 handler function만 직접 wire/test한다.
+label_correction_recorded의 outbox->job_runs dispatch wiring은 이후 integration step이다."""
 
 import uuid
 

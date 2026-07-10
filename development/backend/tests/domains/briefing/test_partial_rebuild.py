@@ -26,7 +26,7 @@ async def test_partial_rebuild_single_message() -> None:
     assert rebuilt == [m1]
     assert item1 is not None
     assert item1["section"] == FAKE_SECTION
-    assert item2 is None  # untouched — m2 was never in scope
+    assert item2 is None  # 변경 없음 — m2는 scope에 없었음
 
 
 async def test_rebuild_idempotent() -> None:
@@ -48,16 +48,16 @@ async def test_rebuild_idempotent() -> None:
             connection, connected_account_id=account_id
         )
 
-    assert first["id"] == second["id"]  # upsert, not a second row
+    assert first["id"] == second["id"]  # upsert이며 두 번째 row가 아님
     assert len(all_items) == 1
     assert second["section"] == first["section"]
     assert second["importance_band"] == first["importance_band"]
 
 
 async def test_rebuild_preserves_item_state() -> None:
-    """Durable seen state (message_id-keyed) is untouched by a rebuild —
-    briefing.md 강제 invariant, tested end-to-end again in
-    test_seen_state.py::test_seen_survives_rebuild."""
+    """Durable seen state(message_id-keyed)는 rebuild로 변경되지 않는다.
+    briefing.md 강제 invariant이며 test_seen_state.py::test_seen_survives_rebuild에서
+    다시 end-to-end로 검증한다."""
     from datetime import datetime, timezone
 
     workspace_id, _user_id, account_id = await seed_scope()
@@ -103,4 +103,4 @@ async def test_full_rebuild_workspace_scoped() -> None:
     assert m_a in rebuilt
     assert m_b not in rebuilt
     assert item_a is not None
-    assert item_b is None  # other workspace's message never projected
+    assert item_b is None  # 다른 workspace의 message는 projection되지 않음
