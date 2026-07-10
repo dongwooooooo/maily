@@ -8,11 +8,16 @@
 """
 
 import json
+import sys
 from pathlib import Path
 
-from app.main import app
-
 BACKEND_DIR = Path(__file__).resolve().parents[1]
+# 스크립트 실행 시 sys.path[0]은 scripts/ 라서, site-packages에 설치된
+# (오래된) app 복사본이 레포 코드를 가릴 수 있다 — 실제로 stale 스키마가
+# export되는 사고가 있었다. 레포 경로를 항상 최우선으로 둔다.
+sys.path.insert(0, str(BACKEND_DIR))
+
+from app.main import app  # noqa: E402
 
 
 def main() -> None:
