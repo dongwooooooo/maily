@@ -7,6 +7,10 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "Maily API"
+    # 프론트 dev 서버 origin. 운영 배포 origin은 Task15에서 env로 주입한다.
+    # env 주입 시 JSON 배열 문자열 형식 필수(pydantic-settings 복합 타입 규칙):
+    #   CORS_ALLOW_ORIGINS='["https://app.example.com"]'  — 콤마 구분 문자열 아님.
+    cors_allow_origins: list[str] = ["http://127.0.0.1:3000", "http://localhost:3000"]
     database_url: str = "postgresql+asyncpg://maily:maily@localhost:5432/maily"
     redis_url: str = "redis://localhost:6379/0"
     jwt_issuer: str = "maily"
