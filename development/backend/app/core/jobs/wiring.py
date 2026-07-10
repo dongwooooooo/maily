@@ -65,4 +65,8 @@ ACTIVE_EVENT_CONSUMERS: dict[str, list[str]] = {
     # importance_classified) — completing it here alongside the
     # notification half since both consume the same event.
     "reminder_reactivated": ["build_briefing", "emit_notification"],
+    # W4/IC8 (disconnect→purge) — tests/integration/test_ic8_disconnect_purge.py.
+    # source-locked (outbox_dispatcher._SOURCE_LOCKED_JOB_TYPES) so a purge
+    # never races a concurrent sync/watch job for the same account.
+    "gmail_source_disconnected": ["purge_disconnected_source"],
 }

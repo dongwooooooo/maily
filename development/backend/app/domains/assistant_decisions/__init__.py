@@ -6,6 +6,7 @@ from app.domains.assistant_decisions.jobs.generate_summary import generate_summa
 from app.domains.assistant_decisions.jobs.prepare_cleanup_proposals import (
     prepare_cleanup_proposals_job,
 )
+from app.domains.assistant_decisions.purge import purge_source
 from app.domains.assistant_decisions.router import router as router
 
 # _integration-contract.md §2 job_type -> handler contract.
@@ -29,5 +30,4 @@ EVENT_CONSUMERS: dict = {
     "label_correction_recorded": ["create_rule_suggestions"],
 }
 
-# Task 13 (purge) not yet implemented in this worktree.
-PURGE_HANDLER = None
+PURGE_HANDLER = purge_source

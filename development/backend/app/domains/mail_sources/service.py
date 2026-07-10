@@ -11,6 +11,8 @@ from app.domains.mail_sources import repository
 from app.domains.mail_sources.schemas import (
     ConnectGmailSourceInput,
     ConnectedSource,
+    DisconnectGmailSourceInput,
+    DisconnectResult,
     SourceSettingsResult,
 )
 
@@ -98,6 +100,50 @@ async def connect_gmail_source(
         ),
         True,
     )
+
+
+async def disconnect_gmail_source(
+    connection: AsyncConnection, data: DisconnectGmailSourceInput
+) -> DisconnectResult:
+    """Task 13 / module-boundaries.md §8 "계정 연결 해제와 purge" — the
+    synchronous half. Marks the source `disconnecting`, revokes the
+    credential (sets revoked_at — a local marker, no live Gmail revoke
+    call exists in this POC), and emits `gmail_source_disconnected` so
+    the async purge orchestration (mail_sources.jobs.
+    purge_disconnected_source, IC8) can run each domain's PURGE_HANDLER.
+
+    [멱등] already-disconnecting/disconnected is a no-op, not an error —
+    a retried disconnect request must not emit a second event or bump
+    the version again.
+    """
+    account = await repository.get_connected_account(
+        connection, connected_account_id=data.connected_account_id
+    )
+    if account is None or account["workspace_id"] != data.workspace_id:
+        raise NotFoundError("gmail source not found")
+    if account["status"] in ("disconnecting", "disconnected"):
+        return DisconnectResult(connected_account_id=data.connected_account_id, status=account["status"])
+
+    now = datetime.now(timezone.utc)
+    new_version = account["version"] + 1
+    await repository.mark_account_status(
+        connection,
+        account_id=data.connected_account_id,
+        status="disconnecting",
+        version=new_version,
+        disconnected_at=now,
+    )
+    await repository.revoke_credential(
+        connection, connected_account_id=data.connected_account_id, revoked_at=now
+    )
+    await append_event(
+        connection,
+        event_type="gmail_source_disconnected",
+        producer_domain="mail_sources",
+        payload={"source_id": str(data.connected_account_id), "workspace_id": str(data.workspace_id)},
+        idempotency_key=f"source:{data.connected_account_id}:disconnected:{new_version}",
+    )
+    return DisconnectResult(connected_account_id=data.connected_account_id, status="disconnecting")
 
 
 def _to_settings_result(account: dict, settings_row: dict) -> SourceSettingsResult:
