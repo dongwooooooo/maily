@@ -140,13 +140,12 @@ async def update_gmail_label_mapping_name(
 async def get_connected_account_status(
     connection: AsyncConnection, *, connected_account_id: uuid.UUID
 ) -> str | None:
-    """Read-only cross-domain lookup of mail_sources' account status.
+    """mail_sources account status에 대한 read-only cross-domain lookup.
 
-    labels does not own connected_gmail_accounts, but create_or_update_label
-    and move_message_to_label both need to reject requests targeting a
-    disconnected/disconnecting account (module-boundaries.md §invariant).
-    This is a plain read, not a service call — no write side effect
-    crosses the domain boundary here.
+    labels는 connected_gmail_accounts를 소유하지 않지만, create_or_update_label과
+    move_message_to_label은 disconnected/disconnecting account를 대상으로 하는 요청을 모두
+    거부해야 한다(module-boundaries.md §invariant). 이는 service call이 아니라 plain read이며,
+    write side effect가 domain boundary를 넘지 않는다.
     """
     row = (
         await connection.execute(

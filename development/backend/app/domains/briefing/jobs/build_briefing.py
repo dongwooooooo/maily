@@ -1,12 +1,12 @@
 """`build_briefing` job — docs/goals/backend-plans/briefing.md "Job:
 build_briefing".
 
-Official trigger events (_integration-contract.md §3):
+공식 trigger event(_integration-contract.md §3):
 `gmail_snapshot_changed`, `summary_completed`, `importance_classified`,
 `gmail_action_applied`, `gmail_action_undone`, `reminder_reactivated`.
-Wired through the outbox dispatcher to this job at IC2/IC3
-(app.core.jobs.wiring.ACTIVE_EVENT_CONSUMERS). `handle_build_briefing_trigger`
-below is what tests call directly to exercise each trigger's rebuild scope.
+IC2/IC3에서 outbox dispatcher를 통해 이 job으로 wired된다
+(app.core.jobs.wiring.ACTIVE_EVENT_CONSUMERS). 아래 `handle_build_briefing_trigger`는
+test가 각 trigger의 rebuild scope를 검증하기 위해 직접 호출하는 함수다.
 """
 
 import uuid
@@ -38,15 +38,13 @@ async def handle_build_briefing_trigger(
     message_ids: list[uuid.UUID],
     source_id: uuid.UUID | None = None,
 ) -> list[uuid.UUID]:
-    """Per-trigger rebuild scope (briefing.md "트리거별 재생성 범위").
+    """trigger별 rebuild scope(briefing.md "트리거별 재생성 범위").
 
-    Every trigger type converges on the same rebuild — service.
-    rebuild_briefing re-reads current summary_text/importance_band from
-    assistant_decisions' tables fresh on every call, so there's no
-    per-trigger override to thread through here. `trigger_type` stays an
-    explicit, validated parameter: it documents which of the 6
-    contract-listed event types is calling this, and rejects anything
-    else.
+    모든 trigger type은 같은 rebuild로 수렴한다. service.rebuild_briefing은 호출마다
+    assistant_decisions table에서 현재 summary_text/importance_band를 새로 읽으므로,
+    여기로 전달할 trigger별 override는 없다. `trigger_type`은 explicit하고 validated된
+    parameter로 유지한다. contract에 나열된 6개 event type 중 무엇이 호출했는지를 문서화하고
+    그 외 값을 거부하기 위해서다.
     """
     if trigger_type not in TRIGGER_TYPES:
         raise ValidationError(f"unknown build_briefing trigger_type: {trigger_type}")
@@ -67,9 +65,9 @@ async def handle_build_briefing_trigger(
 
 
 async def build_briefing_job(payload: dict) -> None:
-    """JOB_HANDLERS["build_briefing"] entry point — see __init__.py.
+    """JOB_HANDLERS["build_briefing"] entry point — __init__.py 참고.
 
-    payload shape per _integration-contract.md §2:
+    _integration-contract.md §2 기준 payload shape:
     `{workspace_id, source_id?, message_ids?}`.
     """
     from app.core.database import engine

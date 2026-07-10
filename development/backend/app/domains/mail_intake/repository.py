@@ -17,7 +17,7 @@ from app.domains.mail_intake.models import (
 )
 from app.domains.mail_sources.models import connected_gmail_accounts, gmail_source_settings
 
-# --- job_runs enqueue helper (shared by every job in this domain) -----------
+# --- job_runs enqueue helper (이 domain의 모든 job이 공유) ------------------
 
 
 async def enqueue_job(
@@ -29,10 +29,10 @@ async def enqueue_job(
     lock_key: str | None,
     scheduled_at: datetime,
 ) -> uuid.UUID | None:
-    """Insert one job_runs row, deduped on (job_type, idempotency_key).
+    """job_runs row 하나를 insert하고 (job_type, idempotency_key)로 dedupe한다.
 
-    Returns the new row id, or None if a row with that key already exists
-    (duplicate enqueue is a no-op) — mirrors core.outbox.append_event.
+    새 row id를 반환한다. 해당 key의 row가 이미 있으면 None을 반환한다(duplicate enqueue는
+    no-op). core.outbox.append_event와 같은 패턴이다.
     """
     stmt = (
         pg_insert(job_runs)
@@ -52,7 +52,7 @@ async def enqueue_job(
     return row.id if row is not None else None
 
 
-# --- message snapshot ---------------------------------------------------
+# --- message snapshot 관리 -----------------------------------------------
 
 
 async def _upsert_excerpt(
@@ -92,15 +92,13 @@ async def upsert_message_snapshot(
     is_archived: bool,
     last_history_id: int | None,
 ) -> tuple[uuid.UUID, bool]:
-    """Upsert one Gmail message snapshot row, keyed by
-    (connected_account_id, gmail_message_id).
+    """Gmail message snapshot row 하나를 upsert한다.
 
-    Returns (message_id, changed). changed=False means every field already
-    matched the existing row — snapshot_version is left untouched and the
-    caller must not include this message_id in the gmail_snapshot_changed
-    event (mail_intake.md "이미 최신인 메시지는 snapshot_version 증가 없이
-    no-op"). The excerpt (Gmail's snippet, never raw body) is upserted into
-    the separate message_excerpts table alongside any real change.
+    key는 (connected_account_id, gmail_message_id)다. (message_id, changed)를 반환한다.
+    changed=False는 모든 field가 기존 row와 이미 일치한다는 뜻이다. snapshot_version은 건드리지
+    않고, caller는 이 message_id를 gmail_snapshot_changed event에 포함하면 안 된다
+    (mail_intake.md "이미 최신인 메시지는 snapshot_version 증가 없이 no-op"). excerpt(Gmail의
+    snippet이며 raw body가 아님)는 실제 change와 함께 별도 message_excerpts table에 upsert된다.
     """
     existing = (
         await connection.execute(
@@ -205,8 +203,11 @@ async def list_message_labels(connection: AsyncConnection, *, message_id: uuid.U
 async def replace_message_labels(
     connection: AsyncConnection, *, message_id: uuid.UUID, labels: list[tuple[str, str]]
 ) -> None:
-    """Full replace — used by full sync, where the reader's label_ids for a
-    message is a complete, authoritative snapshot for that message."""
+    """full replace.
+
+    full sync에서 사용한다. 이때 reader의 message별 label_ids는 해당 message에 대한 완전하고
+    authoritative한 snapshot이다.
+    """
     await connection.execute(
         delete(gmail_message_labels).where(gmail_message_labels.c.message_id == message_id)
     )
@@ -285,10 +286,12 @@ async def update_message_state(
 
 
 async def delete_message_snapshot(connection: AsyncConnection, *, message_id: uuid.UUID) -> None:
-    """Gmail reported messagesDeleted. db-schema.md has no soft-delete
-    column for gmail_messages, and the snapshot is documented as fully
-    rebuildable/non-authoritative, so this hard-deletes the row and its
-    children (labels, excerpt) rather than tombstoning."""
+    """Gmail이 messagesDeleted를 보고했다.
+
+    db-schema.md에는 gmail_messages용 soft-delete column이 없고, snapshot은 완전히
+    rebuildable/non-authoritative하다고 문서화되어 있다. 따라서 tombstone을 남기지 않고 row와
+    child(labels, excerpt)를 hard-delete한다.
+    """
     await connection.execute(
         delete(gmail_message_labels).where(gmail_message_labels.c.message_id == message_id)
     )
@@ -298,7 +301,7 @@ async def delete_message_snapshot(connection: AsyncConnection, *, message_id: uu
     await connection.execute(delete(gmail_messages).where(gmail_messages.c.id == message_id))
 
 
-# --- sync cursor ---------------------------------------------------------
+# --- sync cursor 관리 -----------------------------------------------------
 
 
 async def get_cursor(
@@ -388,10 +391,12 @@ _INACTIVE_STATUSES = ("disconnecting", "disconnected", "paused")
 async def list_sources_for_polling(
     connection: AsyncConnection, *, stale_before: datetime
 ) -> list[dict]:
-    """Fallback-polling target selection: active, unpaused sources with a
-    cursor whose last_successful_sync_at is null or older than
-    `stale_before` (mail_intake.md poll_history "[데이터경계] 대상 선정은
-    활성·미paused source로 한정")."""
+    """fallback-polling target selection.
+
+    active, unpaused source 중 cursor의 last_successful_sync_at이 null이거나 `stale_before`보다
+    오래된 source를 고른다(mail_intake.md poll_history
+    "[데이터경계] 대상 선정은 활성·미paused source로 한정").
+    """
     rows = (
         await connection.execute(
             select(
@@ -421,7 +426,7 @@ async def list_sources_for_polling(
     return [dict(row) for row in rows]
 
 
-# --- watch registrations ---------------------------------------------------
+# --- watch registration 관리 -----------------------------------------------
 
 
 async def get_watch_registration(
@@ -486,10 +491,11 @@ async def mark_watch_registration_failed(
 async def list_watches_expiring_before(
     connection: AsyncConnection, *, before: datetime
 ) -> list[dict]:
-    """Renewal target selection: active watches expiring before `before`,
-    restricted to sources that are still eligible for sync (mail_intake.md
-    renew_watch "[선행조건] disconnecting/paused/credential revoked → 갱신
-    스킵")."""
+    """renewal target selection.
+
+    `before` 전에 expiring되는 active watch 중 아직 sync eligible한 source로 제한한다
+    (mail_intake.md renew_watch "[선행조건] disconnecting/paused/credential revoked → 갱신 스킵").
+    """
     rows = (
         await connection.execute(
             select(
@@ -514,7 +520,7 @@ async def list_watches_expiring_before(
     return [dict(row) for row in rows]
 
 
-# --- notification events ---------------------------------------------------
+# --- notification event 관리 ------------------------------------------------
 
 
 async def insert_notification_event(
@@ -525,10 +531,11 @@ async def insert_notification_event(
     history_id: int,
     dedupe_key: str,
 ) -> None:
-    """Raises sqlalchemy.exc.IntegrityError on a duplicate dedupe_key — the
-    caller wraps this in a nested transaction and treats that as an
-    already-processed notification (mail_intake.md "UNIQUE가 두 번째
-    insert 거부(IntegrityError)")."""
+    """duplicate dedupe_key면 sqlalchemy.exc.IntegrityError를 raise한다.
+
+    caller는 이를 nested transaction으로 감싸고 already-processed notification으로 취급한다
+    (mail_intake.md "UNIQUE가 두 번째 insert 거부(IntegrityError)").
+    """
     await connection.execute(
         insert(gmail_notification_events).values(
             id=notification_id,
@@ -565,10 +572,12 @@ async def get_notification_event_by_dedupe_key(
 async def list_active_sources_by_email(
     connection: AsyncConnection, *, email_address: str
 ) -> list[dict]:
-    """Fan-out target selection for process_gmail_notification: every
-    active (not disconnecting/disconnected), unpaused source with this
-    Gmail address — across every workspace (module-boundaries.md "같은
-    Gmail 주소가 여러 active connection에 존재하면 ... 전체로 fan-out")."""
+    """process_gmail_notification의 fan-out target selection.
+
+    모든 workspace에 걸쳐 이 Gmail address를 가진 active(disconnecting/disconnected 아님),
+    unpaused source를 모두 고른다(module-boundaries.md
+    "같은 Gmail 주소가 여러 active connection에 존재하면 ... 전체로 fan-out").
+    """
     rows = (
         await connection.execute(
             select(
@@ -592,7 +601,7 @@ async def list_active_sources_by_email(
     return [dict(row) for row in rows]
 
 
-# --- sync runs ---------------------------------------------------------
+# --- sync run 관리 -----------------------------------------------------
 
 
 async def insert_sync_run(

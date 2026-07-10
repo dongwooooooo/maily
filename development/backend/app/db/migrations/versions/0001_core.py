@@ -1,4 +1,4 @@
-"""core: outbox_events, job_runs, idempotency_keys
+"""core 테이블: outbox_events, job_runs, idempotency_keys
 
 Revision ID: 0001_core
 Revises:
@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
+# Alembic이 사용하는 revision 식별자.
 revision = "0001_core"
 down_revision = None
 branch_labels = None

@@ -49,10 +49,9 @@ async def test_summary_completed_rebuilds_single_message() -> None:
             connection, connected_account_id=account_id, message_id=m1
         )
 
-    # importance_classified re-reads both real tables — summary_text set
-    # by the earlier trigger is still there because message_summaries
-    # itself hasn't changed, not because of any override bookkeeping
-    # (briefing.md Job §동시).
+    # importance_classified는 실제 table 둘을 다시 읽는다. 이전 trigger가 설정한
+    # summary_text가 남아 있는 이유는 message_summaries 자체가 바뀌지 않았기 때문이지,
+    # 별도 override bookkeeping 때문이 아니다(briefing.md Job §동시).
     assert after_importance["summary_text"] == "이번 분기 정산 요약입니다."
     assert after_importance["importance_band"] == "fake_high"
 
@@ -72,8 +71,8 @@ async def test_snapshot_changed_no_importance_no_pending_item() -> None:
             connection, connected_account_id=account_id, message_id=m1
         )
 
-    # No item-level pending state — importance_band is simply null, the
-    # only "waiting" signal is account-level syncing (briefing.md §선행조건).
+    # item-level pending state는 없다. importance_band는 단순히 null이고,
+    # 유일한 "waiting" signal은 account-level syncing이다(briefing.md §선행조건).
     assert item is not None
     assert item["importance_band"] is None
 
@@ -93,9 +92,9 @@ async def test_action_applied_reflects_done_state() -> None:
             connection, connected_account_id=account_id, message_id=m1
         )
 
-    # Simulate gmail_actions applying the mutation and mail_intake
-    # reconciling the snapshot (out of scope for this isolated worktree —
-    # briefing only reacts to the trigger and re-joins current state).
+    # gmail_actions가 mutation을 적용하고 mail_intake가 snapshot을 reconcile한 상황을
+    # simulate한다(이 isolated worktree의 범위 밖이다. briefing은 trigger에 반응해
+    # current state를 다시 join할 뿐이다).
     async with engine.begin() as connection:
         await connection.execute(
             update(gmail_messages).where(gmail_messages.c.id == m1).values(is_read=True)
@@ -117,7 +116,7 @@ async def test_action_applied_reflects_done_state() -> None:
 
     assert after["rebuilt_at"] > before["rebuilt_at"]
     card = next(c for c in cards if c["message_id"] == m1)
-    assert card["is_read"] is True  # "done" derives from Gmail read state
+    assert card["is_read"] is True  # "done"은 Gmail read state에서 파생된다
 
 
 async def test_partial_scope_only() -> None:
@@ -140,7 +139,7 @@ async def test_partial_scope_only() -> None:
         )
 
     assert item1 is not None
-    assert item2 is None  # payload didn't name m2 -> never rebuilt
+    assert item2 is None  # payload가 m2를 지목하지 않음 -> rebuild되지 않음
 
 
 async def test_job_idempotent() -> None:
@@ -181,10 +180,10 @@ async def test_job_idempotent() -> None:
 
 
 async def test_build_briefing_job_handler_reads_official_payload_shape() -> None:
-    """JOB_HANDLERS["build_briefing"] contract entry point —
+    """JOB_HANDLERS["build_briefing"] contract 진입점 —
     _integration-contract.md §2 payload `{workspace_id, source_id?,
-    message_ids?}` (no summary_text/importance_band — those are
-    handle_build_briefing_trigger-only test hooks, see its docstring)."""
+    message_ids?}`를 읽는다(summary_text/importance_band 없음. 둘은
+    handle_build_briefing_trigger 전용 test hook이며 해당 docstring 참고)."""
     from app.domains.briefing.jobs.build_briefing import build_briefing_job
 
     workspace_id, _user_id, account_id = await seed_scope()

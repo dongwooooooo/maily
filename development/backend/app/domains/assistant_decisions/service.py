@@ -1,7 +1,8 @@
-"""Shared read-context helpers used by summaries.py, importance.py, and
-cleanup.py — message lookup + LLM payload assembly. Centralized here so
-the "never pass raw body/prompt" boundary is enforced in exactly one place
-(module-boundaries.md "LLM payload는 최소만") instead of duplicated per job.
+"""summaries.py, importance.py, cleanup.py가 공유하는 read-context helper.
+
+message lookup + LLM payload assembly를 담당한다. job마다 중복하지 않고 여기에서
+centralize해 "never pass raw body/prompt" boundary를 정확히 한 곳에서 강제한다
+(module-boundaries.md "LLM payload는 최소만").
 """
 
 import uuid
@@ -23,9 +24,11 @@ async def get_message_or_404(connection: AsyncConnection, *, message_id: uuid.UU
 async def resolve_message_scope_or_404(
     connection: AsyncConnection, *, message_id: uuid.UUID
 ) -> dict:
-    """Returns {"workspace_id", "connected_account_id"} for a message —
-    raises NotFoundError if the message has no snapshot (assistant_decisions
-    never evaluates a message that doesn't exist per mail_intake)."""
+    """message의 {"workspace_id", "connected_account_id"}를 반환한다.
+
+    message에 snapshot이 없으면 NotFoundError를 raise한다(assistant_decisions는 mail_intake
+    기준 존재하지 않는 message를 평가하지 않는다).
+    """
     scope = await repository.get_message_workspace_and_account(connection, message_id=message_id)
     if scope is None:
         raise NotFoundError("message snapshot not found")

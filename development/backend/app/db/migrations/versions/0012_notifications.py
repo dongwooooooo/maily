@@ -1,4 +1,4 @@
-"""notifications: notification_subscriptions, notification_events
+"""notifications 테이블: notification_subscriptions, notification_events
 
 Revision ID: 0012_notifications
 Revises: 0011_assistant_rules
@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
+# Alembic이 사용하는 revision 식별자.
 revision = "0012_notifications"
 down_revision = "0011_assistant_rules"
 branch_labels = None
@@ -41,13 +41,12 @@ def upgrade() -> None:
         sa.Column("notification_type", sa.String(), nullable=False),
         sa.Column("route_target", postgresql.JSONB(), nullable=False),
         sa.Column("read_at", sa.DateTime(timezone=True), nullable=True),
-        # Not in db-schema.md's notifications table (only id/workspace_id/
-        # notification_type/route_target/read_at are listed there) — added
-        # because the Read API's documented "최신순" (most-recent-first)
-        # ordering requirement (notifications.md "GET /notifications
-        # [필터]") needs a creation timestamp to order by. Mirrors
-        # outbox_events.created_at (app/core/outbox.py), not a status enum
-        # column, so it does not touch _integration-contract.md §5.
+        # db-schema.md의 notifications table에는 없다(거기에는 id/workspace_id/
+        # notification_type/route_target/read_at만 나열됨). Read API 문서의 "최신순"
+        # 최신순(most-recent-first) ordering requirement(notifications.md
+        # "GET /notifications [필터]")가 정렬용 creation timestamp를 필요로 하므로 추가했다.
+        # status enum column이 아니라 outbox_events.created_at(app/core/outbox.py)을
+        # mirror하므로 _integration-contract.md §5를 건드리지 않는다.
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),

@@ -41,7 +41,7 @@ async def _create_pending_command(
 
 
 async def test_execute_applies_and_emits(_fresh_fake_mutator: FakeGmailMutationPort) -> None:
-    _fresh_fake_mutator.seed_labels(uuid.uuid4(), set())  # unrelated seed, no-op
+    _fresh_fake_mutator.seed_labels(uuid.uuid4(), set())  # 무관한 seed, no-op
     _, _, _, message_id, command = await _create_pending_command(action_type="mark_read")
     _fresh_fake_mutator.seed_labels(message_id, {"UNREAD", "INBOX"})
 
@@ -68,9 +68,9 @@ async def test_execute_applies_and_emits(_fresh_fake_mutator: FakeGmailMutationP
 
 
 async def test_changed_false_on_noop(_fresh_fake_mutator: FakeGmailMutationPort) -> None:
-    """[changed flag] mark_read on a message that's already read -> changed=False."""
+    """[changed flag] 이미 read 상태인 message에 mark_read -> changed=False."""
     _, _, _, message_id, command = await _create_pending_command(action_type="mark_read")
-    _fresh_fake_mutator.seed_labels(message_id, {"INBOX"})  # UNREAD already absent
+    _fresh_fake_mutator.seed_labels(message_id, {"INBOX"})  # UNREAD가 이미 없음
 
     async with engine.begin() as connection:
         await run_execute_action(connection, command_id=command.id)
@@ -83,8 +83,8 @@ async def test_changed_false_on_noop(_fresh_fake_mutator: FakeGmailMutationPort)
 
 
 async def test_execute_idempotent(_fresh_fake_mutator: FakeGmailMutationPort) -> None:
-    """[멱등] re-running execute_action on an already-applied command is a
-    no-op: no version bump, no duplicate activity_log."""
+    """[멱등] 이미 applied된 command에 execute_action을 재실행하면 no-op이다.
+    version bump도 duplicate activity_log도 없다."""
     _, _, _, message_id, command = await _create_pending_command(action_type="archive")
     _fresh_fake_mutator.seed_labels(message_id, {"INBOX", "UNREAD"})
 
@@ -98,7 +98,7 @@ async def test_execute_idempotent(_fresh_fake_mutator: FakeGmailMutationPort) ->
         activity = await repository.get_activity_log_by_command(connection, command_id=command.id)
 
     assert updated["status"] == "applied"
-    assert updated["version"] == 1  # still 1, not bumped again
+    assert updated["version"] == 1  # 여전히 1, 다시 bump되지 않음
     assert activity is not None
 
 
@@ -117,7 +117,7 @@ async def test_failure_sets_failed_and_emits(_fresh_fake_mutator: FakeGmailMutat
     assert updated["version"] == 1
     assert updated["error_reason"] is not None
     assert updated["applied_at"] is None
-    assert activity is None  # no activity for a failed command
+    assert activity is None  # failed command에는 activity 없음
 
     key = f"command:{command.id}:failed:1"
     async with engine.connect() as connection:
@@ -133,7 +133,7 @@ async def test_failure_sets_failed_and_emits(_fresh_fake_mutator: FakeGmailMutat
 async def test_pending_becomes_blocked_when_account_disconnecting(
     _fresh_fake_mutator: FakeGmailMutationPort,
 ) -> None:
-    """[선행조건] account disconnecting -> execution stops, command stays pending."""
+    """[선행조건] account disconnecting -> execution은 멈추고 command는 pending 유지."""
     from sqlalchemy import update
 
     from app.domains.mail_sources.models import connected_gmail_accounts

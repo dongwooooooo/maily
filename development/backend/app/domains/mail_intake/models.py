@@ -15,7 +15,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.base import metadata
 
-# --- 0004_mail_intake_snapshot ---
+# --- 0004_mail_intake_snapshot migration 영역 ---
 
 gmail_messages = Table(
     "gmail_messages",
@@ -76,7 +76,7 @@ gmail_message_labels = Table(
     ),
 )
 
-# --- 0005_mail_intake_sync ---
+# --- 0005_mail_intake_sync migration 영역 ---
 
 gmail_sync_cursors = Table(
     "gmail_sync_cursors",

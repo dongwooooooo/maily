@@ -79,9 +79,9 @@ async def test_reader_never_returns_raw_body() -> None:
         "is_archived",
         "received_at",
     }
-    # The port itself has no body-fetching method by construction — a
-    # live_reader implementing this port literally cannot call
-    # format=full, because there is no method shaped to receive it.
+    # port 자체에는 구조적으로 body-fetching method가 없다. 이 port를 구현하는
+    # live_reader는 format=full을 호출할 수 없다. 그런 값을 받을 shape의 method가 없기
+    # 때문이다.
     assert not hasattr(GmailReaderPort, "get_full_body")
     assert not hasattr(GmailReaderPort, "get_message_body")
     assert not hasattr(GmailReaderPort, "get_body")

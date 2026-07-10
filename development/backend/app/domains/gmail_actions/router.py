@@ -30,7 +30,9 @@ class CreateActionRequest(BaseModel):
 @router.post("", response_model=GmailActionCommand)
 async def create_action(
     body: CreateActionRequest,
-    idempotency_key: str = Header(default="", alias="Idempotency-Key"),
+    # required(기본값 없음) — OpenAPI 스펙에 필수로 나가 프론트 codegen이
+    # 타입 수준에서 강제한다. 빈 문자열은 아래 가드가 거른다.
+    idempotency_key: str = Header(alias="Idempotency-Key"),
     context: RequestContext = Depends(get_request_context),
     connection: AsyncConnection = Depends(get_db_connection),
 ) -> GmailActionCommand:

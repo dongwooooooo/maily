@@ -34,8 +34,8 @@ gmail_label_mappings = Table(
         ForeignKey("connected_gmail_accounts.id"),
         nullable=False,
     ),
-    # Null until gmail_actions actually creates the label in Gmail — see
-    # docs/goals/backend-plans/labels.md "매핑 분리 근거".
+    # gmail_actions가 Gmail에 실제 label을 만들 때까지 null이다.
+    # docs/goals/backend-plans/labels.md "매핑 분리 근거" 참고.
     Column("gmail_label_id", String, nullable=True),
     Column("gmail_label_name", String, nullable=False),
 )

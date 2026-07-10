@@ -3,8 +3,8 @@ import type {
   CompactItem,
   MailCardItem,
   Section as SectionType,
-} from '@/features/briefing/data/briefing.mock'
-import { hasUrgentItems, mySections, myZoneLabel, sections } from '@/features/briefing/data/briefing.mock'
+} from '@/features/briefing/types'
+import { computeHasUrgentItems } from '@/features/briefing/adapters'
 import EmptyBriefing from '@/features/briefing/components/EmptyBriefing'
 
 function BriefcaseIcon() {
@@ -181,20 +181,24 @@ function Section({ section, selectedId, onSelect }: SectionProps) {
 }
 
 interface MailListProps {
+  sections: SectionType[]
   selectedId: string
   onSelect: (id: string) => void
 }
 
-/** Center pane: 오늘 브리핑 sections + 내 섹션 (사용자 분류함), each collapsible. */
-function MailList({ selectedId, onSelect }: MailListProps) {
-  if (!hasUrgentItems) {
-    const organizedSection = sections.find((section) => section.id === 'organized')
+/** Center pane: 오늘 브리핑 sections, each collapsible.
+ *
+ * 내 섹션(사용자 분류함)은 데이터 소스(라벨 API 연결)가 아직 없어 표시하지
+ * 않는다 — F8(rules/labels 연결)에서 복원. */
+function MailList({ sections, selectedId, onSelect }: MailListProps) {
+  if (!computeHasUrgentItems(sections)) {
+    const passiveSections = sections.filter((section) => section.id === 'done')
     return (
       <main className="list-pane" id="today-briefing" aria-label="오늘 브리핑 — 빈 상태">
         <EmptyBriefing />
-        {organizedSection && (
-          <Section section={organizedSection} selectedId={selectedId} onSelect={onSelect} />
-        )}
+        {passiveSections.map((section) => (
+          <Section key={section.id} section={section} selectedId={selectedId} onSelect={onSelect} />
+        ))}
       </main>
     )
   }
@@ -202,12 +206,6 @@ function MailList({ selectedId, onSelect }: MailListProps) {
   return (
     <main className="list-pane" id="today-briefing" aria-label="오늘 브리핑 목록">
       {sections.map((section) => (
-        <Section key={section.id} section={section} selectedId={selectedId} onSelect={onSelect} />
-      ))}
-
-      <div className="zone-head">{myZoneLabel}</div>
-
-      {mySections.map((section) => (
         <Section key={section.id} section={section} selectedId={selectedId} onSelect={onSelect} />
       ))}
     </main>

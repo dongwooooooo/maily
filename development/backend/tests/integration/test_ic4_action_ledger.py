@@ -1,13 +1,12 @@
 """IC4 (docs/goals/backend-plans/_build-schedule.md) — action ledger.
 
-gmail_actions.request_gmail_action (real producer) emits
-gmail_action_requested -> dispatch queues execute_action -> running it
-applies the fake mutation and emits gmail_action_applied (now carrying
-workspace_id/message_id/label deltas, added this IC) -> dispatch fans
-that out to build_briefing (message-scoped rebuild) AND mail_intake's
-reconcile_action (the "snapshot reconcile" _build-schedule.md names
-explicitly) -> both land: gmail_messages.is_read flips locally without
-waiting for a sync tick, and briefing_items reflects the done state.
+gmail_actions.request_gmail_action(real producer)이 gmail_action_requested를 emit한다
+-> dispatch가 execute_action을 queue한다 -> 이를 실행하면 fake mutation이 적용되고
+gmail_action_applied를 emit한다(이 IC에서 추가된 workspace_id/message_id/label delta 포함)
+-> dispatch가 이를 build_briefing(message-scoped rebuild)과 mail_intake의 reconcile_action
+(_build-schedule.md가 명시적으로 부르는 "snapshot reconcile")으로 fan-out한다 -> 둘 다
+반영된다. sync tick을 기다리지 않고 gmail_messages.is_read가 local에서 바뀌고,
+briefing_items는 done state를 반영한다.
 """
 
 import uuid
@@ -84,7 +83,7 @@ async def test_mark_read_action_reconciles_snapshot_and_rebuilds_briefing() -> N
     async with engine.begin() as connection:
         command, _is_new = await request_gmail_action(connection, data)
 
-    # Round 1: gmail_action_requested -> execute_action.
+    # 1차: gmail_action_requested -> execute_action.
     round1 = await _dispatch_relevant(command_id=command.id, message_id=message_id)
     assert [r["job_type"] for r in round1] == ["execute_action"]
     await _run_all([r["id"] for r in round1])
@@ -93,9 +92,9 @@ async def test_mark_read_action_reconciles_snapshot_and_rebuilds_briefing() -> N
         row = (
             await connection.execute(select(gmail_messages).where(gmail_messages.c.id == message_id))
         ).mappings().first()
-    assert row["is_read"] is False  # not reconciled yet — that's round 2
+    assert row["is_read"] is False  # 아직 reconciled 아님 — 2차에서 처리
 
-    # Round 2: gmail_action_applied -> build_briefing + reconcile_action.
+    # 2차: gmail_action_applied -> build_briefing + reconcile_action.
     round2 = await _dispatch_relevant(command_id=command.id, message_id=message_id)
     assert sorted(r["job_type"] for r in round2) == ["build_briefing", "reconcile_action"]
     await _run_all([r["id"] for r in round2])

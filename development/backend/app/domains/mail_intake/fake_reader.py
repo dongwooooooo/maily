@@ -1,12 +1,12 @@
-"""Deterministic in-memory GmailReaderPort double for TDD.
+"""TDD용 deterministic in-memory GmailReaderPort double.
 
-Task 4/5 primary deliverable: no live Gmail credential is needed to test
-watch registration, history delta, message metadata reads, or full
-enumeration. Seed a mailbox with `seed_mailbox`, then feed changes with
-`push_history`. Same seed -> same responses across repeated calls; there is
-no hidden randomness and no clock read inside response bodies other than
-what `register_watch` computes for `expiration` (kept short and documented
-below since Gmail's own expiration is itself a relative-to-now value).
+Task 4/5의 primary deliverable은 watch registration, history delta,
+message metadata read, full enumeration이다. 이를 test하는 데 live Gmail credential은
+필요 없다. `seed_mailbox`로 mailbox를 seed한 뒤 `push_history`로 change를 공급한다.
+same seed -> repeated call에서는 same response다.
+숨은 randomness는 없고, `register_watch`가 `expiration` 계산에 쓰는 것 외에는 response body
+안에서 clock read도 없다(Gmail의 expiration 자체가 now-relative value라서 아래에 짧게
+문서화한다).
 """
 
 import uuid
@@ -51,7 +51,7 @@ class FakeGmailReader(GmailReaderPort):
     def __init__(self) -> None:
         self._mailboxes: dict[uuid.UUID, _Mailbox] = {}
 
-    # --- seeding / test control -------------------------------------------------
+    # --- seeding / test 제어 ----------------------------------------------------
 
     def seed_mailbox(
         self,
@@ -72,9 +72,10 @@ class FakeGmailReader(GmailReaderPort):
     def expire_history_before(
         self, connected_account_id: uuid.UUID, oldest_known_history_id: int
     ) -> None:
-        """Simulate Gmail forgetting history older than this point — a
-        `history(start_history_id)` call with a smaller value now returns
-        `valid=False`."""
+        """Gmail이 이 지점보다 오래된 history를 잊은 상황을 simulate한다.
+
+        더 작은 값으로 `history(start_history_id)`를 호출하면 이제 `valid=False`를 반환한다.
+        """
         self._get_mailbox(connected_account_id).oldest_known_history_id = (
             oldest_known_history_id
         )
@@ -88,10 +89,10 @@ class FakeGmailReader(GmailReaderPort):
         gmail_message_id: str | None = None,
         label_ids: list[str] | None = None,
     ) -> int:
-        """Append one history record and advance current_history_id.
+        """history record 하나를 append하고 current_history_id를 전진시킨다.
 
         record_type: "message_added" | "message_deleted" | "labels_added" | "labels_removed"
-        Returns the new history_id.
+        새 history_id를 반환한다.
         """
         mailbox = self._get_mailbox(connected_account_id)
         mailbox.current_history_id += 1
@@ -144,7 +145,7 @@ class FakeGmailReader(GmailReaderPort):
             raise KeyError(f"no fake mailbox seeded for {connected_account_id}")
         return mailbox
 
-    # --- GmailReaderPort ----------------------------------------------------
+    # --- GmailReaderPort 구현 -----------------------------------------------
 
     async def register_watch(self, connected_account_id: uuid.UUID) -> WatchRegistration:
         mailbox = self._get_mailbox(connected_account_id)

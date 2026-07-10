@@ -1,14 +1,12 @@
 """IC7 (docs/goals/backend-plans/_build-schedule.md) — 알림 라우팅.
 
-Real chain: briefing.run_reactivate_reminders (real producer, past-due
-reminder seeded directly like tests/domains/briefing/
-test_reactivate_reminders_job.py does) emits reminder_reactivated with the
-workspace_id/message_id enrichment added this IC -> dispatch fans that out
-to BOTH build_briefing (message-scoped rebuild) and emit_notification
-(wrapped as {trigger, payload} — a shape the generic pass-through can't
-produce on its own, per outbox_dispatcher._wrap_for_emit_notification) ->
-running both produces a real notification_events row with a resolved
-route_target, not just a job that ran without erroring.
+Real chain: briefing.run_reactivate_reminders(real producer, past-due reminder는
+tests/domains/briefing/test_reactivate_reminders_job.py처럼 직접 seed)가 이 IC에서 추가된
+workspace_id/message_id enrichment를 담아 reminder_reactivated를 emit한다 -> dispatch가 이를
+build_briefing(message-scoped rebuild)과 emit_notification 둘 다로 fan-out한다
+({trigger, payload}로 wrap됨. outbox_dispatcher._wrap_for_emit_notification 기준 generic
+pass-through만으로는 만들 수 없는 shape) -> 둘을 실행하면 단순히 error 없이 실행된 job이
+아니라, resolved route_target을 가진 실제 notification_events row가 생긴다.
 """
 
 import uuid
@@ -72,10 +70,10 @@ async def test_reminder_reactivated_rebuilds_briefing_and_emits_notification() -
             .values(remind_at=datetime.now(timezone.utc) - timedelta(minutes=5))
         )
 
-    # Producer: real reactivate_reminders job (due-scan).
+    # Producer: 실제 reactivate_reminders job(due-scan).
     await reactivate_reminders_job({})
 
-    # Dispatch: reminder_reactivated -> build_briefing + emit_notification.
+    # Dispatch 단계: reminder_reactivated -> build_briefing + emit_notification.
     async with engine.begin() as connection:
         enqueued = await dispatch_pending_events(connection, consumers=ACTIVE_EVENT_CONSUMERS)
     async with engine.connect() as connection:

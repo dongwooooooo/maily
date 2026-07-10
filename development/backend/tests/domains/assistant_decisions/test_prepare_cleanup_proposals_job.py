@@ -36,5 +36,5 @@ async def test_job_wrapper_no_message_ids_is_noop() -> None:
     await prepare_cleanup_proposals_job(
         {"workspace_id": str(workspace_id), "requested_by": str(user_id)}
     )
-    # No exception, no proposals — nothing to assert on message-scoped
-    # tables since no message_ids were given.
+    # exception도 proposals도 없다. message_ids가 주어지지 않았으므로
+    # message-scoped table에 대해 assert할 것이 없다.

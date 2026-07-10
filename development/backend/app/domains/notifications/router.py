@@ -11,9 +11,9 @@ from app.domains.notifications.schemas import (
 )
 from app.domains.notifications.service import list_notifications, subscribe
 
-# _integration-contract.md §3 prefix table: notifications -> "/notifications".
-# Routes below declare "" and "/subscribe" and rely on that prefix (see
-# app/api/router.py _PREFIX_BY_DOMAIN), mirroring mail_sources' router.
+# _integration-contract.md §3 prefix table: notifications -> "/notifications" 매핑.
+# 아래 route는 ""와 "/subscribe"를 선언하고 해당 prefix에 의존한다(app/api/router.py
+# _PREFIX_BY_DOMAIN 참고). mail_sources router와 같은 방식이다.
 router = APIRouter()
 
 

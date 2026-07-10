@@ -1,17 +1,15 @@
-"""Activity log construction + recovery (docs/goals/backend-plans/gmail_actions.md
+"""activity log 생성 + recovery(docs/goals/backend-plans/gmail_actions.md
 "Job: execute_action" §[부분실패] and §activity_log recovery test).
 
-Design note — action_summary copy: CLAUDE.md's copy rules ("카피 즉흥 생성
-금지") apply to user-facing UI text. `activity_logs.action_summary` is
-eventually user-facing (F11 활동 로그), but `design/copy-principles.md` only
-has one directly reusable, verbatim-confirmed phrase for this domain
-("Gmail에서도 읽음 처리했습니다." under "Gmail 읽음 처리") — used below for
-mark_read. The other three action types (archive, read_and_archive,
-label_apply) and the undo/reverse summary have no standalone confirmed
-phrase in that document (the closest examples combine a specific label name
-and relative timestamp this domain layer doesn't have), so they are left as
-`[미확정: ...]` placeholders per the "확정 문구가 없으면 placeholder" rule.
-Report these to product/copy before this reaches a real UI.
+Design note — action_summary copy: CLAUDE.md의 copy rule("카피 즉흥 생성 금지")은
+user-facing UI text에 적용된다. `activity_logs.action_summary`는 결국 user-facing이다
+(F11 활동 로그). 하지만 `design/copy-principles.md`에는 이 domain에서 직접 재사용할 수
+있고 verbatim-confirmed된 phrase가 하나뿐이다("Gmail 읽음 처리" 아래
+"Gmail에서도 읽음 처리했습니다."). 아래 mark_read에 이를 사용한다. 다른 세 action type
+(archive, read_and_archive, label_apply)과 undo/reverse summary는 해당 문서에 standalone
+confirmed phrase가 없다(가장 가까운 예시는 이 domain layer가 갖지 않는 특정 label name과
+relative timestamp를 함께 사용). 그래서 "확정 문구가 없으면 placeholder" rule에 따라
+`[미확정: ...]` placeholder로 둔다. 실제 UI에 도달하기 전에 product/copy에 보고해야 한다.
 """
 
 import uuid
@@ -22,8 +20,8 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 from app.domains.gmail_actions import repository
 from app.domains.gmail_actions.schemas import ActivityLogEntry
 
-# Action types where a reverse mutation is well-defined (payload
-# add_label_ids/remove_label_ids can simply be swapped — see undo.py).
+# reverse mutation이 well-defined된 action type(payload add_label_ids/remove_label_ids를
+# 단순 swap하면 됨 — undo.py 참고).
 REVERSIBLE_ACTION_TYPES = {"mark_read", "archive", "read_and_archive", "label_apply", "reverse_mutation"}
 
 _ACTION_SUMMARIES = {
@@ -36,20 +34,20 @@ _ACTION_SUMMARIES = {
 
 
 def build_action_summary(action_type: str) -> str:
-    """Minimal, message-body-free description of what a command did.
+    """command가 수행한 일을 설명하는 최소한의 message-body-free 문구.
 
-    Never include message subject/body/summary text here — see the
-    "activity log는 감사와 사용자 설명에 필요한 최소 정보만 남긴다" invariant.
+    여기에는 message subject/body/summary text를 절대 포함하지 않는다.
+    "activity log는 감사와 사용자 설명에 필요한 최소 정보만 남긴다" invariant 참고.
     """
     return _ACTION_SUMMARIES.get(action_type, f"[미확정: {action_type} activity 요약 카피]")
 
 
 def compute_undo_availability(*, action_type: str, changed: bool | None) -> bool:
-    """[정상] applied + changed=True + a known reversible action_type => undoable.
+    """[정상] applied + changed=True + 알려진 reversible action_type이면 undoable이다.
 
-    changed=False (already in target state) has nothing to undo
-    (docs/goals/backend-plans/gmail_actions.md §Command 상태 전이 "changed=false
-    ... 되돌릴 변화 없음").
+    changed=False(이미 target state)는 undo할 것이 없다
+    (docs/goals/backend-plans/gmail_actions.md §Command 상태 전이 "changed=false ...
+    되돌릴 변화 없음").
     """
     return bool(changed) and action_type in REVERSIBLE_ACTION_TYPES
 
@@ -61,13 +59,12 @@ async def ensure_activity_and_undo(
     workspace_id: uuid.UUID,
     actor_id: uuid.UUID | None,
 ) -> tuple[dict, dict]:
-    """Create (or recover) the activity_log + undo_actions pair for a command.
+    """command에 대한 activity_log + undo_actions pair를 생성하거나 recover한다.
 
-    Idempotent/recoverable by design: `command.status` + `command.applied_at`
-    is the source of truth for "did this mutation happen", and this function
-    can be called again after a crash between the Gmail call succeeding and
-    the activity_log insert committing — it backfills from the ledger instead
-    of assuming activity_log always exists once a command is applied
+    설계상 idempotent/recoverable하다. `command.status` + `command.applied_at`이
+    "이 mutation이 발생했는가"의 source of truth이며, Gmail call 성공 후 activity_log insert
+    commit 전에 crash가 나도 이 function을 다시 호출할 수 있다. command가 applied이면
+    activity_log가 항상 존재한다고 가정하지 않고 ledger에서 backfill한다
     (docs/goals/backend-plans/gmail_actions.md "Job: execute_action" §부분실패,
     test_activity_reconstructable_from_ledger).
     """
@@ -113,7 +110,7 @@ async def list_activity(
     connection: AsyncConnection, *, workspace_id: uuid.UUID
 ) -> list[ActivityLogEntry]:
     """GET /actions/activity — docs/goals/backend-plans/gmail_actions.md
-    "Read API ... 활동 로그". [빈상태] no rows -> empty list, not an error.
+    "Read API ... 활동 로그". [빈상태] row 없음 -> empty list이며 error가 아니다.
     """
     rows = await repository.list_activity_logs(connection, workspace_id=workspace_id)
     entries = []

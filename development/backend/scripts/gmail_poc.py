@@ -1,22 +1,22 @@
-"""Manual Gmail API POC — throwaway script, not part of the app.
+"""수동 Gmail API POC — 앱에 포함되지 않는 일회용 스크립트.
 
-Resolves the open questions left in docs/areas/backend/db-schema.md:
-- does `format=metadata` include the `snippet` field?
-- does `users.watch` registration succeed against the configured Pub/Sub topic?
-- does a `Maily/{name}` label actually nest under `Maily` in the Gmail UI?
+docs/areas/backend/db-schema.md에 남은 열린 질문을 확인한다:
+- `format=metadata` 응답에 `snippet` 필드가 포함되는가?
+- 설정된 Pub/Sub topic으로 `users.watch` 등록이 성공하는가?
+- `Maily/{name}` 라벨이 Gmail UI에서 실제로 `Maily` 아래에 중첩되는가?
 
-OAuth uses PKCE, so the authorization code must be exchanged by the same
-process (same code_verifier) that generated the auth URL. Since the human
-consent step happens in a real browser across a separate turn, this is split
-into two steps that hand off state through a scratch file:
+OAuth가 PKCE를 쓰므로 authorization code는 auth URL을 생성한 것과 같은
+프로세스(같은 code_verifier)가 교환해야 한다. 사람의 동의 단계가 별도
+턴의 실제 브라우저에서 일어나므로, scratch 파일로 상태를 넘기는 두 단계로
+나눈다:
 
-  # step 1 — print the URL to open in a browser, save flow state
+  # 1단계 — 브라우저에서 열 URL을 출력하고 flow 상태를 저장
   python scripts/gmail_poc.py start
 
-  # step 2 — after consent, exchange the redirected URL and run the checks
+  # 2단계 — 동의 후 리다이렉트된 URL을 교환하고 확인 항목 실행
   python scripts/gmail_poc.py finish "<redirected url>"
 
-Both steps need: cd development/backend && set -a && source .env && set +a
+두 단계 모두 필요: cd development/backend && set -a && source .env && set +a
 """
 
 import json

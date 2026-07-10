@@ -2,15 +2,13 @@
 assistant_decisions.md "Job: prepare_cleanup_proposals" / "Command:
 approve_cleanup_proposal".
 
-Deviation note (see task report): F10/module-boundaries.md explicitly say
-assistant_decisions "승인 후 gmail_actions command를 요청할 수 있다" — the
-sanctioned way to do that without calling Gmail directly is gmail_actions'
-own public `request_gmail_action` (it only inserts a pending command +
-emits gmail_action_requested; no Gmail call happens inside it either).
-gmail_actions is already merged in this worktree, so this module imports
-it directly for the approve/auto-apply path rather than duplicating its
-idempotency-safe insert logic. This is the one place this domain reaches
-into another domain's service layer.
+Deviation note(task report 참고): F10/module-boundaries.md는 assistant_decisions가
+"승인 후 gmail_actions command를 요청할 수 있다"고 명시한다. Gmail을 직접 호출하지 않고
+이를 수행하는 허용된 방법은 gmail_actions의 public `request_gmail_action`이다(이 함수도
+pending command insert + gmail_action_requested emit만 수행하며 내부에서 Gmail call은 하지
+않는다). gmail_actions는 이미 이 worktree에 merge되어 있으므로, 이 module은
+idempotency-safe insert logic을 중복하지 않고 approve/auto-apply path에서 이를 직접
+import한다. 이곳이 이 domain이 다른 domain의 service layer에 들어가는 유일한 지점이다.
 """
 
 import uuid
@@ -82,11 +80,13 @@ async def prepare_cleanup_proposals(
     message_ids: list[uuid.UUID],
     requested_by: uuid.UUID,
 ) -> list[dict]:
-    """payload={workspace_id, message_ids} — this worktree always requires
-    explicit message_ids (the "scan the whole workspace" enumeration path
-    is out of scope for this fake/POC pass; see task report open question).
-    `requested_by` is only used for the auto-apply immediate command
-    request (assistant acting as the requester of record)."""
+    """payload={workspace_id, message_ids}.
+
+    이 worktree는 항상 명시적 message_ids를 요구한다("scan the whole workspace"
+    enumeration path는 이번 fake/POC pass 범위 밖이며, task report open question 참고).
+    `requested_by`는 auto-apply immediate command request에서만 사용한다(assistant가
+    requester of record로 동작).
+    """
     created: list[dict] = []
     for message_id in message_ids:
         scope = await service.resolve_message_scope_or_404(connection, message_id=message_id)

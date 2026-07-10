@@ -1,18 +1,16 @@
-"""GmailMutationPort — the only way gmail_actions is allowed to write to Gmail.
+"""GmailMutationPort — gmail_actions가 Gmail에 write할 수 있는 유일한 방법.
 
 See docs/goals/backend-plans/gmail_actions.md "경계 계약: GmailMutationPort":
-the interface is a single `apply(command_id)` method. The port reads the
-command row itself (connected_account_id, action_type, payload) from the
-ledger — it cannot be called without a command already existing, which is
-exactly the "no Gmail write without a command row" invariant expressed as a
-method signature. mark_read/archive/read_and_archive/label_apply are not
-separate port methods: Gmail's own `messages.modify` collapses all of them
-into one add/remove label id call, and `gmail_action_commands.payload`
-already normalizes every action_type into `{add_label_ids, remove_label_ids}`
-before the port ever sees it (see schemas.py / service.py). "Reverse mutation
-when supported" is a ledger-level concept (undo.py computes the reverse
-payload and inserts a new command) rather than a distinct port method — the
-port only ever applies whatever command it's given, forward or reverse.
+interface는 단일 `apply(command_id)` method다. port는 ledger에서 command row 자체
+(connected_account_id, action_type, payload)를 읽는다. 이미 존재하는 command 없이 호출할 수
+없으므로, "no Gmail write without a command row" invariant가 method signature로 표현된다.
+mark_read/archive/read_and_archive/label_apply는 별도 port method가 아니다. Gmail의
+`messages.modify` 자체가 이를 모두 하나의 add/remove label id call로 접고,
+`gmail_action_commands.payload`는 port가 보기 전에 이미 모든 action_type을
+`{add_label_ids, remove_label_ids}`로 normalize한다(schemas.py / service.py 참고).
+"Reverse mutation when supported"는 별도 port method가 아니라 ledger-level concept이다
+(undo.py가 reverse payload를 계산하고 새 command를 insert). port는 forward든 reverse든
+전달받은 command만 apply한다.
 """
 
 import uuid
@@ -32,15 +30,13 @@ class GmailMutationPort(ABC):
     async def apply(
         self, connection: AsyncConnection, *, command_id: uuid.UUID
     ) -> MutationResult:
-        """Apply the Gmail mutation described by the command row.
+        """command row가 설명하는 Gmail mutation을 apply한다.
 
-        Implementations look up the command by id (never accept a bare
-        action_type/payload from a caller), resolve the connected
-        account's credential (live_mutator only — fake_mutator has no
-        credential access at all), and call Gmail's `messages.modify`
-        equivalent with `payload["add_label_ids"]` /
-        `payload["remove_label_ids"]`. Must be idempotent: re-applying an
-        already-applied command is safe and simply reports whether this
-        call itself changed anything.
+        implementation은 id로 command를 lookup하고(caller의 bare action_type/payload를 받지
+        않음), connected account의 credential을 resolve한 뒤(live_mutator 전용이며 fake_mutator는
+        credential access가 전혀 없음), `payload["add_label_ids"]` /
+        `payload["remove_label_ids"]`로 Gmail의 `messages.modify` equivalent를 호출한다.
+        idempotent해야 한다. 이미 applied된 command를 다시 apply해도 안전하며, 이 호출 자체가
+        무엇을 바꿨는지만 보고한다.
         """
         raise NotImplementedError

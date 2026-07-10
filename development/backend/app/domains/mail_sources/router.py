@@ -12,9 +12,16 @@ from app.domains.mail_sources import repository
 from app.domains.mail_sources.schemas import (
     ConnectGmailSourceInput,
     ConnectedSource,
+    DisconnectGmailSourceInput,
+    DisconnectResult,
     SourceSettingsResult,
 )
-from app.domains.mail_sources.service import connect_gmail_source, update_gmail_source_settings
+from app.domains.mail_sources.service import (
+    connect_gmail_source,
+    disconnect_gmail_source,
+    get_gmail_source_settings,
+    update_gmail_source_settings,
+)
 
 router = APIRouter()
 
@@ -40,7 +47,7 @@ async def _get_owned_account(
 ) -> dict:
     account = await repository.get_connected_account(connection, connected_account_id=source_id)
     if account is None or account["workspace_id"] != workspace_id:
-        # 404 either way — existence of another workspace's source is not revealed.
+        # 어느 경우든 404다. 다른 workspace source의 존재를 드러내지 않는다.
         raise NotFoundError("gmail source not found")
     return account
 
@@ -77,6 +84,17 @@ async def get_source(
     return ConnectedSource(**account)
 
 
+@router.get("/{source_id}/settings", response_model=SourceSettingsResult)
+async def get_source_settings(
+    source_id: uuid.UUID,
+    context: RequestContext = Depends(get_request_context),
+    connection: AsyncConnection = Depends(get_db_connection),
+) -> SourceSettingsResult:
+    """설정 화면 토글 초기값 조회 — 무부작용 읽기 (F6 프론트 연결용)."""
+    await _get_owned_account(connection, source_id=source_id, workspace_id=context.workspace_id)
+    return await get_gmail_source_settings(connection, connected_account_id=source_id)
+
+
 @router.patch("/{source_id}", response_model=SourceSettingsResult)
 async def patch_source_settings(
     source_id: uuid.UUID,
@@ -88,4 +106,17 @@ async def patch_source_settings(
     changes = body.model_dump(exclude_unset=True)
     return await update_gmail_source_settings(
         connection, connected_account_id=source_id, changes=changes
+    )
+
+
+@router.delete("/{source_id}", response_model=DisconnectResult)
+async def disconnect_source(
+    source_id: uuid.UUID,
+    context: RequestContext = Depends(get_request_context),
+    connection: AsyncConnection = Depends(get_db_connection),
+) -> DisconnectResult:
+    await _get_owned_account(connection, source_id=source_id, workspace_id=context.workspace_id)
+    return await disconnect_gmail_source(
+        connection,
+        DisconnectGmailSourceInput(workspace_id=context.workspace_id, connected_account_id=source_id),
     )

@@ -15,13 +15,13 @@ from tests.domains.notifications.conftest import (
 )
 
 
-# --- Route target mapping (notifications.md "Route target 매핑") --------
+# --- Route target mapping 검증(notifications.md "Route target 매핑") -----
 
 
 async def test_type_maps_to_screen_and_item() -> None:
-    """Every row of notifications.md's 7-row mapping table resolves to the
-    fixed (notification_type, screen, item_id) triple — no event kind
-    invents its own screen."""
+    """notifications.md의 7-row mapping table의 모든 row는 고정된
+    (notification_type, screen, item_id) triple로 resolve된다. 어떤 event kind도
+    자체 screen을 만들지 않는다."""
     source_id = uuid.uuid4()
     command_id = uuid.uuid4()
     proposal_id = uuid.uuid4()
@@ -115,28 +115,27 @@ def test_daily_briefing_has_no_selected_item_but_keeps_screen() -> None:
     assert resolution.route_target["item_id"] is None
 
 
-# --- Generic landing negative case ---------------------------------------
+# --- Generic landing 부정 case -------------------------------------------
 
 
 def test_route_target_required_no_generic_landing_unmapped_trigger() -> None:
-    """An event kind not in the fixed mapping table must not produce a
-    route — resolve_route_target degrades to None (skip), never a
-    fabricated generic landing screen."""
+    """고정 mapping table에 없는 event kind는 route를 만들면 안 된다.
+    resolve_route_target은 fabricated generic landing screen이 아니라 None(skip)으로
+    degrade된다."""
     resolution = service.resolve_route_target("some_unmapped_event_type", {"workspace_id": str(uuid.uuid4())})
     assert resolution is None
 
 
 def test_route_target_required_no_generic_landing_empty_screen_rejected() -> None:
-    """Defensive guard: building a route_target with no screen key is
-    rejected outright (never silently becomes a generic landing)."""
+    """Defensive guard: screen key 없는 route_target build는 즉시 reject된다.
+    조용히 generic landing으로 바뀌면 안 된다."""
     with pytest.raises(ValidationError):
         service._route_target("", uuid.uuid4())
 
 
 async def test_emit_notification_skips_silently_for_unmapped_trigger() -> None:
-    """End-to-end: an unmapped trigger creates no notification_events row
-    and raises no exception (graceful skip, not an error, not a generic
-    landing)."""
+    """End-to-end: unmapped trigger는 notification_events row를 만들지 않고
+    exception도 발생시키지 않는다(graceful skip이며 error나 generic landing이 아님)."""
     workspace_id = await seed_workspace()
     async with engine.begin() as connection:
         result = await service.emit_notification(
@@ -153,7 +152,7 @@ async def test_emit_notification_skips_silently_for_unmapped_trigger() -> None:
     assert rows == []
 
 
-# --- notification_enabled=false skip (account-related alerts) -----------
+# --- notification_enabled=false skip(account-related alert) 검증 ---------
 
 
 async def test_notification_disabled_account_skipped() -> None:
@@ -183,8 +182,7 @@ async def test_notification_disabled_account_skipped() -> None:
 
 
 async def test_notification_enabled_account_not_skipped() -> None:
-    """Control case for the above — notification_enabled=true (default)
-    lets the same trigger through."""
+    """위 test의 control case다. notification_enabled=true(default)는 같은 trigger를 통과시킨다."""
     workspace_id, _user_id, account_id = await seed_scope(notification_enabled=True)
 
     async with engine.begin() as connection:
@@ -201,7 +199,7 @@ async def test_notification_enabled_account_not_skipped() -> None:
     assert result is not None
 
 
-# --- browser push subscription -------------------------------------------
+# --- browser push subscription 검증 --------------------------------------
 
 
 async def test_subscribe_registers_endpoint() -> None:
@@ -267,7 +265,7 @@ async def test_subscription_scoped_to_user() -> None:
     assert row_a["id"] != row_b["id"]
 
 
-# --- GET /notifications read model ----------------------------------------
+# --- GET /notifications read model 검증 ----------------------------------
 
 
 async def test_list_notifications_scoped() -> None:

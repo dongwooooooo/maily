@@ -12,9 +12,10 @@
 2. Job registry (job_type → 도메인 handler 매핑)
 3. `main.py` 라우터 include + outbox event → consumer wiring
 
-공유 규약 2개(코드 컨벤션):
+공유 규약 3개(코드 컨벤션):
 4. 도메인 패키지 노출 인터페이스 (core가 도메인을 자동 발견하는 규칙)
 5. status enum 값 집합 (테이블별 상태값 divergence 방지)
+6. API 계약 표면 (에러 봉투·OpenAPI 메타데이터 — 프론트 codegen 입력)
 
 ---
 
@@ -169,3 +170,36 @@ PURGE_HANDLER = ...     # callable(source_id) 또는 None (Task 13)
 | `summary_jobs.status` / `importance_jobs.status` | `queued`, `running`, `succeeded`, `failed` |
 
 `[미정]` 값 집합(schema §열린 결정): `briefing_items.section`, `importance_band`, `confidence_band` — 이 파일이 아니라 db-schema.md의 [미정] 해소 시 반영. 그 전까지 각 도메인은 `fake_*` 계약 상수로만 참조.
+
+---
+
+## 6. API 계약 표면 (프론트 codegen 입력)
+
+프론트는 `openapi.json` → openapi-typescript로 타입을 자동 생성한다. 아래 규칙을 어기면 codegen 산출물이 깨진다 — `tests/api/test_openapi_metadata.py`·`test_error_format.py`가 강제.
+
+### 에러 응답 봉투 (단일 형식)
+
+모든 에러는 status code와 무관하게 한 가지 형태다:
+
+```json
+{"error": {"code": "<error_code>", "message": "<메시지>", "request_id": "<uuid|null>", "details": [...]?}}
+```
+
+- `MailyError` 계열 → `app/core/error_handlers.py::maily_error_handler`. `MailyError.details`(dict)는 `error.details`로 전달된다
+- FastAPI `RequestValidationError`(422) → `request_validation_error_handler`가 같은 봉투로 변환. Pydantic 위치 정보는 `error.details`(list)에 보존하되 `input`/`ctx` 키는 제거한다(사용자 원문 값 — 크리덴셜 유출 경로)
+- `validation_error` 코드는 두 경로가 공유한다(도메인 `ValidationError` + 스키마 검증 실패). 구분 기준은 `details` shape: list = 스키마 검증, dict/null = 도메인
+- 미처리 예외 → 500 `internal_error` (메시지 마스킹)
+- FastAPI 기본 `{"detail": [...]}` 형식은 밖으로 나가지 않는다
+- OpenAPI 문서화: `app/main.py`의 `include_router(..., responses={422, "default": ErrorResponse})` 중앙 1곳 — 엔드포인트에 개별 `responses=` 금지
+- 스키마 위치: `app/api/schemas.py::ErrorResponse`
+
+### operationId 규칙
+
+- `operationId` = 라우트 함수명 (`generate_unique_id_function`, `app/main.py`) — 도메인 전체에서 라우트 함수명 유일 필수. 충돌 시 함수명을 도메인 어휘로 구체화한다(예: `get_rules`, `get_cleanup_queue`).
+- 모든 2xx 응답에 response_model 필수 — `-> dict` 반환 금지.
+
+### openapi.json export/drift
+
+- `development/backend/openapi.json`은 커밋 대상 — 프론트 codegen이 Python 환경 없이 소비한다. diff 리뷰 = API 계약 변경 리뷰.
+- 갱신: `.venv/bin/python scripts/export_openapi.py`. 라우트·스키마를 바꾸고 export를 안 돌리면 `tests/api/test_openapi_export.py`가 실패한다.
+- 프론트 소비처: `development/frontend`의 `pnpm codegen:api`(openapi-typescript → `src/shared/api/schema.d.ts`).

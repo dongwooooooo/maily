@@ -1,10 +1,16 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { detail } from '@/features/briefing/data/briefing.mock'
-import { addLabelCopy, labelGroups } from '@/features/archive/data/archive.mock'
+import type { DetailBody } from '@/features/briefing/types'
+import { addLabelCopy } from '@/features/archive/data/archive.mock'
+import { fetchLabels, type ServiceLabel } from '@/features/archive/api'
+import { moveMessageToLabel } from '@/features/briefing/api'
+import type { ApiError } from '@/shared/api/errors'
+import { errorMessageFor } from '@/shared/api/errorMessages'
+import { newIdempotencyKey } from '@/shared/api/idempotency'
 
 interface DetailPaneProps {
+  detail: DetailBody
   onMarkRead: () => void
 }
 
@@ -48,11 +54,34 @@ function ArchiveIcon() {
 }
 
 /** Right pane: detail header (account + primary actions), summary tint box, serif original body. */
-function DetailPane({ onMarkRead }: DetailPaneProps) {
+function DetailPane({ detail, onMarkRead }: DetailPaneProps) {
   const [overlayView, setOverlayView] = useState<OverlayView>('none')
-  const [selectedLabel, setSelectedLabel] = useState(labelGroups[0]?.heading ?? '')
+  const [labels, setLabels] = useState<ServiceLabel[]>([])
+  const [selectedLabelId, setSelectedLabelId] = useState<string | null>(null)
   const [ruleBannerShown, setRuleBannerShown] = useState(false)
+  const [moveError, setMoveError] = useState<ApiError | null>(null)
   const actionsRef = useRef<HTMLDivElement>(null)
+  // 같은 이동(메시지+라벨)의 재시도는 같은 Idempotency-Key를 재사용한다 —
+  // 응답 유실 후 재시도가 서버에서 중복 적용되지 않게(README 계약).
+  // 성공하거나 대상이 바뀌면 키를 버린다.
+  const moveKeyRef = useRef<{ messageId: string; labelId: string; key: string } | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchLabels()
+      .then((data) => {
+        if (cancelled) return
+        const visible = data.filter((label) => !label.hidden)
+        setLabels(visible)
+        setSelectedLabelId((current) => current ?? visible[0]?.id ?? null)
+      })
+      .catch((error) => console.error('라벨 목록 로드 실패', error))
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const selectedLabelName = labels.find((label) => label.id === selectedLabelId)?.name ?? ''
 
   useEffect(() => {
     if (overlayView === 'none') return
@@ -78,13 +107,37 @@ function DetailPane({ onMarkRead }: DetailPaneProps) {
     setOverlayView((view) => (view === 'none' ? 'menu' : 'none'))
   }
 
-  function confirmMoveOnce() {
-    setOverlayView('none')
+  async function moveToSelectedLabel(): Promise<boolean> {
+    // 정적 샘플(messageId=null, /storage 임시 상세)에서는 API를 부르지 않는다.
+    if (!detail.messageId || !selectedLabelId) return false
+    const held = moveKeyRef.current
+    const key =
+      held && held.messageId === detail.messageId && held.labelId === selectedLabelId
+        ? held.key
+        : newIdempotencyKey()
+    moveKeyRef.current = { messageId: detail.messageId, labelId: selectedLabelId, key }
+    try {
+      await moveMessageToLabel(detail.messageId, selectedLabelId, key)
+      moveKeyRef.current = null
+      setMoveError(null)
+      return true
+    } catch (error) {
+      console.error('라벨 이동 실패', error)
+      setMoveError(error as ApiError)
+      return false
+    }
   }
 
-  function confirmMoveAlways() {
+  async function confirmMoveOnce() {
     setOverlayView('none')
-    setRuleBannerShown(true)
+    await moveToSelectedLabel()
+  }
+
+  async function confirmMoveAlways() {
+    setOverlayView('none')
+    // 이동 자체가 학습 신호로 기록된다(라벨 교정 시그널 → 규칙 제안).
+    const moved = await moveToSelectedLabel()
+    if (moved) setRuleBannerShown(true)
   }
 
   return (
@@ -101,12 +154,18 @@ function DetailPane({ onMarkRead }: DetailPaneProps) {
           <div className="message-title-row">
             <h2 className="detail-title">{detail.title}</h2>
             <div className="detail-actions-top" aria-label="주요 처리" ref={actionsRef}>
-              <button className="icon-action" type="button" aria-label="Gmail에서 열기">
+              <a
+                className="icon-action"
+                href={detail.gmailUrl}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Gmail에서 열기"
+              >
                 <svg className="button-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M5 19 19 5"></path>
                   <path d="M11 5h8v8"></path>
                 </svg>
-              </button>
+              </a>
               <button
                 className="icon-action"
                 type="button"
@@ -160,27 +219,24 @@ function DetailPane({ onMarkRead }: DetailPaneProps) {
                 aria-label="브리핑 이동"
               >
                 <div className="move-label">이동할 라벨</div>
-                {labelGroups.map((group) => (
+                <div role="radiogroup" aria-label="이동할 라벨">
+                {labels.map((label) => (
                   <button
-                    key={group.id}
+                    key={label.id}
                     className="move-row"
                     type="button"
                     role="radio"
-                    aria-checked={selectedLabel === group.heading}
-                    onClick={() => setSelectedLabel(group.heading)}
+                    aria-checked={selectedLabelId === label.id}
+                    onClick={() => setSelectedLabelId(label.id)}
                   >
-                    <span>{group.heading}</span>
+                    <span>{label.name}</span>
                   </button>
                 ))}
-                <button
-                  className="move-row"
-                  type="button"
-                  role="radio"
-                  aria-checked={false}
-                  onClick={() => setSelectedLabel(addLabelCopy)}
-                >
+                {/* 새 라벨 생성 UI는 미배선 — POST /labels 연결은 후속. */}
+                <button className="move-row" type="button" role="radio" aria-checked={false}>
                   <span>{addLabelCopy}</span>
                 </button>
+                </div>
                 <div className="move-foot">
                   <button className="btn-t3" type="button" onClick={confirmMoveAlways}>
                     다음부터도 여기로
@@ -197,6 +253,11 @@ function DetailPane({ onMarkRead }: DetailPaneProps) {
       </header>
 
       <section className="detail-body" aria-label="선택한 메일 내용">
+        {moveError && (
+          <p className="list-error" role="alert">
+            {errorMessageFor(moveError)}
+          </p>
+        )}
         <div
           className="banner banner--info"
           data-show={ruleBannerShown ? 'true' : 'false'}
@@ -204,7 +265,8 @@ function DetailPane({ onMarkRead }: DetailPaneProps) {
           aria-live="polite"
         >
           <span className="banner-text">
-            앞으로 현대카드의 결제 알림은 <b>{selectedLabel}</b>에 표시합니다.
+            {/* 보드 카피는 샘플 발신자(현대카드) 고정 — 실데이터 문형은 미확정. */}
+            [미확정: 자동 분류 규칙 안내 문구] <b>{selectedLabelName}</b>
           </span>
           <button className="banner-action" type="button" onClick={() => setRuleBannerShown(false)}>
             되돌리기

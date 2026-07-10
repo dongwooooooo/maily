@@ -1,1 +1,1 @@
-"""Core backend configuration."""
+"""core backend 설정."""

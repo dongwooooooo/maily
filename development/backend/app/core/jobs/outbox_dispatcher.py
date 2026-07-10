@@ -1,21 +1,18 @@
 """Outbox -> job_runs dispatcher — _integration-contract.md §3.
 
-Reads pending outbox_events, looks up which job_type(s) each event_type
-should queue, enqueues one job_runs row per (event, job_type) pair, and
-marks the event dispatched. Producer domains never call a consumer
-directly — this module is the one place that crosses that boundary, and
-it does so generically (event_type -> job_type string lookup), never
-importing a domain's service/job function.
+pending outbox_events를 읽고 각 event_type이 어떤 job_type을 queue해야 하는지
+찾아 (event, job_type) pair마다 job_runs row 하나를 enqueue한 뒤 event를
+dispatched로 표시한다. Producer domain은 consumer를 직접 호출하지 않는다. 이
+module은 그 boundary를 넘는 유일한 곳이며, domain의 service/job 함수를 import하지
+않고 범용으로 처리한다(event_type -> job_type 문자열 lookup).
 
-Callers MUST pass `app.core.jobs.wiring.ACTIVE_EVENT_CONSUMERS` (or a
-narrower subset), NOT `app.core.discovery.collect_event_consumers(...)`.
-The discovery map is every domain's *declared* contract intent, including
-entries domains have explicitly flagged as not really wired yet; the
-wiring module is the curated subset actually proven safe to dispatch, one
-IC checkpoint at a time — see wiring.py's docstring for why (event-type
-payload shapes that need N-way fan-out, like gmail_snapshot_changed's
-message_ids list, can't go through this generic 1-event-to-1-job pass-
-through at all).
+Caller는 반드시 `app.core.jobs.wiring.ACTIVE_EVENT_CONSUMERS`(또는 더 좁은
+subset)를 넘겨야 하며, `app.core.discovery.collect_event_consumers(...)`를 넘기면
+안 된다. discovery map은 모든 domain의 *선언된* contract 의도이며, domain이 아직
+실제로 wired되지 않았다고 명시한 entry도 포함한다. wiring module은 IC checkpoint별로
+dispatch가 안전하다고 입증된 subset만 담는다. 이유는 wiring.py의 docstring 참고
+(gmail_snapshot_changed의 message_ids list처럼 N-way fan-out이 필요한 event-type
+payload shape는 이 generic한 1-event-to-1-job pass-through를 전혀 통과할 수 없다).
 """
 
 import uuid
@@ -31,19 +28,18 @@ from app.core.outbox import outbox_events
 
 
 class MissingJobPayloadKeyError(Exception):
-    """Raised when a wired (event_type, job_type) pair would enqueue a
-    job_runs row missing a key that job_type's handler requires. This is
-    a wiring bug (a wiring.ACTIVE_EVENT_CONSUMERS entry added without a
-    matching payload shape), not a data problem — it should fail loudly
-    at dispatch time instead of silently queuing a job that will only
-    fail once a worker picks it up."""
+    """wired (event_type, job_type) pair가 job_type handler에 필요한 key가 빠진
+    job_runs row를 enqueue하려 할 때 발생한다. 이는 data 문제가 아니라 wiring
+    bug다(matching payload shape 없이 wiring.ACTIVE_EVENT_CONSUMERS entry가 추가된
+    경우). worker가 집은 뒤에야 실패할 job을 조용히 queue하지 말고 dispatch 시점에
+    명확히 실패해야 한다."""
 
 
-# Minimal required-key backstop for job_types currently reachable through
-# wiring.ACTIVE_EVENT_CONSUMERS. Extend this alongside each new IC entry —
-# it is not a full payload-shape validator, just a cheap guard against the
-# exact failure mode found in IC1 review: a wired pair whose event payload
-# doesn't actually carry a key the job handler does `payload["key"]` on.
+# 현재 wiring.ACTIVE_EVENT_CONSUMERS를 통해 도달 가능한 job_type에 대한 최소
+# required-key backstop. 새 IC entry를 추가할 때 함께 확장한다. full payload-shape
+# validator가 아니라, IC1 review에서 발견된 정확한 failure mode를 막는 저렴한
+# guard다. 즉 wired pair의 event payload가 job handler가 `payload["key"]`로 읽는
+# key를 실제로 담지 않는 경우다.
 _REQUIRED_PAYLOAD_KEYS: dict[str, set[str]] = {
     "register_watch": {"source_id"},
     "sync_full": {"source_id"},
@@ -52,16 +48,15 @@ _REQUIRED_PAYLOAD_KEYS: dict[str, set[str]] = {
     "classify_importance": {"message_id"},
     "execute_action": {"command_id"},
     "reconcile_action": {"message_id"},
+    "purge_disconnected_source": {"source_id"},
 }
 
-# emit_notification's job payload is a wrapper — {"trigger": event_type,
-# "payload": {...}} — so the generic _REQUIRED_PAYLOAD_KEYS check (which
-# looks at top-level keys) can't validate it: the fields that actually
-# matter live one level down, and which fields are required depends on
-# which trigger produced the event (notifications.service.resolve_route_
-# target's per-trigger branches). workspace_id is required for every
-# trigger (emit_notification's own unconditional check); the rest mirror
-# resolve_route_target exactly.
+# emit_notification의 job payload는 {"trigger": event_type, "payload": {...}} wrapper다.
+# 따라서 top-level key를 보는 generic _REQUIRED_PAYLOAD_KEYS check로는 검증할 수
+# 없다. 실제로 중요한 field는 한 단계 아래에 있으며, 어떤 field가 필요한지는 event를
+# 만든 trigger에 따라 달라진다(notifications.service.resolve_route_target의 trigger별
+# branch). workspace_id는 모든 trigger에 필요하고(emit_notification 자체의 무조건
+# check), 나머지는 resolve_route_target과 정확히 맞춘다.
 _EMIT_NOTIFICATION_REQUIRED_KEYS: dict[str, set[str]] = {
     "gmail_source_recovery_needed": {"workspace_id", "source_id", "reason", "version"},
     "gmail_action_failed": {"workspace_id", "command_id", "version"},
@@ -69,11 +64,10 @@ _EMIT_NOTIFICATION_REQUIRED_KEYS: dict[str, set[str]] = {
     "reminder_reactivated": {"workspace_id", "reminder_id", "message_id"},
 }
 
-# _integration-contract.md §2 lock_key rules: source-targeted jobs lock per
-# source_id (no concurrent sync/watch churn on one account); execute_action
-# locks per command_id; message-level jobs (generate_summary,
-# classify_importance, build_briefing, ...) need no lock — idempotency_key
-# alone is enough.
+# _integration-contract.md §2 lock_key 규칙: source-targeted job은 source_id별로
+# lock한다(한 account에서 sync/watch churn 동시 실행 없음). execute_action은
+# command_id별로 lock한다. message-level job(generate_summary, classify_importance,
+# build_briefing 등)은 lock이 필요 없으며 idempotency_key만으로 충분하다.
 _SOURCE_LOCKED_JOB_TYPES = {
     "register_watch",
     "renew_watch",
@@ -94,13 +88,11 @@ def _resolve_lock_key(job_type: str, payload: dict) -> str | None:
     return None
 
 
-# Default behavior: pass the event payload through unchanged, as a single
-# job — every job handler reads only the keys it needs (dict access on a
-# fixed key set), so extra keys from the event are harmless. Only add an
-# entry here when a (event_type, job_type) pair needs something the
-# default 1-event-to-1-job pass-through can't produce: a static key
-# override, or a real fan-out (1 event -> N jobs, e.g. one job per
-# message_id in an event's message_ids list).
+# 기본 동작: event payload를 변경 없이 단일 job으로 pass-through한다. 모든 job
+# handler는 필요한 key만 읽으므로(fixed key set에 대한 dict access) event의 추가 key는
+# 무해하다. (event_type, job_type) pair가 기본 1-event-to-1-job pass-through로 만들 수
+# 없는 값이 필요할 때만 여기에 entry를 추가한다. 예: static key override 또는 실제
+# fan-out(1 event -> N jobs, 예: event의 message_ids list에서 message_id별 job 하나).
 def _override_reason_initial_connect(event_payload: dict) -> list[dict]:
     return [{**event_payload, "reason": "initial_connect"}]
 
@@ -110,10 +102,10 @@ def _fan_out_per_message_id(event_payload: dict) -> list[dict]:
 
 
 def _single_message_id_to_build_briefing_payload(event_payload: dict) -> list[dict]:
-    # summary_completed/importance_classified carry a single `message_id`
-    # (assistant_decisions evaluates one message per job); build_briefing's
-    # payload contract wants the plural `message_ids` list — even a
-    # 1-element one — since that's the key its handler reads.
+    # summary_completed/importance_classified는 단일 `message_id`를 담는다
+    # (assistant_decisions는 job마다 message 하나를 평가). build_briefing의 payload
+    # contract는 handler가 읽는 key인 복수형 `message_ids` list를 요구한다. element가
+    # 1개뿐이어도 list여야 한다.
     return [
         {
             "workspace_id": event_payload["workspace_id"],
@@ -123,12 +115,11 @@ def _single_message_id_to_build_briefing_payload(event_payload: dict) -> list[di
 
 
 def _optional_message_id_to_build_briefing_payload(event_payload: dict) -> list[dict]:
-    # gmail_action_applied/gmail_action_undone's message_id can genuinely
-    # be null (a command not tied to one message, e.g. a future bulk
-    # action) — unlike summary/importance which always evaluate a real
-    # message. No message_id means nothing for briefing to rebuild, so
-    # this returns no job rather than enqueuing build_briefing with a
-    # message_ids: [None] that would blow up in the handler.
+    # gmail_action_applied/gmail_action_undone의 message_id는 실제로 null일 수 있다
+    # (하나의 message에 묶이지 않는 command, 예: 미래 bulk action). 항상 실제 message를
+    # 평가하는 summary/importance와 다르다. message_id가 없으면 briefing이 rebuild할
+    # 대상도 없으므로, handler에서 터질 message_ids: [None]으로 build_briefing을
+    # enqueue하지 않고 job을 반환하지 않는다.
     if not event_payload.get("message_id"):
         return []
     return [
@@ -140,22 +131,20 @@ def _optional_message_id_to_build_briefing_payload(event_payload: dict) -> list[
 
 
 def _skip_if_no_message_id(event_payload: dict) -> list[dict]:
-    # Same message-less-command guard as above, for reconcile_action —
-    # nothing to reconcile without a message_id.
+    # 위와 같은 message-less-command guard를 reconcile_action에 적용한다.
+    # message_id가 없으면 reconcile할 대상도 없다.
     if not event_payload.get("message_id"):
         return []
     return [dict(event_payload)]
 
 
 def _wrap_for_emit_notification(event_type: str) -> Callable[[dict], list[dict]]:
-    # emit_notification_job's payload shape is {"trigger": <event_type>,
-    # "payload": <raw event payload>} (notifications/jobs/emit_notification.py) —
-    # a wrapper the generic pass-through can't produce on its own, since it
-    # needs the *event_type string itself* as a payload value, not just
-    # the event's own payload dict. One tiny closure per wired trigger
-    # (registered below) instead of a single parametrized builder, since
-    # _PAYLOAD_BUILDERS values are Callable[[dict], list[dict]] with no
-    # event_type argument.
+    # emit_notification_job의 payload shape는 {"trigger": <event_type>,
+    # "payload": <raw event payload>}이다(notifications/jobs/emit_notification.py).
+    # event 자체의 payload dict뿐 아니라 *event_type 문자열 자체*가 payload 값으로
+    # 필요하므로 generic pass-through만으로는 이 wrapper를 만들 수 없다. _PAYLOAD_BUILDERS
+    # 값은 event_type 인자가 없는 Callable[[dict], list[dict]]이므로, 단일 parametrized
+    # builder 대신 wired trigger마다 작은 closure 하나씩을 아래에 등록한다.
     def _builder(event_payload: dict) -> list[dict]:
         return [{"trigger": event_type, "payload": event_payload}]
 
@@ -172,14 +161,13 @@ _PAYLOAD_BUILDERS: dict[tuple[str, str], Callable[[dict], list[dict]]] = {
     ("gmail_action_undone", "build_briefing"): _optional_message_id_to_build_briefing_payload,
     ("gmail_action_applied", "reconcile_action"): _skip_if_no_message_id,
     ("reminder_reactivated", "build_briefing"): _optional_message_id_to_build_briefing_payload,
-    # IC7 (알림 라우팅) — the 4 triggers notifications.md's route_target
-    # table already resolves (service.py "Trigger scope note"): the other
-    # 3 (gmail_action_undone, and the two gmail_snapshot_changed splits)
-    # stay unwired — gmail_action_undone->emit_notification would need
-    # its own dedupe/UX decision (already covered for briefing rebuild by
-    # IC4's gmail_action_undone->build_briefing), and the snapshot_changed
-    # splits aren't derivable from mail_intake's actual payload at all
-    # (no importance signal in it) per that same docstring.
+    # IC7 (알림 라우팅) — notifications.md의 route_target table이 이미 resolve하는
+    # trigger 4개(service.py "Trigger scope note"). 나머지 3개(gmail_action_undone 및
+    # gmail_snapshot_changed split 2개)는 unwired로 둔다. gmail_action_undone->
+    # emit_notification은 별도 dedupe/UX 결정이 필요하고(IC4의 gmail_action_undone->
+    # build_briefing으로 briefing rebuild는 이미 처리됨), 같은 docstring에 적힌 대로
+    # snapshot_changed split은 mail_intake의 실제 payload에서 전혀 파생할 수 없다
+    # (그 안에 importance signal 없음).
     ("gmail_source_recovery_needed", "emit_notification"): _wrap_for_emit_notification(
         "gmail_source_recovery_needed"
     ),
@@ -227,20 +215,18 @@ async def _enqueue_job(
 async def dispatch_pending_events(
     connection: AsyncConnection, *, consumers: dict[str, list[str]]
 ) -> list[uuid.UUID]:
-    """Queue one job_runs row per (pending outbox event, consumer job_type)
-    pair, per `consumers` (event_type -> job_type list; callers pass
-    app.core.jobs.wiring.ACTIVE_EVENT_CONSUMERS — see module docstring for
-    why not discovery.collect_event_consumers).
+    """`consumers`에 따라 (pending outbox event, consumer job_type) pair마다
+    job_runs row 하나를 queue한다(event_type -> job_type list; caller는
+    app.core.jobs.wiring.ACTIVE_EVENT_CONSUMERS를 넘긴다. discovery.collect_event_consumers를
+    쓰지 않는 이유는 module docstring 참고).
 
-    Marks every selected event dispatched regardless of whether any
-    consumer claimed it — an event type with no registered consumer yet
-    (an IC-deferred trigger) is a no-op, not an error, so it doesn't get
-    re-selected on the next poll.
+    consumer가 claim했는지와 무관하게 선택된 모든 event를 dispatched로 표시한다. 아직
+    등록된 consumer가 없는 event type(IC-deferred trigger)은 error가 아니라 no-op이므로
+    다음 poll에서 다시 선택되지 않는다.
 
-    idempotency_key is `event:{event_id}:job:{job_type}` — the outbox
-    event id is a real causal disambiguator (not a fresh random uuid), so
-    re-running dispatch over the same pending rows (e.g. two overlapping
-    poll ticks) can't double-enqueue a job_runs row for the same event.
+    idempotency_key는 `event:{event_id}:job:{job_type}`이다. outbox event id는 새 random
+    uuid가 아니라 실제 causal disambiguator이므로, 같은 pending row에 dispatch를 다시
+    실행해도(예: 겹치는 poll tick 두 개) 같은 event에 대해 job_runs row를 중복 enqueue할 수 없다.
     """
     rows = (
         (
@@ -262,23 +248,21 @@ async def dispatch_pending_events(
                     event["event_type"], job_type, dict(event["payload"])
                 )
             except KeyError as exc:
-                # A builder (_fan_out_per_message_id etc.) did a direct
-                # payload[key] read the event's actual payload didn't
-                # satisfy — same "wiring bug, fail loud at dispatch time"
-                # intent as the required-key check below, just raised from
-                # inside a builder instead of the generic post-check.
+                # builder(_fan_out_per_message_id 등)가 event의 실제 payload가 충족하지
+                # 못하는 payload[key] 직접 read를 했다. 아래 required-key check와 같은
+                # "wiring bug는 dispatch 시점에 명확히 실패" 의도이며, generic post-check가
+                # 아니라 builder 내부에서 발생했을 뿐이다.
                 raise MissingJobPayloadKeyError(
                     f"{event['event_type']} -> {job_type} builder needs key {exc} "
                     f"(event_id={event['id']})"
                 ) from exc
             for index, job_payload in enumerate(job_payloads):
                 required = _REQUIRED_PAYLOAD_KEYS.get(job_type, set())
-                # Value-level check, not just key presence: a required key
-                # present but null (e.g. a producer emitting
-                # {"workspace_id": None} instead of omitting the key
-                # entirely) must fail exactly the same way as a missing
-                # key — a downstream job handler doing uuid.UUID(str(None))
-                # is the same silent-retry-exhaustion failure either way.
+                # 단순 key 존재 여부가 아니라 value-level check다. required key가 있지만
+                # null인 경우(예: producer가 key를 완전히 생략하는 대신
+                # {"workspace_id": None}을 emit)는 missing key와 정확히 같은 방식으로
+                # 실패해야 한다. downstream job handler가 uuid.UUID(str(None))을 실행하는
+                # 것은 어느 쪽이든 같은 silent-retry-exhaustion failure다.
                 missing = {key for key in required if job_payload.get(key) is None}
                 if missing:
                     raise MissingJobPayloadKeyError(
@@ -296,15 +280,13 @@ async def dispatch_pending_events(
                             f"{event['event_type']} -> emit_notification payload missing/null "
                             f"{sorted(inner_missing)} (event_id={event['id']})"
                         )
-                # A fan-out event (job_payloads has >1 entry) needs a
-                # distinct idempotency_key per payload, or the UNIQUE
-                # constraint on (job_type, idempotency_key) would let only
-                # the first of N through — silently dropping the rest, no
-                # error. Gate this on the actual fan-out condition
-                # (len(job_payloads) > 1), not on a specific key name like
-                # "message_id" happening to be present — a future fan-out
-                # builder keyed on something else (action_id, etc.) must
-                # not silently fall through to the single-payload branch.
+                # fan-out event(job_payloads entry가 2개 이상)은 payload마다 서로 다른
+                # idempotency_key가 필요하다. 그렇지 않으면 (job_type, idempotency_key)의
+                # UNIQUE constraint 때문에 N개 중 첫 번째만 통과하고 나머지는 error 없이
+                # 조용히 drop된다. "message_id" 같은 특정 key 이름의 우연한 존재가 아니라
+                # 실제 fan-out 조건(len(job_payloads) > 1)으로 gate한다. 나중에 다른
+                # key(action_id 등)를 기준으로 하는 fan-out builder가 single-payload branch로
+                # 조용히 빠지면 안 된다.
                 idempotency_key = f"event:{event['id']}:job:{job_type}"
                 if len(job_payloads) > 1:
                     idempotency_key += f":{index}"

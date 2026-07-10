@@ -10,11 +10,10 @@ class InvalidGoogleIdTokenError(Exception):
 
 
 async def verify_google_id_token(id_token: str) -> GoogleProfile:
-    """Verify a Google Identity Services ID token and extract the profile.
+    """Google Identity Services ID token을 verify하고 profile을 추출한다.
 
-    Frontend performs the Google sign-in and hands this backend an
-    ID token; we verify its signature/audience/expiry against
-    Google's certs rather than trusting client-supplied claims.
+    frontend가 Google sign-in을 수행하고 이 backend에 ID token을 넘긴다. client-supplied claim을
+    신뢰하지 않고 Google cert로 signature/audience/expiry를 verify한다.
     """
     try:
         claims = google_id_token.verify_oauth2_token(

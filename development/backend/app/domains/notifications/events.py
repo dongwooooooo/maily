@@ -19,11 +19,11 @@ async def record_notification_event_created(
     notification_type: str,
     route_target: dict,
 ) -> uuid.UUID | None:
-    """Emit notification_event_created for a newly written notification row.
+    """새로 작성된 notification row에 대해 notification_event_created를 emit한다.
 
-    Consumer (browser push worker, per _integration-contract.md §3) fans
-    out to active `notification_subscriptions` — out of scope here (POC
-    uses a fake push sink, see notifications.md "워크트리 격리 노트").
+    consumer(_integration-contract.md §3 기준 browser push worker)는 active
+    `notification_subscriptions`로 fan-out한다. 여기서는 범위 밖이다(POC는 fake push sink 사용,
+    notifications.md "워크트리 격리 노트" 참고).
     """
     return await append_event(
         connection,

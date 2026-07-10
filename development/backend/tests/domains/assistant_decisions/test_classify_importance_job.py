@@ -103,9 +103,9 @@ async def test_missing_message_snapshot_rejects_job() -> None:
 async def test_classify_importance_independent_of_generate_summary_job_failure(
     _fresh_fake_llm,
 ) -> None:
-    """[동시]/[부분실패] generate_summary failing (or being skipped) never
-    blocks classify_importance for the same message, run through the real
-    job wrappers this time (not the bare service functions)."""
+    """[동시]/[부분실패] generate_summary 실패(또는 skip)가 같은 message의
+    classify_importance를 막지 않는다. 이번에는 bare service function이 아니라
+    실제 job wrapper를 통해 실행한다."""
     _, _, account_id = await seed_scope(summary_enabled=True)
     message_id = await seed_message(account_id, snippet="본문 스니펫")
     _fresh_fake_llm.fail_next_summarize()
@@ -118,5 +118,5 @@ async def test_classify_importance_independent_of_generate_summary_job_failure(
         classification = await repository.get_message_importance_classification(
             connection, message_id=message_id
         )
-    assert summary is None  # summary job failed, no row written
-    assert classification is not None  # importance unaffected
+    assert summary is None  # summary job 실패, row 미작성
+    assert classification is not None  # importance는 영향 없음

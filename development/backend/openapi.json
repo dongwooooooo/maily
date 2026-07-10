@@ -1,0 +1,3516 @@
+{
+  "components": {
+    "schemas": {
+      "AccountBriefingGroup": {
+        "properties": {
+          "connected_account_id": {
+            "format": "uuid",
+            "title": "Connected Account Id",
+            "type": "string"
+          },
+          "gmail_address": {
+            "title": "Gmail Address",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BriefingCard"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "syncing": {
+            "title": "Syncing",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "connected_account_id",
+          "gmail_address",
+          "status",
+          "syncing",
+          "items"
+        ],
+        "title": "AccountBriefingGroup",
+        "type": "object"
+      },
+      "ActivityLogEntry": {
+        "properties": {
+          "action_summary": {
+            "title": "Action Summary",
+            "type": "string"
+          },
+          "actor_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Id"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "undo_available": {
+            "title": "Undo Available",
+            "type": "boolean"
+          },
+          "undone_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Undone At"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "command_id",
+          "action_summary",
+          "actor_id",
+          "occurred_at",
+          "undo_available",
+          "undone_at"
+        ],
+        "title": "ActivityLogEntry",
+        "type": "object"
+      },
+      "BriefingCard": {
+        "description": "today briefing / card list shape.\n\nGmail mutation action, AI judgement reason, raw body field\ub97c \uc758\ub3c4\uc801\uc73c\ub85c \uc81c\uc678\ud55c\ub2e4.\nbriefing.md \"\uce74\ub4dc \uc751\ub2f5\uc5d0\ub294 Gmail mutation action, AI \ud310\ub2e8 \uc774\uc720, raw body\ub97c \ub123\uc9c0 \uc54a\ub294\ub2e4\"\n(\uac15\uc81c invariant). test\ub294 null value\uac00 \uc544\ub2c8\ub77c field *absence*\ub97c assert\ud558\ubbc0\ub85c, \uadf8\ub7f0 field\ub97c\n\uc5ec\uae30 \uc120\uc5b8\ud558\uc9c0 \uc54a\ub294\ub2e4.",
+        "properties": {
+          "connected_account_id": {
+            "format": "uuid",
+            "title": "Connected Account Id",
+            "type": "string"
+          },
+          "done": {
+            "title": "Done",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "importance_band": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Importance Band"
+          },
+          "message_id": {
+            "format": "uuid",
+            "title": "Message Id",
+            "type": "string"
+          },
+          "rebuilt_at": {
+            "format": "date-time",
+            "title": "Rebuilt At",
+            "type": "string"
+          },
+          "received_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received At"
+          },
+          "section": {
+            "title": "Section",
+            "type": "string"
+          },
+          "seen": {
+            "title": "Seen",
+            "type": "boolean"
+          },
+          "sender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sender"
+          },
+          "snippet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snippet"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject"
+          },
+          "summary_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary Text"
+          }
+        },
+        "required": [
+          "id",
+          "connected_account_id",
+          "message_id",
+          "section",
+          "subject",
+          "sender",
+          "snippet",
+          "received_at",
+          "importance_band",
+          "summary_text",
+          "done",
+          "seen",
+          "rebuilt_at"
+        ],
+        "title": "BriefingCard",
+        "type": "object"
+      },
+      "ClassificationRule": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "match_condition": {
+            "additionalProperties": true,
+            "title": "Match Condition",
+            "type": "object"
+          },
+          "service_label_id": {
+            "format": "uuid",
+            "title": "Service Label Id",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "service_label_id",
+          "match_condition",
+          "active"
+        ],
+        "title": "ClassificationRule",
+        "type": "object"
+      },
+      "CleanupProposal": {
+        "properties": {
+          "after_state": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "After State"
+          },
+          "before_state": {
+            "additionalProperties": true,
+            "title": "Before State",
+            "type": "object"
+          },
+          "confidence_band": {
+            "title": "Confidence Band",
+            "type": "string"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "gmail_action_command_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gmail Action Command Id"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "message_id": {
+            "format": "uuid",
+            "title": "Message Id",
+            "type": "string"
+          },
+          "proposed_action": {
+            "title": "Proposed Action",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "message_id",
+          "proposed_action",
+          "confidence_band",
+          "status",
+          "before_state",
+          "after_state",
+          "gmail_action_command_id",
+          "decided_at"
+        ],
+        "title": "CleanupProposal",
+        "type": "object"
+      },
+      "ConnectSourceRequest": {
+        "properties": {
+          "access_token": {
+            "title": "Access Token",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "gmail_address": {
+            "title": "Gmail Address",
+            "type": "string"
+          },
+          "refresh_token": {
+            "title": "Refresh Token",
+            "type": "string"
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          }
+        },
+        "required": [
+          "gmail_address",
+          "access_token",
+          "refresh_token",
+          "scope",
+          "expires_at"
+        ],
+        "title": "ConnectSourceRequest",
+        "type": "object"
+      },
+      "ConnectedSource": {
+        "properties": {
+          "connected_at": {
+            "format": "date-time",
+            "title": "Connected At",
+            "type": "string"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "gmail_address": {
+            "title": "Gmail Address",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "gmail_address",
+          "display_name",
+          "status",
+          "connected_at"
+        ],
+        "title": "ConnectedSource",
+        "type": "object"
+      },
+      "CreateActionRequest": {
+        "properties": {
+          "action_type": {
+            "title": "Action Type",
+            "type": "string"
+          },
+          "connected_account_id": {
+            "format": "uuid",
+            "title": "Connected Account Id",
+            "type": "string"
+          },
+          "gmail_label_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gmail Label Id"
+          },
+          "message_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message Id"
+          }
+        },
+        "required": [
+          "connected_account_id",
+          "action_type"
+        ],
+        "title": "CreateActionRequest",
+        "type": "object"
+      },
+      "CreateLabelRequest": {
+        "properties": {
+          "connected_account_id": {
+            "format": "uuid",
+            "title": "Connected Account Id",
+            "type": "string"
+          },
+          "hidden": {
+            "default": false,
+            "title": "Hidden",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "order_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Index"
+          }
+        },
+        "required": [
+          "connected_account_id",
+          "name"
+        ],
+        "title": "CreateLabelRequest",
+        "type": "object"
+      },
+      "DisconnectResult": {
+        "properties": {
+          "connected_account_id": {
+            "format": "uuid",
+            "title": "Connected Account Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "connected_account_id",
+          "status"
+        ],
+        "title": "DisconnectResult",
+        "type": "object"
+      },
+      "ErrorBody": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "details": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorBody",
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse",
+        "type": "object"
+      },
+      "GmailActionCommand": {
+        "properties": {
+          "action_type": {
+            "title": "Action Type",
+            "type": "string"
+          },
+          "applied_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied At"
+          },
+          "changed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changed"
+          },
+          "connected_account_id": {
+            "format": "uuid",
+            "title": "Connected Account Id",
+            "type": "string"
+          },
+          "error_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Reason"
+          },
+          "failed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failed At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "message_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message Id"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "requested_at": {
+            "format": "date-time",
+            "title": "Requested At",
+            "type": "string"
+          },
+          "requested_by": {
+            "format": "uuid",
+            "title": "Requested By",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "connected_account_id",
+          "message_id",
+          "action_type",
+          "payload",
+          "status",
+          "version",
+          "changed",
+          "requested_by",
+          "requested_at",
+          "applied_at",
+          "failed_at",
+          "error_reason"
+        ],
+        "title": "GmailActionCommand",
+        "type": "object"
+      },
+      "GoogleCallbackRequest": {
+        "properties": {
+          "id_token": {
+            "title": "Id Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id_token"
+        ],
+        "title": "GoogleCallbackRequest",
+        "type": "object"
+      },
+      "GoogleCallbackResponse": {
+        "properties": {
+          "is_new_user": {
+            "title": "Is New User",
+            "type": "boolean"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "user_id",
+          "workspace_id",
+          "is_new_user"
+        ],
+        "title": "GoogleCallbackResponse",
+        "type": "object"
+      },
+      "ItemStateResult": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "message_id": {
+            "format": "uuid",
+            "title": "Message Id",
+            "type": "string"
+          },
+          "remind_later_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remind Later At"
+          },
+          "seen": {
+            "title": "Seen",
+            "type": "boolean"
+          },
+          "seen_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seen At"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "message_id",
+          "seen",
+          "seen_at",
+          "remind_later_at",
+          "version",
+          "updated_at"
+        ],
+        "title": "ItemStateResult",
+        "type": "object"
+      },
+      "ManualSyncQueued": {
+        "properties": {
+          "job_type": {
+            "title": "Job Type",
+            "type": "string"
+          },
+          "queued": {
+            "title": "Queued",
+            "type": "boolean"
+          },
+          "source_id": {
+            "format": "uuid",
+            "title": "Source Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_id",
+          "job_type",
+          "queued"
+        ],
+        "title": "ManualSyncQueued",
+        "type": "object"
+      },
+      "ManualSyncRequest": {
+        "properties": {
+          "run_type": {
+            "default": "delta",
+            "enum": [
+              "delta",
+              "full"
+            ],
+            "title": "Run Type",
+            "type": "string"
+          }
+        },
+        "title": "ManualSyncRequest",
+        "type": "object"
+      },
+      "MessageDetail": {
+        "description": "GET /messages/{id} readonly view.\n\nmutation action field(mark_read/archive/label)\uac00 \uc5c6\uace0 AI reason field\ub3c4 \uae30\ubcf8\uc73c\ub85c \uc5c6\ub2e4.\nbriefing.md \"Read API\" \u00a7negative / \u00a7\ube48\uc0c1\ud0dc \uae30\uc900\uc774\ub2e4.",
+        "properties": {
+          "connected_account_id": {
+            "format": "uuid",
+            "title": "Connected Account Id",
+            "type": "string"
+          },
+          "done": {
+            "title": "Done",
+            "type": "boolean"
+          },
+          "excerpt_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Excerpt Text"
+          },
+          "gmail_message_id": {
+            "title": "Gmail Message Id",
+            "type": "string"
+          },
+          "gmail_thread_id": {
+            "title": "Gmail Thread Id",
+            "type": "string"
+          },
+          "gmail_url": {
+            "title": "Gmail Url",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "importance_band": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Importance Band"
+          },
+          "received_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received At"
+          },
+          "sender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sender"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject"
+          },
+          "summary_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary Text"
+          }
+        },
+        "required": [
+          "id",
+          "connected_account_id",
+          "gmail_message_id",
+          "gmail_thread_id",
+          "gmail_url",
+          "subject",
+          "sender",
+          "received_at",
+          "excerpt_text",
+          "summary_text",
+          "importance_band",
+          "done"
+        ],
+        "title": "MessageDetail",
+        "type": "object"
+      },
+      "MoveMessageRequest": {
+        "properties": {
+          "label_id": {
+            "format": "uuid",
+            "title": "Label Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label_id"
+        ],
+        "title": "MoveMessageRequest",
+        "type": "object"
+      },
+      "MoveMessageResult": {
+        "properties": {
+          "correction_signal_id": {
+            "format": "uuid",
+            "title": "Correction Signal Id",
+            "type": "string"
+          },
+          "message_id": {
+            "format": "uuid",
+            "title": "Message Id",
+            "type": "string"
+          },
+          "service_label_id": {
+            "format": "uuid",
+            "title": "Service Label Id",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "correction_signal_id",
+          "message_id",
+          "service_label_id",
+          "version"
+        ],
+        "title": "MoveMessageResult",
+        "type": "object"
+      },
+      "NotificationEvent": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "notification_type": {
+            "title": "Notification Type",
+            "type": "string"
+          },
+          "read_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Read At"
+          },
+          "route_target": {
+            "$ref": "#/components/schemas/RouteTarget"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "notification_type",
+          "route_target",
+          "read_at",
+          "created_at"
+        ],
+        "title": "NotificationEvent",
+        "type": "object"
+      },
+      "NotificationSubscription": {
+        "properties": {
+          "endpoint": {
+            "title": "Endpoint",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "endpoint",
+          "revoked_at"
+        ],
+        "title": "NotificationSubscription",
+        "type": "object"
+      },
+      "PubSubAckResponse": {
+        "properties": {
+          "deduped": {
+            "title": "Deduped",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "deduped"
+        ],
+        "title": "PubSubAckResponse",
+        "type": "object"
+      },
+      "ReadyResponse": {
+        "properties": {
+          "checks": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Checks",
+            "type": "object"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "checks"
+        ],
+        "title": "ReadyResponse",
+        "type": "object"
+      },
+      "RemindLaterRequest": {
+        "properties": {
+          "remind_at": {
+            "format": "date-time",
+            "title": "Remind At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "remind_at"
+        ],
+        "title": "RemindLaterRequest",
+        "type": "object"
+      },
+      "ReminderResult": {
+        "properties": {
+          "briefing_item_state_id": {
+            "format": "uuid",
+            "title": "Briefing Item State Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "reactivated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reactivated At"
+          },
+          "remind_at": {
+            "format": "date-time",
+            "title": "Remind At",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "briefing_item_state_id",
+          "remind_at",
+          "reactivated_at",
+          "status"
+        ],
+        "title": "ReminderResult",
+        "type": "object"
+      },
+      "RouteTarget": {
+        "description": "\"\uc5b4\ub290 \ud654\uba74 + \uc5b4\ub290 selected item\" \u2014 notifications.md \ub9e4\ud551\ud45c\uc758 \uacb0\uacfc shape.\n\n`screen`\uc740 \ud56d\uc0c1 \uc874\uc7ac\ud55c\ub2e4(generic-landing-prohibition invariant \u2014\nnotifications.md \"route_target\uc774 \ube44\uba74(selected item \ubd80\uc7ac\ub294 \ud5c8\uc6a9, \ud654\uba74\n\ubd80\uc7ac\ub294 \ubd88\uac00) \ubc1c\ud589\uc744 \uac70\ubd80\ud55c\ub2e4\"). `item_id`\ub294 screen-only notification(\uc608: daily_briefing)\uc5d0\uc11c\nNone\uc77c \uc218 \uc788\ub2e4.",
+        "properties": {
+          "item_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Id"
+          },
+          "screen": {
+            "title": "Screen",
+            "type": "string"
+          }
+        },
+        "required": [
+          "screen"
+        ],
+        "title": "RouteTarget",
+        "type": "object"
+      },
+      "RuleSuggestion": {
+        "properties": {
+          "correction_signal_id": {
+            "format": "uuid",
+            "title": "Correction Signal Id",
+            "type": "string"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "suggested_condition": {
+            "additionalProperties": true,
+            "title": "Suggested Condition",
+            "type": "object"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "correction_signal_id",
+          "suggested_condition",
+          "status",
+          "decided_at"
+        ],
+        "title": "RuleSuggestion",
+        "type": "object"
+      },
+      "RulesView": {
+        "description": "GET /rules response shape \u2014 pending suggestion\uacfc active rule.",
+        "properties": {
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationRule"
+            },
+            "title": "Rules",
+            "type": "array"
+          },
+          "suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/RuleSuggestion"
+            },
+            "title": "Suggestions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "suggestions",
+          "rules"
+        ],
+        "title": "RulesView",
+        "type": "object"
+      },
+      "ServiceLabel": {
+        "properties": {
+          "connected_account_id": {
+            "format": "uuid",
+            "title": "Connected Account Id",
+            "type": "string"
+          },
+          "gmail_label_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gmail Label Id"
+          },
+          "gmail_label_name": {
+            "title": "Gmail Label Name",
+            "type": "string"
+          },
+          "hidden": {
+            "title": "Hidden",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "order_index": {
+            "title": "Order Index",
+            "type": "integer"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "name",
+          "order_index",
+          "hidden",
+          "updated_at",
+          "connected_account_id",
+          "gmail_label_id",
+          "gmail_label_name"
+        ],
+        "title": "ServiceLabel",
+        "type": "object"
+      },
+      "SessionSummaryResponse": {
+        "properties": {
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          },
+          "workspace_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Name"
+          }
+        },
+        "required": [
+          "user_id",
+          "email",
+          "display_name",
+          "workspace_id",
+          "workspace_name"
+        ],
+        "title": "SessionSummaryResponse",
+        "type": "object"
+      },
+      "SourceSettingsResult": {
+        "properties": {
+          "briefing_enabled": {
+            "title": "Briefing Enabled",
+            "type": "boolean"
+          },
+          "connected_account_id": {
+            "format": "uuid",
+            "title": "Connected Account Id",
+            "type": "string"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "effective_display_name": {
+            "title": "Effective Display Name",
+            "type": "string"
+          },
+          "gmail_address": {
+            "title": "Gmail Address",
+            "type": "string"
+          },
+          "notification_enabled": {
+            "title": "Notification Enabled",
+            "type": "boolean"
+          },
+          "paused": {
+            "title": "Paused",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "summary_enabled": {
+            "title": "Summary Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "connected_account_id",
+          "gmail_address",
+          "display_name",
+          "effective_display_name",
+          "status",
+          "briefing_enabled",
+          "summary_enabled",
+          "notification_enabled",
+          "paused"
+        ],
+        "title": "SourceSettingsResult",
+        "type": "object"
+      },
+      "SubscribeRequest": {
+        "properties": {
+          "endpoint": {
+            "title": "Endpoint",
+            "type": "string"
+          },
+          "keys": {
+            "additionalProperties": true,
+            "title": "Keys",
+            "type": "object"
+          }
+        },
+        "required": [
+          "endpoint",
+          "keys"
+        ],
+        "title": "SubscribeRequest",
+        "type": "object"
+      },
+      "UndoResult": {
+        "properties": {
+          "activity_id": {
+            "format": "uuid",
+            "title": "Activity Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "original_command_id": {
+            "format": "uuid",
+            "title": "Original Command Id",
+            "type": "string"
+          },
+          "reverse_command_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reverse Command Id"
+          },
+          "undo_available": {
+            "title": "Undo Available",
+            "type": "boolean"
+          },
+          "undone_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Undone At"
+          }
+        },
+        "required": [
+          "id",
+          "activity_id",
+          "original_command_id",
+          "reverse_command_id",
+          "undo_available",
+          "undone_at"
+        ],
+        "title": "UndoResult",
+        "type": "object"
+      },
+      "UpcomingReminderEntry": {
+        "properties": {
+          "message_id": {
+            "format": "uuid",
+            "title": "Message Id",
+            "type": "string"
+          },
+          "remind_at": {
+            "format": "date-time",
+            "title": "Remind At",
+            "type": "string"
+          },
+          "reminder_id": {
+            "format": "uuid",
+            "title": "Reminder Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reminder_id",
+          "message_id",
+          "remind_at"
+        ],
+        "title": "UpcomingReminderEntry",
+        "type": "object"
+      },
+      "UpcomingStorage": {
+        "properties": {
+          "this_week": {
+            "items": {
+              "$ref": "#/components/schemas/UpcomingReminderEntry"
+            },
+            "title": "This Week",
+            "type": "array"
+          },
+          "today": {
+            "items": {
+              "$ref": "#/components/schemas/UpcomingReminderEntry"
+            },
+            "title": "Today",
+            "type": "array"
+          },
+          "tomorrow": {
+            "items": {
+              "$ref": "#/components/schemas/UpcomingReminderEntry"
+            },
+            "title": "Tomorrow",
+            "type": "array"
+          }
+        },
+        "required": [
+          "today",
+          "tomorrow",
+          "this_week"
+        ],
+        "title": "UpcomingStorage",
+        "type": "object"
+      },
+      "UpdateLabelRequest": {
+        "properties": {
+          "hidden": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hidden"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "order_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Index"
+          }
+        },
+        "title": "UpdateLabelRequest",
+        "type": "object"
+      },
+      "UpdateSourceSettingsRequest": {
+        "properties": {
+          "briefing_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Briefing Enabled"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "notification_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notification Enabled"
+          },
+          "paused": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paused"
+          },
+          "summary_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary Enabled"
+          }
+        },
+        "title": "UpdateSourceSettingsRequest",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Maily API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/actions": {
+      "post": {
+        "operationId": "create_action",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GmailActionCommand"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Create Action",
+        "tags": [
+          "gmail_actions"
+        ]
+      }
+    },
+    "/actions/activity": {
+      "get": {
+        "operationId": "get_activity",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ActivityLogEntry"
+                  },
+                  "title": "Response Get Activity",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Get Activity",
+        "tags": [
+          "gmail_actions"
+        ]
+      }
+    },
+    "/actions/{activity_id}/undo": {
+      "post": {
+        "operationId": "undo_action",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "activity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Activity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UndoResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Undo Action",
+        "tags": [
+          "gmail_actions"
+        ]
+      }
+    },
+    "/auth/google/callback": {
+      "post": {
+        "operationId": "google_callback",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleCallbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCallbackResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Google Callback",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/auth/session": {
+      "get": {
+        "operationId": "get_session",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionSummaryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Get Session",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/briefing/items/{briefing_item_id}/remind_later": {
+      "post": {
+        "operationId": "remind_later",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "briefing_item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Briefing Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemindLaterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReminderResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Remind Later",
+        "tags": [
+          "briefing"
+        ]
+      }
+    },
+    "/briefing/items/{briefing_item_id}/seen": {
+      "post": {
+        "operationId": "mark_item_seen",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "briefing_item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Briefing Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemStateResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Mark Item Seen",
+        "tags": [
+          "briefing"
+        ]
+      }
+    },
+    "/briefing/today": {
+      "get": {
+        "operationId": "today_briefing",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AccountBriefingGroup"
+                  },
+                  "title": "Response Today Briefing",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Today Briefing",
+        "tags": [
+          "briefing"
+        ]
+      }
+    },
+    "/cleanup": {
+      "get": {
+        "operationId": "get_cleanup_queue",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CleanupProposal"
+                  },
+                  "title": "Response Get Cleanup Queue",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Get Cleanup Queue",
+        "tags": [
+          "assistant_decisions"
+        ]
+      }
+    },
+    "/cleanup/{proposal_id}/approve": {
+      "post": {
+        "operationId": "post_approve_cleanup",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CleanupProposal"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Post Approve Cleanup",
+        "tags": [
+          "assistant_decisions"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Health",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/intake/pubsub": {
+      "post": {
+        "description": "Pub/Sub push webhook.\n\nauth\uac00 \ud1b5\uacfc\ud558\uba74 \ud56d\uc0c1 200\uc73c\ub85c ack\ud55c\ub2e4. duplicate \ub610\ub294 orphan(matching active source \uc5c6\uc74c)\nnotification\ub3c4 error\uac00 \uc544\ub2c8\ub77c normal outcome\uc774\ubbc0\ub85c(mail_intake.md \"[\uba71\ub4f1]\"/\"[\ube48\uc0c1\ud0dc]\"),\nPub/Sub\uc774 retry storm\uc744 \ub9cc\ub4e4\uc9c0 \uc54a\ub294\ub2e4.",
+        "operationId": "pubsub_webhook",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PubSubAckResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Pubsub Webhook",
+        "tags": [
+          "mail_intake"
+        ]
+      }
+    },
+    "/intake/sources/{source_id}/sync": {
+      "post": {
+        "description": "manual resync trigger.\n\nroute\ub294 \uc774 router\uc758 /intake prefix(app/api/router.py) \uc544\ub798 mount\ub418\uc5b4\nPOST /intake/sources/{id}/sync\uac00 \ub41c\ub2e4. _integration-contract.md \u00a73\uc758 literal path\n(\"POST /sources/{id}/sync\", /intake prefix \uc5c6\uc74c)\ub97c \uc4f0\ub824\uba74 `router`\ub97c \ub450 exposed symbol\ub85c\n\ub098\ub220\uc57c \ud558\ub294\ub370, \u00a74\uc758 single-`router`-per-domain contract\uac00 \uc774\ub97c \ud5c8\uc6a9\ud558\uc9c0 \uc54a\ub294\ub2e4.\n\uc790\uc138\ud55c \uc774\uc720\ub294 \uc774 domain\uc758 final report \ucc38\uace0.",
+        "operationId": "manual_sync",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualSyncRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManualSyncQueued"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Manual Sync",
+        "tags": [
+          "mail_intake"
+        ]
+      }
+    },
+    "/labels": {
+      "get": {
+        "operationId": "get_labels",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_hidden",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Hidden",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ServiceLabel"
+                  },
+                  "title": "Response Get Labels",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Get Labels",
+        "tags": [
+          "labels"
+        ]
+      },
+      "post": {
+        "operationId": "create_label",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLabelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceLabel"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Create Label",
+        "tags": [
+          "labels"
+        ]
+      }
+    },
+    "/labels/{label_id}": {
+      "patch": {
+        "operationId": "patch_label",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "label_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Label Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLabelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceLabel"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Patch Label",
+        "tags": [
+          "labels"
+        ]
+      }
+    },
+    "/messages/{message_id}": {
+      "get": {
+        "operationId": "message_detail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "message_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Message Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Message Detail",
+        "tags": [
+          "briefing"
+        ]
+      }
+    },
+    "/messages/{message_id}/move": {
+      "post": {
+        "operationId": "move_message",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "message_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Message Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MoveMessageResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Move Message",
+        "tags": [
+          "labels"
+        ]
+      }
+    },
+    "/notifications": {
+      "get": {
+        "operationId": "get_notifications",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationEvent"
+                  },
+                  "title": "Response Get Notifications",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Get Notifications",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/notifications/subscribe": {
+      "post": {
+        "operationId": "subscribe_endpoint",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSubscription"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Subscribe Endpoint",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/ready": {
+      "get": {
+        "operationId": "ready",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Ready"
+      }
+    },
+    "/rules": {
+      "get": {
+        "operationId": "get_rules",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RulesView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Get Rules",
+        "tags": [
+          "assistant_decisions"
+        ]
+      }
+    },
+    "/rules/{suggestion_id}/approve": {
+      "post": {
+        "operationId": "post_approve_rule",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleSuggestion"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Post Approve Rule",
+        "tags": [
+          "assistant_decisions"
+        ]
+      }
+    },
+    "/sources": {
+      "get": {
+        "operationId": "list_sources",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConnectedSource"
+                  },
+                  "title": "Response List Sources",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "List Sources",
+        "tags": [
+          "mail_sources"
+        ]
+      },
+      "post": {
+        "operationId": "connect_source",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectSourceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectedSource"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Connect Source",
+        "tags": [
+          "mail_sources"
+        ]
+      }
+    },
+    "/sources/{source_id}": {
+      "delete": {
+        "operationId": "disconnect_source",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisconnectResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Disconnect Source",
+        "tags": [
+          "mail_sources"
+        ]
+      },
+      "get": {
+        "operationId": "get_source",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectedSource"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Get Source",
+        "tags": [
+          "mail_sources"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_source_settings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSourceSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceSettingsResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Patch Source Settings",
+        "tags": [
+          "mail_sources"
+        ]
+      }
+    },
+    "/sources/{source_id}/settings": {
+      "get": {
+        "description": "\uc124\uc815 \ud654\uba74 \ud1a0\uae00 \ucd08\uae30\uac12 \uc870\ud68c \u2014 \ubb34\ubd80\uc791\uc6a9 \uc77d\uae30 (F6 \ud504\ub860\ud2b8 \uc5f0\uacb0\uc6a9).",
+        "operationId": "get_source_settings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceSettingsResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Get Source Settings",
+        "tags": [
+          "mail_sources"
+        ]
+      }
+    },
+    "/storage/upcoming": {
+      "get": {
+        "operationId": "storage_upcoming",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpcomingStorage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Storage Upcoming",
+        "tags": [
+          "briefing"
+        ]
+      }
+    }
+  }
+}

@@ -4,19 +4,19 @@ Revision ID: 0009_briefing_state
 Revises: 0008_briefing_items
 Create Date: 2026-07-09
 
-COORDINATOR NOTE: `briefing_item_states.version` is not listed in
-docs/areas/backend/db-schema.md's column table for this table — added
-here because docs/goals/backend-plans/briefing.md's set_item_seen /
-schedule_reminder checklists require a monotonic version to build the
-outbox idempotency key `item:{id}:state:{version}` and to detect no-op
-updates. Please fold this column back into db-schema.md.
+COORDINATOR NOTE: `briefing_item_states.version`은
+docs/areas/backend/db-schema.md의 이 table column 표에 없다. 하지만
+docs/goals/backend-plans/briefing.md의 set_item_seen / schedule_reminder
+checklist가 outbox idempotency key `item:{id}:state:{version}`를 만들고 no-op
+update를 감지하기 위한 monotonic version을 요구하므로 여기에 추가했다. 이 column을
+db-schema.md에 다시 반영해야 한다.
 """
 
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
+# Alembic이 사용하는 revision 식별자.
 revision = "0009_briefing_state"
 down_revision = "0008_briefing_items"
 branch_labels = None

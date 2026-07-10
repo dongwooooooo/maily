@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-# status enum values — fixed by _integration-contract.md §5.
+# status enum 값은 _integration-contract.md §5로 고정된다.
 JOB_STATUSES = {"queued", "running", "succeeded", "failed"}
 RULE_SUGGESTION_STATUSES = {"pending", "approved", "rejected"}
 CLEANUP_PROPOSAL_STATUSES = {"pending", "approved", "rejected", "applied"}
@@ -19,10 +19,12 @@ class MessageSummary(BaseModel):
 
 
 class MessageImportanceClassification(BaseModel):
-    """Full internal view — includes `reason`. Callers building a public
-    API response must go through `importance.to_public_view()` instead,
-    which drops `reason` by default per the "AI 판단 이유는 기본으로 노출하지
-    않는다" top-level principle."""
+    """full internal view이며 `reason`을 포함한다.
+
+    public API response를 만드는 caller는 대신 `importance.to_public_view()`를 거쳐야
+    하며, 이 함수는 "AI 판단 이유는 기본으로 노출하지 않는다"라는 top-level principle에 따라
+    기본적으로 `reason`을 제거한다.
+    """
 
     id: uuid.UUID
     message_id: uuid.UUID
@@ -49,7 +51,7 @@ class ClassificationRule(BaseModel):
 
 
 class RulesView(BaseModel):
-    """GET /rules response shape — pending suggestions + active rules."""
+    """GET /rules response shape — pending suggestion과 active rule."""
 
     suggestions: list[RuleSuggestion]
     rules: list[ClassificationRule]

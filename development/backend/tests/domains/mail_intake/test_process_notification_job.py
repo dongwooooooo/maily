@@ -18,7 +18,7 @@ async def test_fanout_to_active_sources_by_email() -> None:
     email = f"fanout-{uuid.uuid4()}@gmail.com"
     source_a = await seed_connected_account(gmail_address=email)
     source_b = await seed_connected_account(gmail_address=email)
-    # A paused source with the same address must not receive a queued sync_delta.
+    # 같은 address의 paused source는 sync_delta queue 대상이 아니어야 한다.
     paused_source = await seed_connected_account(gmail_address=email, paused=True)
 
     async with engine.begin() as connection:
@@ -111,8 +111,8 @@ async def test_pubsub_endpoint_acks_and_queues() -> None:
     assert response.status_code == 200
     assert response.json()["deduped"] is False
 
-    # Redelivery of the exact same Pub/Sub message must still ack 200, not
-    # error, or Pub/Sub will retry-storm us (mail_intake.md "[멱등]").
+    # 완전히 같은 Pub/Sub message가 redelivery되어도 error가 아니라 200 ack를 해야 한다.
+    # 그렇지 않으면 Pub/Sub가 retry-storm을 일으킨다(mail_intake.md "[멱등]").
     response_again = client.post("/intake/pubsub", json=body)
     assert response_again.status_code == 200
     assert response_again.json()["deduped"] is True

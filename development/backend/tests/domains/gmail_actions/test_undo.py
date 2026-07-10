@@ -69,7 +69,7 @@ async def test_undo_creates_reverse_command() -> None:
         )
 
     assert original["status"] == "compensating"
-    assert original["version"] == 2  # 0 -> applied(1) -> compensating(2)
+    assert original["version"] == 2  # 상태 전이: 0 -> applied(1) -> compensating(2)
     assert reverse["status"] == "pending"
     assert reverse["payload"] == {"add_label_ids": ["UNREAD"], "remove_label_ids": []}
 
@@ -77,21 +77,20 @@ async def test_undo_creates_reverse_command() -> None:
 async def test_undo_reverses_via_ledger_not_direct_gmail(
     _fresh_fake_mutator: FakeGmailMutationPort,
 ) -> None:
-    """Undo never calls the port directly from undo.py — it only inserts a
-    new pending command. Applying that reverse command through the normal
-    execute_action path is what actually restores Gmail state, and only then
-    does the original command flip to `undone`."""
+    """Undo는 undo.py에서 port를 직접 호출하지 않고 새 pending command만 insert한다.
+    reverse command를 정상 execute_action path로 적용할 때 실제 Gmail state가 복구되고,
+    그때에만 original command가 `undone`으로 바뀐다."""
     workspace_id, user_id, message_id, command, activity = await _create_and_apply(
         action_type="archive"
     )
-    assert _fresh_fake_mutator.current_labels(message_id) == {"UNREAD"}  # INBOX removed
+    assert _fresh_fake_mutator.current_labels(message_id) == {"UNREAD"}  # INBOX 제거됨
 
     async with engine.begin() as connection:
         undo_result = await request_undo(
             connection, activity_id=activity["id"], workspace_id=workspace_id, actor_id=user_id
         )
 
-    # Undo request alone must not have touched Gmail state yet.
+    # Undo request만으로는 아직 Gmail state를 건드리면 안 된다.
     assert _fresh_fake_mutator.current_labels(message_id) == {"UNREAD"}
 
     async with engine.begin() as connection:
@@ -106,16 +105,16 @@ async def test_undo_reverses_via_ledger_not_direct_gmail(
         )
 
     assert original["status"] == "undone"
-    assert original["version"] == 3  # applied(1) -> compensating(2) -> undone(3)
+    assert original["version"] == 3  # 상태 전이: applied(1) -> compensating(2) -> undone(3)
     assert undo_row["undone_at"] is not None
 
 
 async def test_undo_finalize_emits_gmail_action_undone_with_workspace_and_message_id(
     _fresh_fake_mutator: FakeGmailMutationPort,
 ) -> None:
-    """IC4: gmail_action_undone carries workspace_id/message_id (added
-    alongside gmail_action_applied's enrichment) so build_briefing can
-    rebuild without a cross-domain lookup of its own."""
+    """IC4: gmail_action_undone은 workspace_id/message_id를 담는다
+    (gmail_action_applied enrichment와 함께 추가). 그래서 build_briefing이 자체
+    cross-domain lookup 없이 rebuild할 수 있다."""
     workspace_id, user_id, message_id, command, activity = await _create_and_apply(
         action_type="mark_read"
     )
@@ -153,11 +152,10 @@ async def test_undo_finalize_skips_event_when_account_scope_missing(
             connection, activity_id=activity["id"], workspace_id=workspace_id, actor_id=user_id
         )
 
-    # run_execute_action calls get_connected_account_scope twice on its own
-    # (pending-branch precondition check, then activity/undo backfill) —
-    # both must succeed normally so the reverse command actually applies.
-    # Only _finalize_undo_if_reverse's later, independent lookup (3rd call)
-    # simulates the account having disappeared.
+    # run_execute_action은 자체적으로 get_connected_account_scope를 두 번 호출한다
+    # (pending-branch precondition check, 그다음 activity/undo backfill). reverse command가
+    # 실제 적용되려면 둘 다 정상 성공해야 한다. _finalize_undo_if_reverse의 더 늦은 독립
+    # lookup(세 번째 call)만 account가 사라진 상황을 simulate한다.
     real_get_scope = repository.get_connected_account_scope
     call_count = 0
 
@@ -181,7 +179,7 @@ async def test_undo_finalize_skips_event_when_account_scope_missing(
             )
         ).mappings().all()
 
-    assert original["status"] == "undone"  # ledger transition unaffected
+    assert original["status"] == "undone"  # ledger transition은 영향 없음
     assert not any(r["payload"]["command_id"] == str(command.id) for r in rows)
 
 
@@ -206,8 +204,8 @@ async def test_undo_idempotent_via_undone_at() -> None:
 
 
 async def test_undo_rejected_while_reverse_in_flight() -> None:
-    """[동시] a second undo call before the first reverse command has
-    applied must not create a second reverse command."""
+    """[동시] 첫 reverse command가 applied되기 전의 두 번째 undo call은
+    두 번째 reverse command를 만들면 안 된다."""
     workspace_id, user_id, message_id, command, activity = await _create_and_apply(
         action_type="mark_read"
     )
@@ -224,9 +222,9 @@ async def test_undo_rejected_while_reverse_in_flight() -> None:
 
 
 async def test_undo_unavailable_rejected() -> None:
-    """changed=False (already in target state) -> nothing to undo -> 422."""
+    """changed=False(이미 target state) -> undo할 것 없음 -> 422."""
     workspace_id, user_id, message_id, command, activity = await _create_and_apply(
-        action_type="mark_read", initial_labels={"INBOX"}  # UNREAD already absent
+        action_type="mark_read", initial_labels={"INBOX"}  # UNREAD가 이미 없음
     )
 
     async with engine.connect() as connection:

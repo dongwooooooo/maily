@@ -13,9 +13,9 @@ from tests.domains.briefing.conftest import seed_message, seed_scope
 
 
 async def _seed_reminder(remind_at: datetime) -> tuple[uuid.UUID, uuid.UUID, uuid.UUID]:
-    """Returns (workspace_id, message_id, reminder_id). remind_at is set
-    directly (bypassing schedule_reminder's future-only guard) so past-due
-    reminders can be seeded for reactivation tests."""
+    """(workspace_id, message_id, reminder_id)를 반환한다. reactivation test에서
+    past-due reminder를 seed할 수 있도록 schedule_reminder의 future-only guard를
+    우회해 remind_at을 직접 설정한다."""
     workspace_id, user_id, account_id = await seed_scope()
     message_id = await seed_message(account_id)
     async with engine.begin() as connection:
@@ -65,7 +65,7 @@ async def test_due_reminder_reactivates_and_emits() -> None:
     assert reminder_id in reactivated
     matching = [e for e in events if e["payload"]["reminder_id"] == str(reminder_id)]
     assert len(matching) == 1
-    assert reminder is None  # no longer pending
+    assert reminder is None  # 더 이상 pending 아님
 
 
 async def test_reactivate_idempotent() -> None:
@@ -85,7 +85,7 @@ async def test_reactivate_idempotent() -> None:
         ).mappings().all()
 
     assert reminder_id in first
-    assert reminder_id not in second  # already reactivated, not picked up again
+    assert reminder_id not in second  # 이미 reactivated되어 다시 선택되지 않음
     matching = [e for e in events if e["payload"]["reminder_id"] == str(reminder_id)]
     assert len(matching) == 1
 
@@ -98,13 +98,13 @@ async def test_pending_only_picked() -> None:
     async with engine.begin() as connection:
         reactivated = await run_reactivate_reminders(connection)
 
-    assert future_reminder not in reactivated  # remind_at not due yet
+    assert future_reminder not in reactivated  # remind_at이 아직 due 아님
 
 
 async def test_concurrent_no_double_reactivate() -> None:
-    """Two racing scans of the same due reminder — the conditional
-    `WHERE status='pending'` update lets only one caller observe a
-    non-None result (briefing.md Job §동시)."""
+    """같은 due reminder를 두 scan이 동시에 잡는 상황이다. conditional
+    `WHERE status='pending'` update 덕분에 한 caller만 non-None result를
+    관측한다(briefing.md Job §동시)."""
     _workspace_id, _message_id, reminder_id = await _seed_reminder(
         datetime.now(timezone.utc) - timedelta(minutes=5)
     )

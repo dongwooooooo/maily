@@ -42,8 +42,8 @@ async def test_recovery_event_routes_to_account_settings() -> None:
         assert row["notification_type"] == service.NOTIFICATION_TYPE_RECOVERY_NEEDED
         assert row["route_target"]["screen"] == service.SCREEN_ACCOUNT_SETTINGS
         assert row["route_target"]["item_id"] == str(account_id)
-        # each reason is dedupe-distinct at version=0, so 3 separate rows
-        # accumulate across the loop — verified by the count assertion below.
+        # version=0에서 각 reason은 dedupe-distinct라 loop 동안 별도 row 3개가 쌓인다.
+        # 아래 count assertion으로 확인한다.
 
     async with engine.connect() as connection:
         rows = (
@@ -51,7 +51,7 @@ async def test_recovery_event_routes_to_account_settings() -> None:
                 select(notification_events).where(notification_events.c.workspace_id == workspace_id)
             )
         ).mappings().all()
-    assert len(rows) == 3  # one per distinct reason
+    assert len(rows) == 3  # distinct reason마다 하나
 
 
 async def test_recovery_idempotent_per_reason() -> None:
@@ -103,4 +103,4 @@ async def test_recovery_does_not_mutate_source_state() -> None:
                 )
             )
         ).first()
-    assert row[0] == "permission_needed"  # unchanged by notifications
+    assert row[0] == "permission_needed"  # notifications가 바꾸지 않음

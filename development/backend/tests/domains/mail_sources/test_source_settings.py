@@ -129,3 +129,30 @@ async def test_briefing_and_notification_toggles_independent() -> None:
     assert result.briefing_enabled is False
     assert result.notification_enabled is False
     assert result.summary_enabled is True
+
+
+async def test_get_settings_returns_current_values_without_mutation() -> None:
+    """[읽기] GET용 서비스 — 현재 설정을 그대로 반환하고 version·outbox를 건드리지 않는다."""
+    from app.domains.mail_sources.service import get_gmail_source_settings
+
+    source, gmail_address = await _seed_source()
+
+    async with engine.begin() as connection:
+        await update_gmail_source_settings(
+            connection, connected_account_id=source.id, changes={"summary_enabled": False}
+        )
+    async with engine.connect() as connection:
+        result = await get_gmail_source_settings(connection, connected_account_id=source.id)
+        events = (
+            await connection.execute(
+                select(outbox_events).where(outbox_events.c.event_type == "gmail_source_settings_changed")
+            )
+        ).mappings().all()
+
+    assert result.connected_account_id == source.id
+    assert result.gmail_address == gmail_address
+    assert result.summary_enabled is False
+    assert result.briefing_enabled is True
+    # 읽기 전에 발생한 변경 1건 외에 추가 이벤트 없음(읽기는 무부작용).
+    matching = [e for e in events if e["payload"].get("source_id") == str(source.id)]
+    assert len(matching) == 1

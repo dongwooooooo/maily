@@ -37,10 +37,10 @@ async def append_event(
     payload: dict,
     idempotency_key: str,
 ) -> uuid.UUID | None:
-    """Insert an outbox event, deduped on (event_type, idempotency_key).
+    """outbox event를 insert하고 (event_type, idempotency_key)로 dedupe한다.
 
-    Returns the new row's id, or None if a row with the same
-    (event_type, idempotency_key) already exists.
+    새 row의 id를 반환한다. 같은 (event_type, idempotency_key)의 row가 이미 있으면
+    None을 반환한다.
     """
     stmt = (
         insert(outbox_events)

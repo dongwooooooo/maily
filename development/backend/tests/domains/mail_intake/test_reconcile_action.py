@@ -84,12 +84,12 @@ async def test_message_not_in_snapshot_is_noop() -> None:
             add_label_ids=["UNREAD"],
             remove_label_ids=[],
         )
-    # No exception — that's the assertion.
+    # exception이 없는 것이 assertion이다.
 
 
 async def test_last_history_id_untouched() -> None:
-    """own-action reconcile is not a sync tick — the cursor field stays
-    whatever the last real sync left it at."""
+    """own-action reconcile은 sync tick이 아니다. cursor field는 마지막 실제 sync가
+    남긴 값 그대로 유지된다."""
     account_id = await seed_connected_account()
     message_id = await seed_message(account_id)
 

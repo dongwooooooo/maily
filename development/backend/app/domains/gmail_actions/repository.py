@@ -11,12 +11,11 @@ from app.domains.gmail_actions.models import (
 )
 from app.domains.mail_sources.models import connected_gmail_accounts
 
-# NOTE: this reads connected_gmail_accounts (workspace_id/status scoping
-# columns only — never the encrypted OAuth credential table) to resolve a
-# command's workspace and to gate requests against disconnecting/disconnected
-# accounts, per gmail_actions.md "workspace 스코프는
-# command_id→connected_account_id→workspace로 제한". This is not the OAuth
-# token boundary the negative tests enforce (see test_mutation_port_boundary.py).
+# NOTE: gmail_actions.md "workspace 스코프는 command_id→connected_account_id→workspace로
+# 제한"에 따라 command의 workspace를 resolve하고 disconnecting/disconnected account 요청을
+# gate하려고 connected_gmail_accounts를 읽는다(workspace_id/status scoping column만 읽으며,
+# encrypted OAuth credential table은 절대 읽지 않음). 이것은 negative test가 강제하는 OAuth
+# token boundary가 아니다(test_mutation_port_boundary.py 참고).
 
 
 async def get_connected_account_scope(
@@ -34,7 +33,7 @@ async def get_connected_account_scope(
     return dict(row) if row is not None else None
 
 
-# ---- gmail_action_commands ----------------------------------------------
+# ---- gmail_action_commands 관리 -----------------------------------------
 
 
 async def insert_command(
@@ -91,7 +90,7 @@ async def get_command(connection: AsyncConnection, *, command_id: uuid.UUID) -> 
 async def lock_command_for_update(
     connection: AsyncConnection, *, command_id: uuid.UUID
 ) -> dict | None:
-    """SELECT ... FOR UPDATE — used by execute_action to read-then-transition safely."""
+    """SELECT ... FOR UPDATE — execute_action이 안전하게 read-then-transition할 때 사용."""
     row = (
         await connection.execute(
             select(gmail_action_commands)
@@ -152,7 +151,7 @@ async def mark_command_undone(
     )
 
 
-# ---- activity_logs --------------------------------------------------------
+# ---- activity_logs 관리 --------------------------------------------------
 
 
 async def insert_activity_log(
@@ -212,7 +211,7 @@ async def list_activity_logs(
     return [dict(row) for row in rows]
 
 
-# ---- undo_actions ----------------------------------------------------------
+# ---- undo_actions 관리 ----------------------------------------------------
 
 
 async def insert_undo_action(

@@ -13,7 +13,7 @@ from app.domains.briefing.models import briefing_item_states, briefing_items, re
 from app.domains.mail_intake.models import gmail_messages, message_excerpts
 from app.domains.mail_sources.models import connected_gmail_accounts, gmail_source_settings
 
-# ---- source/message lookups (read-only joins into upstream domains) -------
+# ---- source/message lookup (upstream domain으로 read-only join) -------------
 
 
 async def get_message_summary(connection: AsyncConnection, *, message_id: uuid.UUID) -> dict | None:
@@ -75,9 +75,11 @@ async def get_connected_account(
 async def list_connected_accounts_for_workspace(
     connection: AsyncConnection, *, workspace_id: uuid.UUID, source_id: uuid.UUID | None = None
 ) -> list[dict]:
-    """Accounts + their gmail_source_settings.briefing_enabled, defaulting to
-    True when no settings row exists yet (briefing does not own that row's
-    creation — mail_sources does)."""
+    """account와 해당 gmail_source_settings.briefing_enabled를 반환한다.
+
+    settings row가 아직 없으면 True가 default다(briefing은 그 row 생성을 소유하지 않고
+    mail_sources가 소유한다).
+    """
     query = (
         select(
             connected_gmail_accounts.c.id,
@@ -116,7 +118,7 @@ async def list_messages_for_account(
     return [dict(row) for row in rows]
 
 
-# ---- briefing_items (regenerable projection) -------------------------------
+# ---- briefing_items (재생성 가능한 projection) -----------------------------
 
 
 async def upsert_briefing_item(
@@ -192,9 +194,12 @@ async def list_briefing_items_for_account(
 async def list_briefing_cards_for_account(
     connection: AsyncConnection, *, connected_account_id: uuid.UUID
 ) -> list[dict]:
-    """briefing_items joined with gmail_messages (raw fields, live join —
-    not denormalized, see models.py) and briefing_item_states (seen flag,
-    durable — joined by message_id so it survives projection rebuilds)."""
+    """briefing_items를 gmail_messages 및 briefing_item_states와 join한다.
+
+    gmail_messages는 raw field live join이며 denormalize하지 않는다(models.py 참고).
+    briefing_item_states는 seen flag를 가진 durable state이며, projection rebuild 이후에도
+    살아남도록 message_id로 join한다.
+    """
     query = (
         select(
             briefing_items.c.id,
@@ -230,9 +235,11 @@ async def list_briefing_cards_for_account(
 async def delete_briefing_items_for_workspace(
     connection: AsyncConnection, *, workspace_id: uuid.UUID
 ) -> None:
-    """Test/ops utility only — proves briefing_items is drop-and-rebuild
-    safe (briefing.md 강제 invariant). Never called from request-serving
-    code paths."""
+    """test/ops utility 전용이다.
+
+    briefing_items가 drop-and-rebuild safe임을 증명한다(briefing.md 강제 invariant).
+    request-serving code path에서는 절대 호출하지 않는다.
+    """
     from sqlalchemy import delete
 
     await connection.execute(
@@ -240,7 +247,7 @@ async def delete_briefing_items_for_workspace(
     )
 
 
-# ---- briefing_item_states (durable) ----------------------------------------
+# ---- briefing_item_states(durable) 관리 ------------------------------------
 
 
 async def get_item_state_by_message(
@@ -300,7 +307,7 @@ async def upsert_item_state(
     await connection.execute(stmt)
 
 
-# ---- reminders --------------------------------------------------------------
+# ---- reminders 관리 ---------------------------------------------------------
 
 
 async def insert_reminder(
@@ -361,10 +368,10 @@ async def list_due_pending_reminders(
 async def reactivate_reminder_if_pending(
     connection: AsyncConnection, *, reminder_id: uuid.UUID, reactivated_at: datetime
 ) -> dict | None:
-    """Conditional UPDATE ... WHERE status='pending' ... RETURNING — the
-    concurrency guard from briefing.md "Job: reactivate_reminders" §동시:
-    two concurrent scans racing on the same reminder only let one caller
-    observe a non-None result."""
+    """Conditional UPDATE ... WHERE status='pending' ... RETURNING은
+    briefing.md "Job: reactivate_reminders" §동시의 concurrency guard다.
+    같은 reminder를 두 concurrent scan이 동시에 잡아도 한 caller만 non-None
+    result를 관측한다."""
     stmt = (
         update(reminders)
         .where(and_(reminders.c.id == reminder_id, reminders.c.status == "pending"))

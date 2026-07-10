@@ -45,8 +45,8 @@ async def test_full_resync_is_idempotent() -> None:
             )
         ).mappings().all()
 
-    assert len(rows) == 2  # not duplicated by the second run
-    assert len(sync_run_rows) == 2  # each run recorded, even the no-op one
+    assert len(rows) == 2  # 두 번째 run으로 중복되지 않음
+    assert len(sync_run_rows) == 2  # no-op run까지 각각 기록됨
     assert all(r["status"] == "succeeded" for r in sync_run_rows)
 
 
@@ -62,9 +62,8 @@ async def test_invalid_cursor_triggers_full() -> None:
     async with engine.begin() as connection:
         await service.sync_full(connection, connected_account_id=account_id, reason="initial")
 
-    # Simulate Gmail forgetting our history window entirely — the next
-    # delta attempt must detect this mid-flight (not via a pre-set cursor
-    # flag) and fall back to full.
+    # Gmail이 history window를 완전히 잊은 상황을 흉내낸다. 다음 delta attempt는
+    # pre-set cursor flag가 아니라 mid-flight에서 이를 감지하고 full로 fallback해야 한다.
     reader.expire_history_before(account_id, 999)
     reader.push_history(
         account_id,
@@ -93,6 +92,6 @@ async def test_invalid_cursor_triggers_full() -> None:
         ).mappings().all()
 
     assert cursor["cursor_status"] == "valid"
-    # Full resync re-derives the snapshot from list_message_ids — both the
-    # already-known message and the one added after the history expired.
+    # Full resync는 list_message_ids에서 snapshot을 다시 파생한다. 이미 알고 있던 message와
+    # history 만료 후 추가된 message가 모두 포함된다.
     assert {r["gmail_message_id"] for r in rows} == {"msg-1", "msg-2"}

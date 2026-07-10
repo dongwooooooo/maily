@@ -5,9 +5,11 @@ from app.domains.mail_intake import service
 
 
 async def handle(payload: dict) -> None:
-    """job_type=reconcile_action, payload={message_id, add_label_ids?,
-    remove_label_ids?}. Triggered by gmail_action_applied (IC4,
-    _build-schedule.md "mail_intake snapshot reconcile")."""
+    """job_type=reconcile_action, payload={message_id, add_label_ids?, remove_label_ids?}.
+
+    gmail_action_applied가 trigger한다(IC4, _build-schedule.md
+    "mail_intake snapshot reconcile").
+    """
     message_id = uuid.UUID(payload["message_id"])
     async with engine.begin() as connection:
         await service.reconcile_action_labels(

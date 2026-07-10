@@ -3,24 +3,24 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-# section value set is [미정] — db-schema.md "briefing_items.section" /
-# _integration-contract.md §5. Until product-wireframe-final.md's card
-# section table is confirmed, every projected item is placed in this single
-# fake_section contract constant (docs/goals/backend-plans/briefing.md
-# "워크트리 격리 노트"). Do not invent additional section values here.
+# section value set은 [미정]이다 — db-schema.md "briefing_items.section" /
+# _integration-contract.md §5. product-wireframe-final.md의 card section table이 확정될
+# 때까지 모든 projected item은 이 단일 fake_section contract constant에 둔다
+# (docs/goals/backend-plans/briefing.md "워크트리 격리 노트"). 여기서 추가 section value를
+# 만들지 않는다.
 FAKE_SECTION = "fake_section"
 
-# reminders.status enum — fixed by _integration-contract.md §5.
+# reminders.status enum은 _integration-contract.md §5로 고정된다.
 REMINDER_STATUSES = {"pending", "reactivated", "cancelled"}
 
 
 class BriefingCard(BaseModel):
-    """Today-briefing / card list shape.
+    """today briefing / card list shape.
 
-    Deliberately excludes any Gmail mutation action, AI judgement reason,
-    or raw body field — briefing.md "카드 응답에는 Gmail mutation action,
-    AI 판단 이유, raw body를 넣지 않는다" (강제 invariant). Tests assert
-    field *absence*, not null values, so no such field is declared here.
+    Gmail mutation action, AI judgement reason, raw body field를 의도적으로 제외한다.
+    briefing.md "카드 응답에는 Gmail mutation action, AI 판단 이유, raw body를 넣지 않는다"
+    (강제 invariant). test는 null value가 아니라 field *absence*를 assert하므로, 그런 field를
+    여기 선언하지 않는다.
     """
 
     id: uuid.UUID
@@ -49,8 +49,8 @@ class AccountBriefingGroup(BaseModel):
 class MessageDetail(BaseModel):
     """GET /messages/{id} readonly view.
 
-    No mutation action field (mark_read/archive/label) and no AI reason
-    field by default — briefing.md "Read API" §negative / §빈상태.
+    mutation action field(mark_read/archive/label)가 없고 AI reason field도 기본으로 없다.
+    briefing.md "Read API" §negative / §빈상태 기준이다.
     """
 
     id: uuid.UUID

@@ -62,7 +62,7 @@ async def test_mapping_id_null_before_apply() -> None:
     async with engine.begin() as connection:
         label, _ = await create_or_update_label(connection, data)
 
-    # Gmail label creation is gmail_actions' job — labels only records intent.
+    # Gmail label creation은 gmail_actions의 job이다. labels는 intent만 기록한다.
     assert label.gmail_label_id is None
 
 
@@ -80,7 +80,7 @@ async def test_rename_keeps_gmail_mapping() -> None:
     assert renamed.id == label.id
     assert renamed.name == new_name
     assert renamed.gmail_label_name == f"Maily/{new_name}"
-    # Same mapping row — gmail_label_id (whatever it was) is preserved, not reset.
+    # 같은 mapping row다. gmail_label_id는 값이 무엇이든 reset되지 않고 보존된다.
     assert renamed.gmail_label_id == label.gmail_label_id
 
     async with engine.connect() as connection:
