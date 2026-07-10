@@ -126,7 +126,10 @@ def cmd_retest_label_nesting() -> None:
         },
     )
     print(json.dumps(child, indent=2, ensure_ascii=False))
-    print("\n>>> Gmail 웹 새로고침 후 왼쪽 라벨 목록에서 'Maily' 아래 'POC테스트2'로 중첩됐는지 육안 확인")
+    print(
+        "\n>>> Gmail 웹 새로고침 후 왼쪽 라벨 목록에서 'Maily' 아래\n"
+        ">>> 'POC테스트2'로 중첩됐는지 육안 확인"
+    )
 
 
 def call(method: str, url: str, token: str, **kwargs) -> dict:
