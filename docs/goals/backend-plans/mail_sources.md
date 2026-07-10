@@ -57,7 +57,7 @@ disconnecting
 - **[부분실패]** 계정 insert 성공·credential 암호화 저장 실패 → 전체 트랜잭션 롤백(계정+credential+settings+outbox는 한 트랜잭션). outbox event append도 같은 트랜잭션 → event만 남고 계정 없음/계정만 있고 event 없음 상태 불가. sync job 큐잉은 dispatcher가 outbox를 읽어 처리(별도 트랜잭션) → 계정 커밋 후 프로세스 죽어도 event는 남아 재기동 시 큐잉됨.
 - **[권한]** 세션 workspace ≠ 요청 workspace_id → 403. 타 workspace 계정 목록 조회·조작 불가(workspace_id 직접 컬럼으로 스코프).
 - **[데이터경계]** 같은 주소가 과거 `disconnected` row로 존재 → 신규 연결 허용(새 row, 부분 유니크가 disconnected 제외). purge 미완료(`disconnecting`) 상태의 같은 주소 재연결 시도 → 거부(활성 취급), purge 완료까지 대기.
-- 검증: `tests/domains/mail_sources/test_connection.py::{test_connect_creates_source_and_credential, test_duplicate_active_address_rejected, test_disconnected_address_reconnectable}`, `test_credentials.py::{test_token_plaintext_never_persisted, test_missing_enc_key_rolls_back}`.
+- 검증: `tests/domains/mail_sources/test_connection.py::{test_connect_creates_source_with_connected_status, test_connect_appends_gmail_source_connected_event, test_duplicate_active_address_returns_existing_source_without_new_event, test_disconnected_address_is_reconnectable_as_new_row, test_concurrent_connect_same_address_creates_only_one_active_source}`, `test_credentials.py::{test_token_plaintext_never_persisted, test_missing_encryption_key_rolls_back_entire_connection}`.
 
 ## Command: `update_gmail_source_settings`
 
@@ -74,7 +74,7 @@ disconnecting
 - **[부분실패]** settings update 성공·outbox append 실패 → 트랜잭션 롤백(한 트랜잭션). paused 전이와 settings update는 원자적.
 - **[권한]** 타 workspace source PATCH → 403.
 - **[데이터경계]** display_name을 빈 문자열/null로 → 저장 허용, 응답 시 `gmail_address`로 fallback(Task 3 test). paused=true 상태에서 다시 briefing_enabled 조작 → 허용(설정은 paused와 독립).
-- 검증: `tests/domains/mail_sources/test_source_settings.py::{test_toggle_updates_and_emits, test_noop_update_no_event, test_pause_transitions_status, test_display_name_fallback}`.
+- 검증: `tests/domains/mail_sources/test_source_settings.py::{test_toggle_updates_and_emits_settings_changed_event, test_noop_update_does_not_emit_event, test_pause_transitions_status_and_unpause_reverts_it, test_display_name_falls_back_to_gmail_address_when_unset}`.
 
 ## Command: `disconnect_gmail_source`
 
@@ -91,7 +91,7 @@ disconnecting
 - **[부분실패]** status 전이·revoke 성공·outbox append 실패 → 롤백(한 트랜잭션, token은 아직 유효). revoke 후 purge job 실행 전 프로세스 사망 → outbox event 남아 재기동 시 purge 재큐잉(at-least-once). Google 원격 revoke(live) 실패 → 로컬 `revoked_at`은 세팅해 sync/action 차단은 즉시 발효, 원격 revoke는 retry(Task 13 marker).
 - **[권한]** 타 workspace source 해제 → 403. `actor_id`는 activity/audit용으로만 기록.
 - **[데이터경계]** disconnect 후 content-bearing 데이터(◆) purge 대상: `gmail_oauth_credentials`, `gmail_messages`, `message_excerpts`, `briefing_items`, `briefing_item_states`, summaries, importance, cleanup_proposals, rule_suggestions. 최소 audit(`activity_logs` action_summary)는 보존(body/summary 텍스트 없이). 다른 workspace 데이터는 절대 미삭제(§purge job 멱등).
-- 검증: `tests/domains/mail_sources/test_disconnect_purge.py::{test_disconnect_revokes_and_blocks, test_disconnect_idempotent, test_disconnect_emits_and_queues_purge}`.
+- 검증: `tests/domains/mail_sources/test_disconnect.py::{test_disconnect_marks_disconnecting_and_revokes_credential, test_disconnect_idempotent_on_already_disconnecting, test_disconnect_emits_gmail_source_disconnected}`. 테스트 부재 — disconnect 직후 신규 sync/action 차단을 직접 assert하는 케이스(가드 로직 자체는 mail_intake/mail_sources service에 구현됨).
 
 ## Event(공동 producer): `gmail_source_recovery_needed`
 
@@ -115,7 +115,7 @@ disconnecting
 - **[부분실패]** 중간 도메인 purge 실패 → job `retrying`, 나머지 미완. 재실행 시 멱등이라 완료분은 skip, 미완분만 재시도. 모든 도메인 성공 후에만 `disconnected` 확정.
 - **[권한]** N/A(내부 job, 사용자 컨텍스트 없음). workspace 스코프는 각 도메인 handler가 source_id→workspace로 제한.
 - **[데이터경계]** 절대 다른 source/workspace 데이터 미삭제 — 각 handler는 `WHERE source_id = ?`(또는 message가 그 source 소속인 것만)로 제한. 최소 audit(`activity_logs`)는 삭제 대상 아님.
-- 검증: `tests/domains/mail_sources/test_purge_disconnected_source_job.py::{test_purge_removes_content, test_purge_keeps_audit, test_purge_idempotent_no_cross_workspace_delete}`.
+- 검증: `tests/domains/mail_sources/test_purge_disconnected_source_job.py::{test_orchestration_purges_every_domain_in_fk_safe_order, test_orchestration_idempotent_on_double_run}`(content 삭제·audit 잔존·cross-workspace 미삭제 assert 포함), `tests/domains/mail_sources/test_purge.py`.
 
 ## Read API (경량 — 6축 대신 정상/필터/빈상태/권한)
 
@@ -124,7 +124,7 @@ disconnecting
 - **[필터]** `disconnected` 계정 제외(기본). status별 정렬은 UI 계약 따름.
 - **[빈상태]** 연결 계정 0개 → 빈 배열(에러 아님).
 - **[권한]** 세션 workspace 스코프만. token/credential 필드는 응답에 절대 미포함.
-- 검증: `test_connection.py::test_list_sources_scoped`.
+- 검증: `test_router.py::test_list_sources_scoped_to_workspace`.
 
 ### `GET /sources/{id}`
 - **[정상]** 단건 상태·설정. **[권한]** 타 workspace 404(존재 노출 방지). **[데이터경계]** `disconnecting`/`disconnected`도 상태 확인용 조회는 허용, credential 필드 미포함.

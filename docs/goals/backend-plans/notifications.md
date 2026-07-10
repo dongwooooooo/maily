@@ -54,7 +54,7 @@ browser push 구독, notification event 발행, route target 결정, 권한/sync
 - **[부분실패]** event insert 성공·outbox append 실패 → 트랜잭션 롤백(한 트랜잭션) → event만 남고 push 안 됨/push 됐는데 event 없음 상태 불가. event 커밋 후 push worker 실행 전 프로세스 사망 → `notification_event_created` outbox가 남아 재기동 시 push 재시도(at-least-once). push 자체 실패(브라우저 endpoint 만료)는 구독 `revoked_at` 세팅으로 처리, notification_event는 유지.
 - **[권한]** N/A — 내부 job, 사용자 컨텍스트 없음. workspace 스코프는 소비 event payload의 workspace_id로 제한, 타 workspace로 알림 누출 없음.
 - **[데이터경계]** route_target에 message body/summary 텍스트를 넣지 않는다 — 착지에 필요한 id·화면 키만(카드 문법·최소 payload 원칙). notification_type이 늘어도 event 종류를 늘리지 않고 payload 필드로만 구분.
-- 검증: `tests/domains/notifications/test_notification_routing.py::{test_route_target_required_no_generic_landing, test_type_maps_to_screen_and_item, test_notification_disabled_account_skipped}`, `test_emit_notification_job.py::{test_emit_creates_event_and_outbox, test_emit_idempotent_single_push}`.
+- 검증: `tests/domains/notifications/test_notification_routing.py::{test_route_target_required_no_generic_landing_unmapped_trigger, test_route_target_required_no_generic_landing_empty_screen_rejected, test_type_maps_to_screen_and_item, test_notification_disabled_account_skipped}`, `test_emit_notification_job.py::{test_emit_creates_event_and_outbox, test_emit_idempotent_single_push}`.
 
 ## 동작: browser push 구독 (`subscribe`/`unsubscribe`)
 
