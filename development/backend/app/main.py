@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
+from pydantic import BaseModel
 
 from app.api.deps import get_database_check, get_redis_check
 from app.api.router import api_router
@@ -23,7 +25,19 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title=settings.app_name, lifespan=lifespan)
+def _operation_id_from_route_name(route: APIRoute) -> str:
+    # operationId = 라우트 함수명. 프론트 codegen(openapi-typescript)이
+    # 함수명을 그대로 클라이언트 메서드 이름으로 쓰므로, 도메인 전체에서
+    # 라우트 함수명이 유일해야 한다 — tests/api/test_openapi_metadata.py가 강제.
+    return route.name
+
+
+app = FastAPI(
+    title=settings.app_name,
+    version="0.1.0",
+    lifespan=lifespan,
+    generate_unique_id_function=_operation_id_from_route_name,
+)
 app.add_middleware(RequestContextMiddleware)
 app.include_router(api_router)
 app.add_exception_handler(MailyError, maily_error_handler)
@@ -35,17 +49,24 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.get("/ready")
+class ReadyResponse(BaseModel):
+    status: str
+    checks: dict[str, str]
+
+
+@app.get("/ready", responses={200: {"model": ReadyResponse}, 503: {"model": ReadyResponse}})
 async def ready(
     database_ok: bool = Depends(get_database_check),
     redis_ok: bool = Depends(get_redis_check),
 ) -> JSONResponse:
     all_ok = database_ok and redis_ok
-    body = {
-        "status": "ok" if all_ok else "error",
-        "checks": {
+    # JSONResponse 직접 반환은 FastAPI response_model 검증을 건너뛰므로,
+    # 문서화된 ReadyResponse를 반드시 경유해 스키마-런타임 드리프트를 막는다.
+    body = ReadyResponse(
+        status="ok" if all_ok else "error",
+        checks={
             "database": "ok" if database_ok else "error",
             "redis": "ok" if redis_ok else "error",
         },
-    }
-    return JSONResponse(status_code=200 if all_ok else 503, content=body)
+    )
+    return JSONResponse(status_code=200 if all_ok else 503, content=body.model_dump())

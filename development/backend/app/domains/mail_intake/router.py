@@ -11,17 +11,17 @@ from app.core.config import settings
 from app.core.errors import ConflictError, NotFoundError, UnauthorizedError, ValidationError
 from app.domains.identity.schemas import RequestContext
 from app.domains.mail_intake import repository, service
-from app.domains.mail_intake.schemas import ManualSyncQueued, ManualSyncRequest
+from app.domains.mail_intake.schemas import ManualSyncQueued, ManualSyncRequest, PubSubAckResponse
 from app.domains.mail_sources import repository as mail_sources_repository
 
 router = APIRouter()
 
 
-@router.post("/pubsub", status_code=200)
+@router.post("/pubsub", response_model=PubSubAckResponse, status_code=200)
 async def pubsub_webhook(
     request: Request,
     connection: AsyncConnection = Depends(get_db_connection),
-) -> dict:
+) -> PubSubAckResponse:
     """Pub/Sub push webhook. Always acks with 200 once auth passes — even a
     duplicate or orphan (no matching active source) notification is a
     normal outcome, not an error (mail_intake.md "[멱등]"/"[빈상태]"), so
@@ -55,7 +55,7 @@ async def pubsub_webhook(
         history_id=int(history_id),
         notification_id=message.get("messageId"),
     )
-    return {"deduped": result["deduped"]}
+    return PubSubAckResponse(deduped=result["deduped"])
 
 
 @router.post("/sources/{source_id}/sync", response_model=ManualSyncQueued, status_code=202)
