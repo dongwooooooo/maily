@@ -156,6 +156,29 @@ def _to_settings_result(account: dict, settings_row: dict) -> SourceSettingsResu
     )
 
 
+async def get_gmail_source_settings(
+    connection: AsyncConnection, *, connected_account_id: uuid.UUID
+) -> SourceSettingsResult:
+    """현재 설정 조회 — 무부작용(version bump·outbox event 없음).
+
+    프론트 설정 화면(F6)이 토글 초기값을 읽는 용도. 쓰기 경로는
+    update_gmail_source_settings가 담당한다.
+    """
+    account = await repository.get_connected_account(
+        connection, connected_account_id=connected_account_id
+    )
+    if account is None:
+        raise NotFoundError("gmail source not found")
+    settings_row = await repository.get_source_settings(
+        connection, connected_account_id=connected_account_id
+    )
+    # connect_gmail_source가 기본 settings를 같은 트랜잭션에 넣으므로 정상
+    # 플로우에선 None이 안 나오지만, account 체크와 대칭으로 방어한다.
+    if settings_row is None:
+        raise NotFoundError("gmail source settings not found")
+    return _to_settings_result(account, settings_row)
+
+
 async def update_gmail_source_settings(
     connection: AsyncConnection, *, connected_account_id: uuid.UUID, changes: dict
 ) -> SourceSettingsResult:

@@ -19,6 +19,7 @@ from app.domains.mail_sources.schemas import (
 from app.domains.mail_sources.service import (
     connect_gmail_source,
     disconnect_gmail_source,
+    get_gmail_source_settings,
     update_gmail_source_settings,
 )
 
@@ -81,6 +82,17 @@ async def get_source(
         connection, source_id=source_id, workspace_id=context.workspace_id
     )
     return ConnectedSource(**account)
+
+
+@router.get("/{source_id}/settings", response_model=SourceSettingsResult)
+async def get_source_settings(
+    source_id: uuid.UUID,
+    context: RequestContext = Depends(get_request_context),
+    connection: AsyncConnection = Depends(get_db_connection),
+) -> SourceSettingsResult:
+    """설정 화면 토글 초기값 조회 — 무부작용 읽기 (F6 프론트 연결용)."""
+    await _get_owned_account(connection, source_id=source_id, workspace_id=context.workspace_id)
+    return await get_gmail_source_settings(connection, connected_account_id=source_id)
 
 
 @router.patch("/{source_id}", response_model=SourceSettingsResult)

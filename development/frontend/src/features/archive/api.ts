@@ -22,11 +22,5 @@ export async function fetchLabels(): Promise<ServiceLabel[]> {
   return data
 }
 
-export type ConnectedSource = components['schemas']['ConnectedSource']
-
-/** 상세 패널 계정 라벨(gmail 주소) 매핑용 — 설정 화면 연결(F6)과 공유. */
-export async function fetchSources(): Promise<ConnectedSource[]> {
-  const { data, error, response } = await apiClient.GET('/sources')
-  if (error) throw toApiError(response.status, error)
-  return data
-}
+// sources 호출은 여러 feature가 소비해 shared로 승격됐다 — 기존 소비처 호환 재노출.
+export { fetchSources, type ConnectedSource } from '@/shared/api/sources'

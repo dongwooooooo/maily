@@ -1301,6 +1301,11 @@ details.section[open] .section-chevron {
   color: var(--danger);
   font-size: 13px;
 }
+.acct-confirm-text {
+  color: var(--muted);
+  font-size: 12px;
+  margin-right: auto;
+}
 
 /* ── 02 첫 Gmail 적용 확인 — 단독 진입 확인 화면 ──────────────── */
 .apply-stage {
