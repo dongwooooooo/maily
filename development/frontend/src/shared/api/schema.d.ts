@@ -202,10 +202,11 @@ export interface paths {
         put?: never;
         /**
          * Pubsub Webhook
-         * @description Pub/Sub push webhook. Always acks with 200 once auth passes — even a
-         *     duplicate or orphan (no matching active source) notification is a
-         *     normal outcome, not an error (mail_intake.md "[멱등]"/"[빈상태]"), so
-         *     Pub/Sub doesn't retry-storm us.
+         * @description Pub/Sub push webhook.
+         *
+         *     auth가 통과하면 항상 200으로 ack한다. duplicate 또는 orphan(matching active source 없음)
+         *     notification도 error가 아니라 normal outcome이므로(mail_intake.md "[멱등]"/"[빈상태]"),
+         *     Pub/Sub이 retry storm을 만들지 않는다.
          */
         post: operations["pubsub_webhook"];
         delete?: never;
@@ -225,12 +226,13 @@ export interface paths {
         put?: never;
         /**
          * Manual Sync
-         * @description Manual resync trigger. Route is mounted under this router's /intake
-         *     prefix (app/api/router.py), giving POST /intake/sources/{id}/sync — see
-         *     this domain's final report for why the literal path in
-         *     _integration-contract.md §3 ("POST /sources/{id}/sync", no /intake
-         *     prefix) couldn't be used without splitting `router` into two exposed
-         *     symbols, which §4's single-`router`-per-domain contract doesn't allow.
+         * @description manual resync trigger.
+         *
+         *     route는 이 router의 /intake prefix(app/api/router.py) 아래 mount되어
+         *     POST /intake/sources/{id}/sync가 된다. _integration-contract.md §3의 literal path
+         *     ("POST /sources/{id}/sync", /intake prefix 없음)를 쓰려면 `router`를 두 exposed symbol로
+         *     나눠야 하는데, §4의 single-`router`-per-domain contract가 이를 허용하지 않는다.
+         *     자세한 이유는 이 domain의 final report 참고.
          */
         post: operations["manual_sync"];
         delete?: never;
@@ -430,6 +432,26 @@ export interface paths {
         patch: operations["patch_source_settings"];
         trace?: never;
     };
+    "/sources/{source_id}/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Source Settings
+         * @description 설정 화면 토글 초기값 조회 — 무부작용 읽기 (F6 프론트 연결용).
+         */
+        get: operations["get_source_settings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/storage/upcoming": {
         parameters: {
             query?: never;
@@ -497,12 +519,12 @@ export interface components {
         };
         /**
          * BriefingCard
-         * @description Today-briefing / card list shape.
+         * @description today briefing / card list shape.
          *
-         *     Deliberately excludes any Gmail mutation action, AI judgement reason,
-         *     or raw body field — briefing.md "카드 응답에는 Gmail mutation action,
-         *     AI 판단 이유, raw body를 넣지 않는다" (강제 invariant). Tests assert
-         *     field *absence*, not null values, so no such field is declared here.
+         *     Gmail mutation action, AI judgement reason, raw body field를 의도적으로 제외한다.
+         *     briefing.md "카드 응답에는 Gmail mutation action, AI 판단 이유, raw body를 넣지 않는다"
+         *     (강제 invariant). test는 null value가 아니라 field *absence*를 assert하므로, 그런 field를
+         *     여기 선언하지 않는다.
          */
         BriefingCard: {
             /**
@@ -825,8 +847,8 @@ export interface components {
          * MessageDetail
          * @description GET /messages/{id} readonly view.
          *
-         *     No mutation action field (mark_read/archive/label) and no AI reason
-         *     field by default — briefing.md "Read API" §negative / §빈상태.
+         *     mutation action field(mark_read/archive/label)가 없고 AI reason field도 기본으로 없다.
+         *     briefing.md "Read API" §negative / §빈상태 기준이다.
          */
         MessageDetail: {
             /**
@@ -976,10 +998,10 @@ export interface components {
          * RouteTarget
          * @description "어느 화면 + 어느 selected item" — notifications.md 매핑표의 결과 shape.
          *
-         *     `screen` is always present (generic-landing-prohibition invariant —
+         *     `screen`은 항상 존재한다(generic-landing-prohibition invariant —
          *     notifications.md "route_target이 비면(selected item 부재는 허용, 화면
-         *     부재는 불가) 발행을 거부한다"). `item_id` may be None for screen-only
-         *     notifications (e.g. daily_briefing).
+         *     부재는 불가) 발행을 거부한다"). `item_id`는 screen-only notification(예: daily_briefing)에서
+         *     None일 수 있다.
          */
         RouteTarget: {
             /** Item Id */
@@ -1015,7 +1037,7 @@ export interface components {
         };
         /**
          * RulesView
-         * @description GET /rules response shape — pending suggestions + active rules.
+         * @description GET /rules response shape — pending suggestion과 active rule.
          */
         RulesView: {
             /** Rules */
@@ -1193,8 +1215,8 @@ export interface operations {
     create_action: {
         parameters: {
             query?: never;
-            header?: {
-                "Idempotency-Key"?: string;
+            header: {
+                "Idempotency-Key": string;
                 authorization?: string;
             };
             path?: never;
@@ -2317,6 +2339,48 @@ export interface operations {
                 "application/json": components["schemas"]["UpdateSourceSettingsRequest"];
             };
         };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceSettingsResult"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Maily error envelope */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_source_settings: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string;
+            };
+            path: {
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {

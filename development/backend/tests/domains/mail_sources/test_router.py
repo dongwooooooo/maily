@@ -113,3 +113,30 @@ async def test_list_sources_scoped_to_workspace() -> None:
 
     assert list_b.status_code == 200
     assert all(s["id"] != source_a_id for s in list_b.json())
+
+
+async def test_get_source_settings_endpoint() -> None:
+    headers = await _auth_headers()
+    client = TestClient(app)
+    connect_response = client.post("/sources", headers=headers, json=_connect_body())
+    source_id = connect_response.json()["id"]
+
+    response = client.get(f"/sources/{source_id}/settings", headers=headers)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["connected_account_id"] == source_id
+    assert body["briefing_enabled"] is True
+
+
+async def test_get_source_settings_from_other_workspace_returns_404() -> None:
+    headers_a = await _auth_headers()
+    headers_b = await _auth_headers()
+    client = TestClient(app)
+    connect_response = client.post("/sources", headers=headers_a, json=_connect_body())
+    source_id = connect_response.json()["id"]
+
+    response = client.get(f"/sources/{source_id}/settings", headers=headers_b)
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "not_found"

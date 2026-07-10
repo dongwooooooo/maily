@@ -3395,6 +3395,70 @@
         ]
       }
     },
+    "/sources/{source_id}/settings": {
+      "get": {
+        "description": "\uc124\uc815 \ud654\uba74 \ud1a0\uae00 \ucd08\uae30\uac12 \uc870\ud68c \u2014 \ubb34\ubd80\uc791\uc6a9 \uc77d\uae30 (F6 \ud504\ub860\ud2b8 \uc5f0\uacb0\uc6a9).",
+        "operationId": "get_source_settings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceSettingsResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Maily error envelope"
+          }
+        },
+        "summary": "Get Source Settings",
+        "tags": [
+          "mail_sources"
+        ]
+      }
+    },
     "/storage/upcoming": {
       "get": {
         "operationId": "storage_upcoming",
