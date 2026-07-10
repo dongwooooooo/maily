@@ -30,11 +30,9 @@ pnpm install
 pnpm frontend:dev
 ```
 
-## 현재 결정
+## 상세
 
 - 스택·버전 상세: `docs/current/technical-foundation.md` (프론트 Next.js 16 + React 19, 백엔드 Python 3.14 + FastAPI + PostgreSQL + Redis).
 - 구조: `development/frontend/src/features/*` 기준 feature-first.
-- 현재 구현 범위: 가짜 데이터 기반 오늘 브리핑 화면, 우측 상세 패널, 상단 계정 스코프, 사이드바, Undo toast.
-- 미착수: 실제 Google OAuth, Gmail API, LLM 요약 호출, 저장소 연결, 브라우저 push 전달.
 
 문서 진입점은 `docs/INDEX.md`, 현재 기준은 `docs/CONTEXT.md`.
