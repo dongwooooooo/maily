@@ -7,6 +7,7 @@ from sqlalchemy import insert
 from app.core.database import engine
 from app.domains.identity.models import workspaces
 from app.domains.mail_intake.gmail_reader import set_reader
+from app.domains.mail_intake.models import gmail_messages
 from app.domains.mail_sources.models import connected_gmail_accounts, gmail_source_settings
 
 
@@ -58,3 +59,25 @@ async def seed_connected_account(
             )
         )
     return account_id
+
+
+async def seed_message(
+    connected_account_id: uuid.UUID,
+    *,
+    is_read: bool = False,
+    is_archived: bool = False,
+) -> uuid.UUID:
+    message_id = uuid.uuid4()
+    async with engine.begin() as connection:
+        await connection.execute(
+            insert(gmail_messages).values(
+                id=message_id,
+                connected_account_id=connected_account_id,
+                gmail_message_id=f"gmail-{uuid.uuid4()}",
+                gmail_thread_id=f"thread-{uuid.uuid4()}",
+                is_read=is_read,
+                is_archived=is_archived,
+                last_history_id=1,
+            )
+        )
+    return message_id

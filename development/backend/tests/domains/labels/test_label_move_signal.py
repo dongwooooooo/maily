@@ -1,13 +1,17 @@
 import asyncio
 import uuid
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select, update
 
 from app.core.database import engine
+from app.core.errors import ConflictError
 from app.core.outbox import outbox_events
+from app.domains.gmail_actions.models import gmail_action_commands
 from app.domains.identity.schemas import GoogleProfile
 from app.domains.identity.service import google_login, issue_session
+from app.domains.labels import service as labels_service
 from app.domains.labels.models import label_correction_signals
 from app.domains.labels.schemas import CreateLabelInput, MoveMessageInput, MoveMessageResult
 from app.domains.labels.service import create_or_update_label, move_message_to_label
@@ -51,6 +55,61 @@ async def _seed_scenario(*, account_status: str = "connected") -> dict:
     }
 
 
+async def test_signal_survives_gmail_action_request_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """[부분실패] labels.md §61: request_gmail_action이 실패해도(예: 두
+    스코프 체크 사이 레이스로 계정이 disconnect됨) 이미 기록된 correction
+    signal/event는 살아남는다 — 같은 트랜잭션을 공유하지만 move_message_to_label이
+    MailyError를 흡수하므로 트랜잭션 자체는 정상 커밋된다(코드리뷰 반영)."""
+    scenario = await _seed_scenario()
+    actor_id = await seed_user()
+
+    async def _raise_conflict(*args, **kwargs):
+        raise ConflictError("simulated race: account disconnected between checks")
+
+    monkeypatch.setattr(labels_service, "request_gmail_action", _raise_conflict)
+
+    async with engine.begin() as connection:
+        result = await move_message_to_label(
+            connection,
+            MoveMessageInput(
+                workspace_id=scenario["workspace_id"],
+                message_id=scenario["message_id"],
+                label_id=scenario["label_id"],
+                actor_id=actor_id,
+                idempotency_key=str(uuid.uuid4()),
+            ),
+        )
+
+    async with engine.connect() as connection:
+        signal_rows = (
+            await connection.execute(
+                select(label_correction_signals).where(
+                    label_correction_signals.c.id == result.correction_signal_id
+                )
+            )
+        ).mappings().all()
+        event_rows = (
+            await connection.execute(
+                select(outbox_events).where(outbox_events.c.event_type == "label_correction_recorded")
+            )
+        ).mappings().all()
+        command_rows = (
+            await connection.execute(
+                select(gmail_action_commands).where(
+                    gmail_action_commands.c.message_id == scenario["message_id"]
+                )
+            )
+        ).mappings().all()
+
+    assert len(signal_rows) == 1  # signal survived the downstream failure
+    assert any(
+        e["payload"]["correction_signal_id"] == str(result.correction_signal_id) for e in event_rows
+    )
+    assert command_rows == []  # no command — request_gmail_action never got past the raise
+
+
 async def test_move_records_signal_and_emits() -> None:
     scenario = await _seed_scenario()
     client = TestClient(app)
@@ -88,6 +147,20 @@ async def test_move_records_signal_and_emits() -> None:
         ).mappings().all()
     assert len(event_rows) == 1
     assert event_rows[0]["event_type"] == "label_correction_recorded"
+
+    # IC5: move also requests the Gmail label apply command directly
+    # (labels.md §73 — not event/dispatcher-wired, a synchronous call).
+    async with engine.connect() as connection:
+        command_rows = (
+            await connection.execute(
+                select(gmail_action_commands).where(
+                    gmail_action_commands.c.message_id == scenario["message_id"]
+                )
+            )
+        ).mappings().all()
+    assert len(command_rows) == 1
+    assert command_rows[0]["action_type"] == "label_apply"
+    assert command_rows[0]["connected_account_id"] == scenario["account_id"]
     assert event_rows[0]["producer_domain"] == "labels"
     assert event_rows[0]["payload"]["correction_signal_id"] == body["correction_signal_id"]
 

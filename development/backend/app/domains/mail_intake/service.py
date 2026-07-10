@@ -31,6 +31,7 @@ async def _fail_sync_run_and_emit_recovery(
     *,
     sync_run_id: uuid.UUID,
     connected_account_id: uuid.UUID,
+    workspace_id: uuid.UUID,
     account_version: int,
     reason: str,
 ) -> None:
@@ -43,7 +44,11 @@ async def _fail_sync_run_and_emit_recovery(
         error_reason=reason,
     )
     await events.publish_recovery_needed(
-        connection, connected_account_id=connected_account_id, reason=reason, version=account_version
+        connection,
+        connected_account_id=connected_account_id,
+        workspace_id=workspace_id,
+        reason=reason,
+        version=account_version,
     )
 
 
@@ -76,6 +81,7 @@ async def sync_full(
             connection,
             sync_run_id=sync_run_id,
             connected_account_id=connected_account_id,
+            workspace_id=account["workspace_id"],
             account_version=account["version"],
             reason=exc.reason,
         )
@@ -110,6 +116,7 @@ async def sync_full(
             connection,
             sync_run_id=sync_run_id,
             connected_account_id=connected_account_id,
+            workspace_id=account["workspace_id"],
             account_version=account["version"],
             reason=exc.reason,
         )
@@ -148,6 +155,7 @@ async def sync_full(
     await events.publish_snapshot_changed(
         connection,
         connected_account_id=connected_account_id,
+        workspace_id=account["workspace_id"],
         sync_run_id=sync_run_id,
         message_ids=changed_message_ids,
     )
@@ -291,6 +299,7 @@ async def sync_delta(
             connection,
             sync_run_id=sync_run_id,
             connected_account_id=connected_account_id,
+            workspace_id=account["workspace_id"],
             account_version=account["version"],
             reason=exc.reason,
         )
@@ -330,6 +339,7 @@ async def sync_delta(
             connection,
             sync_run_id=sync_run_id,
             connected_account_id=connected_account_id,
+            workspace_id=account["workspace_id"],
             account_version=account["version"],
             reason=exc.reason,
         )
@@ -361,6 +371,7 @@ async def sync_delta(
     await events.publish_snapshot_changed(
         connection,
         connected_account_id=connected_account_id,
+        workspace_id=account["workspace_id"],
         sync_run_id=sync_run_id,
         message_ids=changed_message_ids,
     )
@@ -445,6 +456,7 @@ async def register_watch(connection: AsyncConnection, *, connected_account_id: u
         await events.publish_recovery_needed(
             connection,
             connected_account_id=connected_account_id,
+            workspace_id=account["workspace_id"],
             reason=exc.reason,
             version=account["version"],
         )
@@ -556,6 +568,7 @@ async def poll_history(connection: AsyncConnection, *, connected_account_id: uui
         await events.publish_recovery_needed(
             connection,
             connected_account_id=connected_account_id,
+            workspace_id=account["workspace_id"],
             reason=exc.reason,
             version=account["version"],
         )
@@ -607,3 +620,60 @@ def default_watch_renewal_threshold() -> datetime:
     inside Gmail's 7-day watch lifetime, matching mail_intake.md "watch
     만료 임박(7일 이내)" with margin for a daily renewal scheduler."""
     return datetime.now(timezone.utc) + timedelta(hours=24)
+
+
+async def reconcile_action_labels(
+    connection: AsyncConnection,
+    *,
+    message_id: uuid.UUID,
+    add_label_ids: list[str],
+    remove_label_ids: list[str],
+) -> None:
+    """IC4 (_build-schedule.md) — "mail_intake snapshot reconcile": a
+    gmail_actions command mutates label state on the fake/live Gmail side
+    only (gmail_actions owns no local message snapshot). Without this,
+    the local snapshot (is_read/is_archived, gmail_message_labels) stays
+    stale until the next sync_delta/sync_full history walk. Reuses the
+    same UNREAD/INBOX -> is_read/is_archived derivation
+    _apply_history_record uses for a real Gmail-side change — the
+    difference here is provenance (our own action, not an observed
+    history record) and that there is no history_id to advance the
+    cursor with, so last_history_id is left untouched.
+    """
+    existing = await repository.get_message(connection, message_id=message_id)
+    if existing is None:
+        # Not in our snapshot (e.g. purged, or never synced) — nothing to
+        # reconcile. Mirrors _apply_history_record's same guard.
+        return
+
+    for label_id in add_label_ids:
+        await repository.add_message_label(connection, message_id=message_id, gmail_label_id=label_id)
+    for label_id in remove_label_ids:
+        await repository.remove_message_label(
+            connection, message_id=message_id, gmail_label_id=label_id
+        )
+
+    is_read = existing["is_read"]
+    is_archived = existing["is_archived"]
+    if "UNREAD" in remove_label_ids:
+        is_read = True
+    if "UNREAD" in add_label_ids:
+        is_read = False
+    if "INBOX" in remove_label_ids:
+        is_archived = True
+    if "INBOX" in add_label_ids:
+        is_archived = False
+
+    await repository.update_message_state(
+        connection,
+        message_id=message_id,
+        is_read=is_read,
+        is_archived=is_archived,
+        last_history_id=existing["last_history_id"],
+    )
+    logger.info(
+        "Gmail 액션 반영 스냅샷 reconcile 완료",
+        message_id=str(message_id),
+        is_read=is_read,
+        is_archived=is_archived,
+    )
