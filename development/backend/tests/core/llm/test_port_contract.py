@@ -1,3 +1,4 @@
+import pytest
 from pydantic import BaseModel
 
 from app.core.llm import (
@@ -18,7 +19,7 @@ def test_request_defaults_and_fields():
     assert req.system is None
     assert req.output_schema is None
     assert req.max_output_tokens == 1024
-    assert req.temperature == 0.0
+    assert req.temperature == pytest.approx(0.0)
     assert req.metadata == {}
 
 

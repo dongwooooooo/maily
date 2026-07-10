@@ -31,5 +31,5 @@ def test_retryable_flags(exc_cls, retryable):
 
 def test_rate_limit_carries_retry_after():
     err = LLMRateLimitError("slow down", retry_after=1.5)
-    assert err.retry_after == 1.5
+    assert err.retry_after == pytest.approx(1.5)
     assert err.retryable is True

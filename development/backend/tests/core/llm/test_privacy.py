@@ -9,11 +9,11 @@ def test_log_completion_excludes_content(capsys):
         processors=[structlog.processors.JSONRenderer()],
         logger_factory=structlog.PrintLoggerFactory(),
     )
-    secret = "SENSITIVE-BODY-TEXT"
+    sensitive_body = "SENSITIVE-BODY-TEXT"
     req = LLMRequest(
         model="m",
         system="SECRET-SYSTEM",
-        messages=[LLMMessage(role="user", content=secret)],
+        messages=[LLMMessage(role="user", content=sensitive_body)],
     )
     result = LLMResult(
         text="SECRET-OUTPUT",
