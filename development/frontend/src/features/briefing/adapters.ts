@@ -119,6 +119,7 @@ export function computeHasUrgentItems(sectionList: Pick<Section, 'id' | 'count'>
 export function toDetailBody(detail: MessageDetailResponse, accountLabel: string): DetailBody {
   const received = formatReceivedAt(detail.received_at)
   return {
+    messageId: detail.id,
     account: accountLabel,
     accountKind: 'work',
     title: detail.subject ?? '[미확정: 제목 없는 메일 표시 문구]',

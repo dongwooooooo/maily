@@ -61,6 +61,8 @@ export interface Section {
 }
 
 export interface DetailBody {
+  /** POST /messages/{id}/move 등 액션 대상 메시지 id. 정적 샘플은 null. */
+  messageId: string | null
   account: string
   accountKind: AccountKind
   title: string
