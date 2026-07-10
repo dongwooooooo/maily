@@ -196,7 +196,7 @@ watch 끊김/notification 미도착
 ## Read/webhook API (경량 — 6축 대신 정상/멱등/권한/빈상태)
 
 ### `POST /intake/pubsub` (Pub/Sub webhook)
-- **[정상]** Pub/Sub push payload decode → `process_notification` 큐잉 → 200(빠른 ack).
+- **[정상]** Pub/Sub push payload decode → `process_notification` 큐잉 → 200(빠른 ack). 응답은 `PubSubAckResponse{deduped: bool}` — OpenAPI codegen 대상이라 dict 반환 금지.
 - **[멱등]** 같은 message 재전달 → dedupe로 no-op, 여전히 200(Pub/Sub 재전송 폭주 방지 위해 실패로 안 돌림).
 - **[권한]** topic 인증(OIDC 토큰) 검증 실패 → 401. 사용자 세션 아님.
 - **[빈상태]** 매칭 active source 0개 → notification 기록만, 200.

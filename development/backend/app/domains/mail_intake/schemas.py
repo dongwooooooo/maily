@@ -36,6 +36,10 @@ class SyncRunResult(BaseModel):
     error_reason: str | None
 
 
+class PubSubAckResponse(BaseModel):
+    deduped: bool
+
+
 class ManualSyncRequest(BaseModel):
     run_type: Literal["delta", "full"] = "delta"
 
