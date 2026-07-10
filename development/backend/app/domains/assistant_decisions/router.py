@@ -9,8 +9,8 @@ from app.domains.assistant_decisions.rules import approve_rule_suggestion, list_
 from app.domains.assistant_decisions.schemas import CleanupProposal, RuleSuggestion, RulesView
 from app.domains.identity.schemas import RequestContext
 
-# _integration-contract.md §3: prefix-less full paths (/rules, /cleanup),
-# same pattern as labels.router — included without a blanket prefix.
+# _integration-contract.md §3: prefix 없는 full path(/rules, /cleanup)이며,
+# labels.router와 같은 패턴이라 blanket prefix 없이 include된다.
 router = APIRouter()
 
 
@@ -58,7 +58,7 @@ async def post_approve_cleanup(
     )
     return CleanupProposal(**result)
 
-# NOTE (open question for coordinator): there is deliberately no
-# `POST /cleanup/approve-all` or `POST /rules/approve-all` route —
-# assistant_decisions.md "approve-all 엔드포인트 없음(negative)" — see
-# test_no_approve_all_endpoint in test_cleanup_review.py.
+# NOTE(coordinator open question): `POST /cleanup/approve-all` 또는
+# `POST /rules/approve-all` route는 의도적으로 없다. assistant_decisions.md
+# "approve-all 엔드포인트 없음(negative)" 및 test_cleanup_review.py의
+# test_no_approve_all_endpoint 참고.

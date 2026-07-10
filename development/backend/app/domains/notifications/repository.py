@@ -12,14 +12,12 @@ from app.domains.notifications.models import notification_events, notification_s
 async def get_source_notification_enabled(
     connection: AsyncConnection, *, connected_account_id: uuid.UUID
 ) -> bool:
-    """Read-only cross-domain lookup of mail_sources' own settings table.
+    """mail_sources own settings table에 대한 read-only cross-domain lookup.
 
-    notifications does not own gmail_source_settings — this is a plain
-    read (not a service call), mirroring labels.repository
-    .get_connected_account_status's precedent for reading an upstream
-    domain's table directly. No settings row (account never configured,
-    or seeded without one in a test) defaults to enabled, matching the
-    column's own `server_default="true"`.
+    notifications는 gmail_source_settings를 소유하지 않는다. 이는 service call이 아니라 plain
+    read이며, upstream domain table을 직접 읽는 labels.repository.get_connected_account_status의
+    precedent를 mirror한다. settings row가 없으면(account가 설정된 적 없거나 test에서 row 없이
+    seed됨) enabled가 default이며, column 자체의 `server_default="true"`와 일치한다.
     """
     row = (
         await connection.execute(
@@ -88,12 +86,12 @@ async def upsert_subscription(
     endpoint: str,
     keys: dict,
 ) -> uuid.UUID:
-    """Register a push subscription, or refresh an existing row for the
-    same `endpoint` — notifications.md "[멱등] 같은 endpoint 재구독 ...
-    기존 row 갱신(keys 갱신, revoked_at 초기화) → 중복 row 안 생김."
+    """push subscription을 register하거나 같은 `endpoint`의 기존 row를 refresh한다.
 
-    Returns the id of the row now in effect (the new id on first
-    subscribe, the pre-existing row's id on resubscribe).
+    notifications.md "[멱등] 같은 endpoint 재구독 ... 기존 row 갱신(keys 갱신, revoked_at 초기화)
+    → 중복 row 안 생김."
+
+    현재 유효한 row의 id를 반환한다(first subscribe면 new id, resubscribe면 기존 row id).
     """
     stmt = (
         insert(notification_subscriptions)

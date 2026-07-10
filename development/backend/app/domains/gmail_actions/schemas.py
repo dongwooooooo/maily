@@ -3,11 +3,11 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-# action_type catalog — payload shape is uniform across all of them
-# (docs/goals/backend-plans/gmail_actions.md "Command: request_gmail_action").
+# action_type catalog — payload shape는 모두 동일하다
+# (docs/goals/backend-plans/gmail_actions.md "Command: request_gmail_action") 기준.
 SUPPORTED_ACTION_TYPES = {"mark_read", "archive", "read_and_archive", "label_apply"}
 
-# status enum — fixed by docs/goals/backend-plans/_integration-contract.md §5.
+# status enum은 docs/goals/backend-plans/_integration-contract.md §5로 고정된다.
 COMMAND_STATUSES = {"pending", "applied", "failed", "compensating", "undone"}
 
 

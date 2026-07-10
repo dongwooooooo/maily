@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 
 from app.db.base import metadata
 
-# --- 0010_assistant_eval ---
+# --- 0010_assistant_eval migration 영역 ---
 
 summary_jobs = Table(
     "summary_jobs",
@@ -29,10 +29,9 @@ message_summaries = Table(
         nullable=False,
         unique=True,
     ),
-    # G6 privacy contract: no body/prompt column exists here or anywhere else
-    # in this module — summary_text is a short derived string only, never
-    # raw email content. null summary_text + is_metadata_only=True is the
-    # "summary off / fallback" fingerprint UI branches on.
+    # G6 privacy contract: 이 module 어디에도 body/prompt column은 없다. summary_text는
+    # 짧은 derived string일 뿐이며 raw email content가 아니다. null summary_text +
+    # is_metadata_only=True는 UI가 분기하는 "summary off / fallback" fingerprint다.
     Column("summary_text", String, nullable=True),
     Column("is_metadata_only", Boolean, nullable=False, server_default="false"),
     Column("summary_version", Integer, nullable=False, server_default="0"),
@@ -67,7 +66,7 @@ message_importance_classifications = Table(
     Column("classification_version", Integer, nullable=False, server_default="0"),
 )
 
-# --- 0011_assistant_rules ---
+# --- 0011_assistant_rules migration 영역 ---
 
 classification_rules = Table(
     "classification_rules",
@@ -106,7 +105,7 @@ cleanup_proposals = Table(
     Column("proposed_action", String, nullable=False),
     Column("confidence_band", String, nullable=False),
     Column("status", String, nullable=False, server_default="pending"),
-    # before/after are label/read-state metadata previews only — never raw body.
+    # before/after는 label/read-state metadata preview일 뿐이며 raw body가 아니다.
     Column("before_state", JSONB, nullable=False),
     Column("after_state", JSONB, nullable=True),
     Column(

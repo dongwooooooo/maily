@@ -1,12 +1,10 @@
-"""Deterministic AssistantLLMPort double for TDD — assistant_decisions.md
-"fake_llm 계약". `importance_band`/`confidence_band` value sets are
-`[미정]` in db-schema.md until the LLM POC lands real thresholds; these
-FAKE_* constants are the only place their string values are pinned for
-now. Tests and job code reference the constants, never the literal
-strings, so a future real-provider swap only touches this module.
+"""TDD용 deterministic AssistantLLMPort double — assistant_decisions.md
+"fake_llm 계약". `importance_band`/`confidence_band` value set은 LLM POC가 실제
+threshold를 확정할 때까지 db-schema.md에서 `[미정]`이다. 지금은 이 FAKE_* constant만
+해당 문자열 값을 고정한다. test와 job code는 literal string이 아니라 constant를 참조하므로
+미래 real-provider 교체는 이 module만 건드리면 된다.
 
-Same seed input -> same output every call; no randomness, no clock reads,
-no network calls.
+같은 seed input -> 매 호출 같은 output이다. randomness, clock read, network call은 없다.
 """
 
 from app.core.errors import ExternalServiceError
@@ -34,9 +32,9 @@ _SUMMARY_EXCERPT_LIMIT = 120
 
 
 class FakeAssistantLLM(AssistantLLMPort):
-    """Test helpers `fail_next_*` make the next call to that method raise
-    ExternalServiceError once, to exercise the [부분실패]/job-failed path
-    deterministically (mirrors gmail_actions.fake_mutator's fail_next)."""
+    """test helper `fail_next_*`는 해당 method의 다음 호출이 ExternalServiceError를 한 번
+    raise하게 만들어 [부분실패]/job-failed path를 deterministic하게 검증한다
+    (gmail_actions.fake_mutator의 fail_next와 같은 패턴)."""
 
     def __init__(self) -> None:
         self._fail_next_summarize = False
@@ -61,8 +59,8 @@ class FakeAssistantLLM(AssistantLLMPort):
         subject = (payload.get("subject") or "").strip()
 
         if not snippet:
-            # metadata-only fallback: no snippet to summarize from -> fall
-            # back to subject-only text instead of failing the job.
+            # metadata-only fallback: 요약할 snippet이 없으면 job을 실패시키지 않고
+            # subject-only text로 fallback한다.
             return SummaryOutcome(
                 summary_text=subject or None,
                 is_metadata_only=True,
@@ -102,7 +100,7 @@ class FakeAssistantLLM(AssistantLLMPort):
         labels = set(signal.get("label_names") or [])
 
         if signal.get("is_archived", False) or not signal.get("is_read", False):
-            # already archived, or still unread -> nothing to propose yet.
+            # 이미 archived이거나 아직 unread면 아직 제안할 것이 없다.
             return CleanupAssessment(confidence_band=FAKE_CONFIDENCE_SILENT, proposed_action=None)
 
         if "PROMOTIONS" in labels:

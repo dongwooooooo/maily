@@ -1,15 +1,13 @@
 """IC1 (docs/goals/backend-plans/_build-schedule.md) — 연결 -> sync.
 
-mail_sources.connect_gmail_source (real producer, not a seed) emits
-gmail_source_connected -> the core outbox dispatcher queues register_watch
-and sync_full (per app.core.jobs.wiring.ACTIVE_EVENT_CONSUMERS, the
-curated per-IC activation table — NOT the raw discovery-collected map,
-which still includes other domains' unwired declared intent) -> running
-those jobs against a fake Gmail mailbox produces a real watch registration
-and message snapshot. This is the first cross-domain flow wired end to
-end; every other domain integration checkpoint (IC2-IC8) reuses this same
-dispatcher, adding its own entry to wiring.ACTIVE_EVENT_CONSUMERS once
-proven here the same way.
+mail_sources.connect_gmail_source(real producer, seed 아님)가 gmail_source_connected를
+emit한다 -> core outbox dispatcher가 register_watch와 sync_full을 queue한다
+(app.core.jobs.wiring.ACTIVE_EVENT_CONSUMERS 기준, IC별로 curated activation table이며
+아직 다른 domain의 unwired declared intent까지 포함하는 raw discovery-collected map이 아님)
+-> 이 job을 fake Gmail mailbox 대상으로 실행하면 실제 watch registration과 message snapshot이
+생긴다. 이것은 end-to-end로 wired된 첫 cross-domain flow다. 다른 domain integration
+checkpoint(IC2-IC8)는 모두 같은 dispatcher를 재사용하고, 여기서 같은 방식으로 입증된 뒤
+자기 entry를 wiring.ACTIVE_EVENT_CONSUMERS에 추가한다.
 """
 
 import uuid
@@ -73,12 +71,10 @@ async def test_connect_queues_register_watch_and_sync_full_and_both_run() -> Non
     )
     set_reader(reader)
 
-    # dispatch_pending_events processes every pending event system-wide (a
-    # real dispatcher poll loop would too) — this test's Postgres is shared
-    # across the whole suite with no per-test rollback, so other tests'
-    # leftover pending outbox rows (unrelated event types) may also get
-    # dispatched here. Scope assertions to rows carrying this test's own
-    # source_id instead of asserting on the full dispatched set.
+    # dispatch_pending_events는 system-wide pending event를 모두 처리한다(real dispatcher
+    # poll loop도 마찬가지). 이 test의 Postgres는 suite 전체에서 공유되고 per-test rollback이
+    # 없으므로, 다른 test가 남긴 pending outbox row(무관한 event type)도 여기서 dispatch될 수
+    # 있다. 전체 dispatched set 대신 이 test의 source_id를 담은 row로 assertion scope를 좁힌다.
     async with engine.begin() as connection:
         enqueued_job_ids = await dispatch_pending_events(connection, consumers=ACTIVE_EVENT_CONSUMERS)
 

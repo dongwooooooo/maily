@@ -95,7 +95,7 @@ async def test_noop_seen_no_event() -> None:
 
     assert first_is_new is True
     assert second_is_new is False
-    assert len(events_for_message) == 1  # no second event on the no-op repeat
+    assert len(events_for_message) == 1  # no-op 반복에서 두 번째 event 없음
     assert result.version == 1
 
 

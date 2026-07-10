@@ -15,7 +15,7 @@ def _alembic_config() -> Config:
 
 @pytest.fixture(scope="session", autouse=True)
 def migrated_db() -> None:
-    """Reset the local dev DB to a clean head-migrated state once per test run."""
+    """test run마다 local dev DB를 깨끗한 head migration 상태로 reset한다."""
     cfg = _alembic_config()
     command.downgrade(cfg, "base")
     command.upgrade(cfg, "head")

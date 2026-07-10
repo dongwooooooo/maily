@@ -74,9 +74,9 @@ async def test_purge_deletes_all_message_scoped_content() -> None:
             )
         ).mappings().all()
 
-    # correction signal itself is labels' own purge responsibility (see
-    # tests/domains/labels/test_purge.py) — only rule_suggestions (this
-    # domain's own table, referencing that signal) is asserted here.
+    # correction signal 자체는 labels의 purge 책임이다
+    # (tests/domains/labels/test_purge.py 참고). 여기서는 그 signal을 참조하는
+    # 이 domain 자체 table인 rule_suggestions만 assert한다.
     assert suggestion_rows == []
 
 
@@ -84,7 +84,7 @@ async def test_purge_no_content_is_noop() -> None:
     _workspace_id, _user_id, account_id = await seed_scope()
     async with engine.begin() as connection:
         await purge_source(connection, source_id=account_id)
-    # No exception — that's the assertion.
+    # exception이 없는 것이 assertion이다.
 
 
 async def test_purge_only_affects_target_account() -> None:

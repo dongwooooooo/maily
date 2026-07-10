@@ -1,9 +1,9 @@
-"""gmail_actions event catalog (producer=gmail_actions).
+"""gmail_actions event catalog(producer=gmail_actions).
 
-Mirrors docs/areas/backend/module-boundaries.md Event Catalog and
-docs/goals/backend-plans/gmail_actions.md "Event(producer) 요약". Kept as a
-single module so idempotency-key formatting isn't duplicated across
-service.py / jobs/execute_action.py / undo.py.
+docs/areas/backend/module-boundaries.md Event Catalog와
+docs/goals/backend-plans/gmail_actions.md "Event(producer) 요약"을 mirror한다.
+idempotency-key formatting이 service.py / jobs/execute_action.py / undo.py에 중복되지 않도록
+단일 module로 유지한다.
 """
 
 import uuid

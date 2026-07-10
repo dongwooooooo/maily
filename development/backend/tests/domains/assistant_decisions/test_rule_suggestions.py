@@ -117,7 +117,7 @@ async def test_reapprove_is_noop() -> None:
             connection, workspace_id=workspace_id
         )
     assert second["status"] == "approved"
-    assert len(rules) == 1  # not duplicated by the second approve call
+    assert len(rules) == 1  # 두 번째 approve call로 중복 생성되지 않음
 
 
 async def test_approve_rejected_suggestion_conflicts() -> None:

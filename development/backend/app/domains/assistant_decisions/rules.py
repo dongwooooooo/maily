@@ -1,8 +1,8 @@
 """Command: create_rule_suggestion (job create_rule_suggestions) + approve —
 assistant_decisions.md "Command: create_rule_suggestion".
 
-Pattern extraction reads only subject/sender off the corrected message —
-never the raw body ("원본 메일 body는 참조 안 함" invariant).
+Pattern extraction은 수정된 message에서 subject/sender만 읽고 raw body는 절대 읽지 않는다
+("원본 메일 body는 참조 안 함" invariant).
 """
 
 import uuid
@@ -19,9 +19,11 @@ logger = structlog.get_logger()
 
 
 def extract_condition(message: dict) -> dict | None:
-    """Subject/sender-only pattern extraction. Returns None when no usable
-    signal exists — callers must not create an empty-condition suggestion
-    (assistant_decisions.md "매칭 조건이 비었거나 패턴 추출 불가 → suggestion 미생성")."""
+    """subject/sender-only pattern extraction.
+
+    usable signal이 없으면 None을 반환한다. caller는 empty-condition suggestion을 만들면
+    안 된다(assistant_decisions.md "매칭 조건이 비었거나 패턴 추출 불가 → suggestion 미생성").
+    """
     sender = (message.get("sender") or "").strip()
     if not sender:
         return None
@@ -31,8 +33,10 @@ def extract_condition(message: dict) -> dict | None:
 async def create_rule_suggestion_from_signal(
     connection: AsyncConnection, *, correction_signal_id: uuid.UUID
 ) -> dict | None:
-    """Returns the inserted (or pre-existing pending) rule_suggestions row,
-    or None if no suggestion was created (missing pattern signal)."""
+    """insert된(또는 기존 pending) rule_suggestions row를 반환한다.
+
+    pattern signal이 없어 suggestion을 만들지 않았으면 None을 반환한다.
+    """
     signal = await repository.get_correction_signal(connection, signal_id=correction_signal_id)
     if signal is None:
         raise NotFoundError("correction signal not found")

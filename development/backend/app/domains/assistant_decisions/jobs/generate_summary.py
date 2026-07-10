@@ -1,8 +1,7 @@
 """job_type=generate_summary, payload={message_id} — _integration-contract.md
-§2. Triggered by gmail_snapshot_changed when summary_enabled (dispatcher
-wiring is a later integration step — this task only wires the handler
-function and tests it directly, same scope note as gmail_actions Task 9's
-execute_action.py)."""
+§2. summary_enabled일 때 gmail_snapshot_changed가 trigger한다(dispatcher wiring은 이후
+integration step. 이 task는 handler function만 wire하고 직접 test한다. gmail_actions
+Task 9의 execute_action.py와 같은 scope note)."""
 
 import uuid
 

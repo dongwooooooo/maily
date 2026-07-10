@@ -1,10 +1,10 @@
 """Job: classify_importance — assistant_decisions.md "Job: classify_importance".
 
-Runs independently of generate_summary: separate job_type, separate table
-(importance_jobs / message_importance_classifications), separate
-try/except — one failing or retrying never touches the other's row.
-"pending" is represented by "no row in message_importance_classifications",
-never a separate pending flag/column (module-boundaries.md 흐름 2).
+generate_summary와 독립적으로 실행된다. 별도 job_type, 별도 table
+(importance_jobs / message_importance_classifications), 별도 try/except를 사용하므로
+한쪽의 failure/retry가 다른 쪽 row를 건드리지 않는다. "pending"은 별도 pending
+flag/column이 아니라 "message_importance_classifications에 row 없음"으로 표현한다
+(module-boundaries.md 흐름 2).
 """
 
 import uuid
@@ -26,9 +26,8 @@ async def run_classify_importance(
 ) -> dict | None:
     message = await service.get_message_or_404(connection, message_id=message_id)
     scope = await service.resolve_message_scope_or_404(connection, message_id=message_id)
-    # snapshot existence is the only precondition — unlike summary, this
-    # runs regardless of summary_enabled (importance drives briefing sort,
-    # not a privacy-sensitive summary surface).
+    # snapshot 존재가 유일한 precondition이다. summary와 달리 summary_enabled와 무관하게
+    # 실행된다(importance는 privacy-sensitive summary surface가 아니라 briefing sort를 구동).
 
     job_id = uuid.uuid4()
     now = datetime.now(timezone.utc)
@@ -83,8 +82,8 @@ async def run_classify_importance(
 
 def to_public_view(classification: dict, *, include_reason: bool = False) -> dict:
     """API 응답 기본값에서 reason 제외 — 최상위 원칙 "AI 판단 이유는 기본으로
-    노출하지 않는다". Callers that need the reason (e.g. a future "왜?" UI
-    affordance) pass include_reason=True explicitly."""
+    노출하지 않는다". reason이 필요한 caller(예: 미래의 "왜?" UI affordance)는
+    include_reason=True를 명시적으로 넘긴다."""
     view = {
         "id": classification["id"],
         "message_id": classification["message_id"],

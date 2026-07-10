@@ -15,17 +15,16 @@ async def record_label_correction_recorded(
     service_label_id: uuid.UUID,
     version: int,
 ) -> uuid.UUID | None:
-    """Emit label_correction_recorded for a newly written correction signal.
+    """새로 작성된 correction signal에 대해 label_correction_recorded를 emit한다.
 
-    idempotency key per module-boundaries.md Event Catalog:
-    message:{message_id}:label:{label_id}:correction:{version} — version
-    is the append-only occurrence count for this (message_id,
-    service_label_id) pair, not a random disambiguator.
+    module-boundaries.md Event Catalog 기준 idempotency key:
+    message:{message_id}:label:{label_id}:correction:{version}. version은 random
+    disambiguator가 아니라 이 (message_id, service_label_id) pair의 append-only occurrence
+    count다.
 
-    Consumer (assistant_decisions create_rule_suggestions) only needs
-    correction_signal_id per _integration-contract.md §2 job payload
-    shape; message_id/service_label_id are included too for any other
-    consumer or debugging use.
+    consumer(assistant_decisions create_rule_suggestions)는 _integration-contract.md §2 job
+    payload shape 기준 correction_signal_id만 필요로 한다. 다른 consumer나 debugging 용도를 위해
+    message_id/service_label_id도 함께 포함한다.
     """
     return await append_event(
         connection,

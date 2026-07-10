@@ -103,11 +103,11 @@ async def test_signal_survives_gmail_action_request_failure(
             )
         ).mappings().all()
 
-    assert len(signal_rows) == 1  # signal survived the downstream failure
+    assert len(signal_rows) == 1  # signal은 downstream failure 이후에도 남음
     assert any(
         e["payload"]["correction_signal_id"] == str(result.correction_signal_id) for e in event_rows
     )
-    assert command_rows == []  # no command — request_gmail_action never got past the raise
+    assert command_rows == []  # command 없음 — request_gmail_action이 raise를 넘지 못함
 
 
 async def test_move_records_signal_and_emits() -> None:
@@ -148,8 +148,8 @@ async def test_move_records_signal_and_emits() -> None:
     assert len(event_rows) == 1
     assert event_rows[0]["event_type"] == "label_correction_recorded"
 
-    # IC5: move also requests the Gmail label apply command directly
-    # (labels.md §73 — not event/dispatcher-wired, a synchronous call).
+    # IC5: move는 Gmail label apply command도 직접 요청한다
+    # (labels.md §73 — event/dispatcher-wired가 아니라 synchronous call).
     async with engine.connect() as connection:
         command_rows = (
             await connection.execute(
@@ -181,8 +181,8 @@ async def test_move_to_default_section_rejected() -> None:
 
 
 def test_no_default_section_move_endpoint_exists() -> None:
-    # This domain owns no "default briefing section" concept/table at all —
-    # prove the API surface has no endpoint that could move a message to one.
+    # 이 domain은 "default briefing section" 개념/table을 전혀 소유하지 않는다.
+    # message를 그쪽으로 move할 수 있는 endpoint가 API surface에 없음을 증명한다.
     paths = set(app.openapi()["paths"].keys())
     assert not any("section" in path for path in paths)
     assert "/messages/{message_id}/move" in paths
@@ -268,12 +268,10 @@ async def test_move_message_not_found_returns_404() -> None:
 
 
 async def test_move_to_label_on_disconnected_account_rejected() -> None:
-    # The label must be created while the account is still active — a
-    # disconnected account can no longer create new label mapping intents
-    # either (create_or_update_label's own precondition). What this test
-    # covers is the realistic sequence: account disconnects *after* a
-    # label already exists, and a move against that now-stale mapping
-    # must still be rejected.
+    # label은 account가 아직 active일 때 만들어져야 한다. disconnected account는
+    # 새 label mapping intent도 더 이상 만들 수 없다(create_or_update_label 자체의
+    # precondition). 이 test는 현실적인 순서, 즉 label이 이미 존재한 *뒤* account가
+    # disconnect되고 이제 stale한 mapping으로 move를 시도해도 거부되어야 함을 다룬다.
     scenario = await _seed_scenario()
     async with engine.begin() as connection:
         await connection.execute(

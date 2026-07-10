@@ -21,11 +21,10 @@ from app.domains.labels.service import (
     update_label,
 )
 
-# No blanket prefix: _integration-contract.md §3 lists labels' representative
-# endpoints as `GET/POST /labels`, `PATCH /labels/{id}`, and
-# `POST /messages/{id}/move` — the last one does not share the `/labels`
-# path prefix, so this router declares full paths and is included in
-# app/api/router.py without a prefix.
+# blanket prefix 없음. _integration-contract.md §3은 labels의 대표 endpoint를
+# `GET/POST /labels`, `PATCH /labels/{id}`, `POST /messages/{id}/move`로 나열한다.
+# 마지막 endpoint는 `/labels` path prefix를 공유하지 않으므로, 이 router는 full path를 선언하고
+# app/api/router.py에서 prefix 없이 include된다.
 router = APIRouter()
 
 

@@ -11,12 +11,11 @@ from app.core.jobs.retry import should_retry
 
 
 async def run_job(connection: AsyncConnection, *, job_id: uuid.UUID, worker_id: str) -> str:
-    """Claim and execute one job_run row. Returns the resulting status.
+    """job_run row 하나를 claim하고 실행한다. 결과 status를 반환한다.
 
-    "locked" if another worker already holds the job, "not_found" if
-    the row doesn't exist, "failed" if no handler is registered for
-    its job_type or retries are exhausted, "retrying" if the handler
-    raised but may be retried, "succeeded" otherwise.
+    다른 worker가 이미 job을 잡고 있으면 "locked", row가 없으면 "not_found",
+    job_type에 등록된 handler가 없거나 retry가 소진됐으면 "failed", handler가
+    raise했지만 retry 가능하면 "retrying", 그 외에는 "succeeded"다.
     """
     locked = await acquire_lock(connection, job_id=job_id, worker_id=worker_id)
     if not locked:

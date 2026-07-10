@@ -1,4 +1,4 @@
-"""mail_sources: connected_gmail_accounts, gmail_oauth_credentials, gmail_source_settings
+"""mail_sources 테이블: connected_gmail_accounts, gmail_oauth_credentials, gmail_source_settings
 
 Revision ID: 0003_mail_sources
 Revises: 0002_identity
@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
+# Alembic이 사용하는 revision 식별자.
 revision = "0003_mail_sources"
 down_revision = "0002_identity"
 branch_labels = None

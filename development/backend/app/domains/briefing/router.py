@@ -18,10 +18,9 @@ from app.domains.briefing.schemas import (
 )
 from app.domains.identity.schemas import RequestContext
 
-# No blanket prefix — _integration-contract.md §3 lists this domain's
-# representative endpoints under three different top-level paths
-# (/briefing, /messages, /storage), like labels' router. Declares full
-# paths and is included in app/api/router.py without a prefix.
+# blanket prefix 없음. _integration-contract.md §3은 labels router처럼 이 domain의 대표
+# endpoint를 세 개의 서로 다른 top-level path(/briefing, /messages, /storage)에 나열한다.
+# full path를 선언하고 app/api/router.py에서 prefix 없이 include된다.
 router = APIRouter()
 
 

@@ -93,12 +93,11 @@ async def _seed_disconnecting_account_with_full_content():
                 idempotency_key=str(uuid.uuid4()),
             ),
         )
-    # rule_suggestions.correction_signal_id is a NOT NULL FK into
-    # labels.label_correction_signals — seeding this here is what makes
-    # the full orchestration test below actually exercise the
-    # assistant_decisions-before-labels ordering constraint (code review
-    # caught this gap: without a real rule_suggestions row, swapping that
-    # order in purge_disconnected_source.py would still pass the suite).
+    # rule_suggestions.correction_signal_id는 labels.label_correction_signals를 향한
+    # NOT NULL FK다. 여기서 이를 seed해야 아래 full orchestration test가 실제로
+    # assistant_decisions-before-labels ordering constraint를 검증한다(code review에서 잡은
+    # gap: 실제 rule_suggestions row가 없으면 purge_disconnected_source.py에서 이 순서를
+    # 바꿔도 suite가 계속 통과한다).
     async with engine.begin() as connection:
         await create_rule_suggestion_from_signal(
             connection, correction_signal_id=move_result.correction_signal_id
@@ -171,16 +170,15 @@ async def test_orchestration_purges_every_domain_in_fk_safe_order() -> None:
     assert importance_rows == []
     assert signal_rows == []
     assert credential_rows == []
-    # Confirms the assistant_decisions-before-labels ordering constraint:
-    # if labels.purge_source had run first, this rule_suggestions row's
-    # NOT NULL FK into the now-deleted signal would have blocked the
-    # delete with an IntegrityError before this test ever reached this
-    # assertion — reaching it at all is itself proof the order held.
+    # assistant_decisions-before-labels ordering constraint를 확인한다. labels.purge_source가
+    # 먼저 실행됐다면, 이 rule_suggestions row의 NOT NULL FK가 이미 삭제된 signal을 가리키며
+    # delete를 IntegrityError로 막아 이 assertion까지 도달하지 못했을 것이다.
+    # 여기까지 도달한 것 자체가 순서가 지켜졌다는 증거다.
     assert suggestion_rows == []
     assert account["status"] == "disconnected"
-    # gmail_actions keeps both command rows (minimal audit) — the explicit
-    # mark_read request plus IC5's own label_apply command from
-    # move_message_to_label — with message_id released on each.
+    # gmail_actions는 command row 둘을 모두 유지한다(minimal audit). 명시적 mark_read
+    # request와 move_message_to_label이 만든 IC5의 label_apply command이며, 각각
+    # message_id는 해제되어 있다.
     assert len(command_rows) == 2
     assert all(row["message_id"] is None for row in command_rows)
 
@@ -194,4 +192,4 @@ async def test_orchestration_idempotent_on_double_run() -> None:
         await run_purge_disconnected_source(connection, source_id=source_id)
     async with engine.begin() as connection:
         await run_purge_disconnected_source(connection, source_id=source_id)
-    # No exception on the second run — that's the assertion.
+    # 두 번째 run에서 exception이 없는 것이 assertion이다.

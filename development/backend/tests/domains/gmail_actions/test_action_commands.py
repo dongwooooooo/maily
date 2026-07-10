@@ -58,9 +58,8 @@ async def test_request_creates_pending_command(action_type, gmail_label_id, expe
 
 
 async def test_action_payload_shape_is_uniform_add_remove_arrays() -> None:
-    """docs/goals/backend-plans/gmail_actions.md: payload is always
-    {add_label_ids, remove_label_ids} regardless of action_type — never a
-    per-type shape."""
+    """docs/goals/backend-plans/gmail_actions.md: payload는 action_type과 무관하게
+    항상 {add_label_ids, remove_label_ids}이며 per-type shape가 아니다."""
     data = await _make_input(action_type="archive")
 
     async with engine.begin() as connection:
@@ -90,8 +89,8 @@ async def test_request_appends_gmail_action_requested_event() -> None:
 
 
 async def test_idempotency_key_dedupes_mutation() -> None:
-    """[멱등] 버튼 두 번 = mutation 한 번: same idempotency_key returns the
-    same command, no second row, no second event."""
+    """[멱등] 버튼 두 번 = mutation 한 번: 같은 idempotency_key는 같은 command를
+    반환하며, 두 번째 row와 두 번째 event를 만들지 않는다."""
     key = str(uuid.uuid4())
     workspace_id, user_id, account_id = await seed_scope()
     message_id = await seed_message(account_id)
@@ -124,8 +123,8 @@ async def test_idempotency_key_dedupes_mutation() -> None:
 
 
 async def test_concurrent_same_idempotency_key_creates_only_one_command() -> None:
-    """[동시] unique constraint rejects the race's loser at the DB level; the
-    service falls back to returning the winner's row instead of erroring."""
+    """[동시] unique constraint가 race의 loser를 DB level에서 reject한다.
+    service는 error 대신 winner row를 반환하는 fallback으로 수렴한다."""
     key = str(uuid.uuid4())
     workspace_id, user_id, account_id = await seed_scope()
     message_id = await seed_message(account_id)
@@ -169,7 +168,7 @@ async def test_other_workspace_account_raises_not_found() -> None:
     _, _, real_account_id = await seed_scope()
     message_id = await seed_message(real_account_id)
     data = RequestGmailActionInput(
-        workspace_id=uuid.uuid4(),  # not the workspace that owns real_account_id
+        workspace_id=uuid.uuid4(),  # real_account_id를 소유한 workspace가 아님
         connected_account_id=real_account_id,
         message_id=message_id,
         action_type="mark_read",
@@ -200,9 +199,8 @@ async def test_disconnecting_account_raises_conflict() -> None:
 
 
 async def test_mutation_requires_command_row() -> None:
-    """[선행조건] GmailMutationPort cannot be called with an arbitrary
-    command_id that has no ledger row — `apply()` looks the command up and
-    refuses to mutate anything it can't find."""
+    """[선행조건] GmailMutationPort는 ledger row가 없는 임의의 command_id로
+    호출될 수 없다. `apply()`는 command를 lookup하고 찾을 수 없는 것은 mutate하지 않는다."""
     mutator = FakeGmailMutationPort()
 
     with pytest.raises(NotFoundError):

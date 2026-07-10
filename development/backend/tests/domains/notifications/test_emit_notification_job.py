@@ -60,8 +60,8 @@ async def test_emit_creates_event_and_outbox() -> None:
 
 
 async def test_emit_via_job_handler_entry_point() -> None:
-    """JOB_HANDLERS["emit_notification"] callable — payload shape
-    {"trigger": ..., "payload": {...}}, per __init__.py contract."""
+    """JOB_HANDLERS["emit_notification"] callable — __init__.py contract에 따른
+    payload shape는 {"trigger": ..., "payload": {...}}이다."""
     workspace_id, _user_id, account_id = await seed_scope()
 
     await emit_notification_job(

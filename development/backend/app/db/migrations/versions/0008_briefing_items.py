@@ -1,4 +1,4 @@
-"""briefing: briefing_items (regenerable projection)
+"""briefing: briefing_items (재생성 가능한 projection)
 
 Revision ID: 0008_briefing_items
 Revises: 0007_gmail_actions
@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
+# Alembic이 사용하는 revision 식별자.
 revision = "0008_briefing_items"
 down_revision = "0007_gmail_actions"
 branch_labels = None

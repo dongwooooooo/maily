@@ -1,21 +1,19 @@
 """PURGE_HANDLER(source_id) — _integration-contract.md §4, Task 13.
 
-module-boundaries.md §8: assistant_decisions purges summaries/proposals/
-rules tied to source content. All message-scoped tables here have a
-NOT NULL message_id FK — deleted outright, not nulled.
+module-boundaries.md §8: assistant_decisions는 source content에 연결된 summaries/
+proposals/rules를 purge한다. 여기의 모든 message-scoped table은 NOT NULL message_id FK를
+가진다. null 처리하지 않고 바로 delete한다.
 
-Ordering constraint (enforced by the orchestration job's explicit call
-order, not by this function): rule_suggestions.correction_signal_id is a
-NOT NULL FK into labels.label_correction_signals, so this handler MUST
-run before labels' purge handler deletes those signal rows, or this
-delete would leave nothing to cascade from (labels would then fail on
-its own FK check against rule_suggestions still referencing it) — this
-handler deletes rule_suggestions first specifically to unblock labels'
-subsequent delete.
+Ordering constraint(이 function이 아니라 orchestration job의 명시적 call order가 강제):
+rule_suggestions.correction_signal_id는 labels.label_correction_signals에 대한 NOT NULL
+FK이므로, labels의 purge handler가 그 signal row를 지우기 전에 이 handler가 반드시 먼저
+실행되어야 한다. 그렇지 않으면 이 delete가 cascade할 대상을 남기지 못하고, labels는 여전히
+이를 reference하는 rule_suggestions에 대한 자체 FK check에서 실패한다. 이 handler가
+rule_suggestions를 먼저 지우는 이유는 labels의 후속 delete를 unblock하기 위해서다.
 
-classification_rules is workspace-level policy (service_label_id +
-match_condition, no message/account FK) — not purged; disconnecting one
-source shouldn't erase rules a workspace still wants for other sources.
+classification_rules는 workspace-level policy(service_label_id + match_condition, message/
+account FK 없음)이므로 purge하지 않는다. source 하나를 disconnect해도 workspace가 다른
+source에 계속 쓰려는 rule을 지우면 안 된다.
 """
 
 import uuid
@@ -35,7 +33,7 @@ from app.domains.labels.models import label_correction_signals
 
 
 async def purge_source(connection: AsyncConnection, *, source_id: uuid.UUID) -> None:
-    # Local import — avoids an __init__.py-time circular import.
+    # local import로 __init__.py-time circular import를 피한다.
     from app.domains.mail_intake.models import gmail_messages
 
     message_ids = (

@@ -1,9 +1,9 @@
 class MailyError(Exception):
-    """Base for every domain-thrown exception.
+    """모든 domain-thrown exception의 base.
 
-    Service/repository layers raise a concrete subclass, never this
-    class directly — see docs/areas/backend/error-handling-and-logging.md
-    for the full exception table and when to use each one.
+    service/repository layer는 이 class를 직접 raise하지 않고 concrete subclass를 raise한다.
+    전체 exception table과 각 exception 사용 시점은
+    docs/areas/backend/error-handling-and-logging.md 참고.
     """
 
     status_code: int = 500

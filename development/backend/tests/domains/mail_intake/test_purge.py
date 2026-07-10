@@ -53,7 +53,7 @@ async def test_purge_no_messages_is_noop() -> None:
     account_id = await seed_connected_account()
     async with engine.begin() as connection:
         await purge_source(connection, source_id=account_id)
-    # No exception — that's the assertion.
+    # exception이 없는 것이 assertion이다.
 
 
 async def test_purge_only_affects_target_account() -> None:

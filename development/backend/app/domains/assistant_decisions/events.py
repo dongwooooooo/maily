@@ -1,12 +1,12 @@
-"""assistant_decisions event catalog (producer=assistant_decisions).
+"""assistant_decisions event catalog(producer=assistant_decisions).
 
-Mirrors docs/areas/backend/module-boundaries.md Event Catalog and
-docs/goals/backend-plans/assistant_decisions.md "Event 발행 목록". Kept as a
-single module so idempotency-key formatting isn't duplicated across
-summaries.py / importance.py / rules.py / cleanup.py.
+docs/areas/backend/module-boundaries.md Event Catalog와
+docs/goals/backend-plans/assistant_decisions.md "Event 발행 목록"을 mirror한다.
+idempotency-key formatting이 summaries.py / importance.py / rules.py / cleanup.py에
+중복되지 않도록 단일 module로 유지한다.
 
-band/reason are event payload fields only — a different band never
-produces a different event_type (assistant_decisions.md invariant).
+band/reason은 event payload field일 뿐이다. 다른 band가 다른 event_type을 만들지는 않는다
+(assistant_decisions.md invariant).
 """
 
 import uuid

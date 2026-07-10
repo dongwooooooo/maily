@@ -23,11 +23,10 @@ async def schedule_reminder(
 ) -> ReminderResult:
     """Command `schedule_reminder` — docs/goals/backend-plans/briefing.md.
 
-    Rejects a past `remind_at` (§선행조건: POC 정책은 거부, not immediate
-    reactivation). A reschedule of the same item always updates the
-    existing pending `reminders` row instead of inserting a second one
-    (§멱등 — "중복 pending row 금지"); a terminal (reactivated/cancelled)
-    reminder is never reused (§상태 전이).
+    과거 `remind_at`은 거부한다(§선행조건: POC 정책은 거부, immediate reactivation 아님).
+    같은 item의 reschedule은 두 번째 row를 insert하지 않고 항상 기존 pending `reminders` row를
+    update한다(§멱등 — "중복 pending row 금지"). terminal(reactivated/cancelled) reminder는
+    재사용하지 않는다(§상태 전이).
     """
     item = await resolve_owned_briefing_item(
         connection, briefing_item_id=briefing_item_id, workspace_id=workspace_id

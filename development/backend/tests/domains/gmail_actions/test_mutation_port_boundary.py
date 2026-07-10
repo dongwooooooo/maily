@@ -1,10 +1,10 @@
-"""Boundary tests for gmail_actions — docs/goals/backend-plans/gmail_actions.md
+"""gmail_actions boundary test — docs/goals/backend-plans/gmail_actions.md
 "경계 계약: GmailMutationPort".
 
-Static (ast-based) checks enforce the physical separation invariant: read/sync
-(`mail_intake.gmail_reader` / `GmailReaderPort`) and write (`GmailMutationPort`)
-must never be importable from the same module. Runtime checks enforce that
-Gmail writes cannot happen without a command ledger row.
+Static(ast-based) check는 물리적 분리 invariant를 강제한다. read/sync
+(`mail_intake.gmail_reader` / `GmailReaderPort`)와 write(`GmailMutationPort`)가
+같은 module에서 import 가능하면 안 된다. Runtime check는 command ledger row 없이
+Gmail write가 일어나지 않음을 강제한다.
 """
 
 import ast
@@ -40,8 +40,8 @@ def _imported_module_names(source_file: Path) -> set[str]:
 
 
 def test_no_mail_intake_reader_import() -> None:
-    """gmail_actions never imports mail_intake's read/sync port — write and
-    read paths are physically separate packages."""
+    """gmail_actions는 mail_intake의 read/sync port를 import하지 않는다.
+    write path와 read path는 물리적으로 분리된 package다."""
     for source_file in _all_source_files():
         imported = _imported_module_names(source_file)
         offenders = {name for name in imported if "mail_intake" in name or "gmail_reader" in name}
@@ -49,9 +49,9 @@ def test_no_mail_intake_reader_import() -> None:
 
 
 def test_no_oauth_token_direct_read() -> None:
-    """gmail_actions reads connected_gmail_accounts (workspace/status scoping
-    only, see repository.py) but never gmail_oauth_credentials — the
-    encrypted token table stays inside mail_sources.
+    """gmail_actions는 connected_gmail_accounts만 읽는다(workspace/status scoping
+    전용, repository.py 참고). gmail_oauth_credentials는 절대 읽지 않으며 encrypted token
+    table은 mail_sources 안에 남는다.
     """
     forbidden_tokens = {"gmail_oauth_credentials", "access_token_ciphertext", "refresh_token_ciphertext"}
     for source_file in _all_source_files():
@@ -61,8 +61,8 @@ def test_no_oauth_token_direct_read() -> None:
 
 
 def test_write_only_through_mutation_port() -> None:
-    """No module outside gmail_mutator.py/fake_mutator.py/live_mutator.py
-    references a raw Gmail API client — every write goes through the port."""
+    """gmail_mutator.py/fake_mutator.py/live_mutator.py 밖의 module은 raw Gmail API
+    client를 참조하지 않는다. 모든 write는 port를 거친다."""
     port_files = {"gmail_mutator.py", "fake_mutator.py", "live_mutator.py"}
     forbidden_tokens = {"googleapiclient", "messages().modify", "gmail_v1"}
     for source_file in _all_source_files():
@@ -74,9 +74,9 @@ def test_write_only_through_mutation_port() -> None:
 
 
 async def test_all_writes_pass_command_ledger() -> None:
-    """The port's only method takes a command_id — it cannot be invoked with
-    a raw action_type/payload, and it refuses to mutate anything for a
-    command_id that has no ledger row (structural + runtime enforcement)."""
+    """port의 유일한 method는 command_id를 받는다. raw action_type/payload로 호출할 수
+    없고, ledger row가 없는 command_id에 대해서는 어떤 것도 mutate하지 않는다
+    (structural + runtime enforcement)."""
     signature = inspect.signature(GmailMutationPort.apply)
     assert list(signature.parameters) == ["self", "connection", "command_id"]
     assert signature.parameters["command_id"].kind == inspect.Parameter.KEYWORD_ONLY

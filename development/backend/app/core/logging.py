@@ -25,12 +25,11 @@ def configure_logging() -> None:
 
 
 class RequestContextMiddleware(BaseHTTPMiddleware):
-    """Binds a request_id to every log line emitted while handling this request.
+    """이 request를 처리하는 동안 emit되는 모든 log line에 request_id를 bind한다.
 
-    Reuses the client-supplied X-Request-Id if present (so a
-    frontend retry keeps the same correlation id across attempts),
-    otherwise generates one. Always echoes it back in the response
-    header so a client can log/report it.
+    client가 보낸 X-Request-Id가 있으면 재사용하고(frontend retry가 attempt 간 같은
+    correlation id를 유지하도록), 없으면 새로 생성한다. client가 log/report할 수 있도록
+    response header에 항상 되돌려준다.
     """
 
     async def dispatch(

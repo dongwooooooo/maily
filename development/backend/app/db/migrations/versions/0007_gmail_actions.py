@@ -1,4 +1,4 @@
-"""gmail_actions: gmail_action_commands, activity_logs, undo_actions
+"""gmail_actions 테이블: gmail_action_commands, activity_logs, undo_actions
 
 Revision ID: 0007_gmail_actions
 Revises: 0006_labels
@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
+# Alembic이 사용하는 revision 식별자.
 revision = "0007_gmail_actions"
 down_revision = "0006_labels"
 branch_labels = None

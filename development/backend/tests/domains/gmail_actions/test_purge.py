@@ -23,8 +23,8 @@ def _fresh_fake_mutator():
 
 
 async def test_purge_nulls_message_id_keeps_command_row() -> None:
-    """module-boundaries.md §8: gmail_actions keeps minimal activity audit —
-    purge releases the message_id FK but never deletes the command row."""
+    """module-boundaries.md §8: gmail_actions는 minimal activity audit을 유지한다.
+    purge는 message_id FK를 해제하지만 command row는 삭제하지 않는다."""
     workspace_id, user_id, account_id = await seed_scope()
     message_id = await seed_message(account_id)
     data = RequestGmailActionInput(
@@ -50,7 +50,7 @@ async def test_purge_nulls_message_id_keeps_command_row() -> None:
 
     assert row is not None
     assert row["message_id"] is None
-    assert row["action_type"] == "mark_read"  # audit trail preserved
+    assert row["action_type"] == "mark_read"  # audit trail 보존
 
 
 async def test_purge_only_affects_target_account() -> None:
@@ -76,4 +76,4 @@ async def test_purge_only_affects_target_account() -> None:
             await connection.execute(select(gmail_action_commands).where(gmail_action_commands.c.id == command.id))
         ).mappings().first()
 
-    assert row["message_id"] == message_id  # untouched — different account
+    assert row["message_id"] == message_id  # 변경 없음 — 다른 account

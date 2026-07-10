@@ -1,18 +1,17 @@
 """IC5 (docs/goals/backend-plans/_build-schedule.md) — labels 이동 → action·rule.
 
-Two independent wirings share `move_message_to_label` as producer:
+서로 독립적인 두 wiring이 `move_message_to_label`을 producer로 공유한다.
 
-1. label apply command — NOT dispatcher-wired. labels.service.
-   move_message_to_label calls gmail_actions.request_gmail_action
-   directly and synchronously (labels.md §73) — verified here without
-   going through the outbox dispatcher at all.
-2. label_correction_recorded -> create_rule_suggestions — dispatcher-wired
-   (wiring.py), verified through the real dispatch/run_job path.
+1. label apply command — dispatcher-wired가 아니다. labels.service.move_message_to_label이
+   gmail_actions.request_gmail_action을 직접 synchronous하게 호출한다(labels.md §73).
+   여기서는 outbox dispatcher를 전혀 거치지 않고 검증한다.
+2. label_correction_recorded -> create_rule_suggestions — dispatcher-wired(wiring.py)이며
+   실제 dispatch/run_job path로 검증한다.
 
-IC6 (cleanup 승인→action) needs no new wiring — assistant_decisions.
-cleanup.approve_cleanup_proposal already calls request_gmail_action
-directly and is already covered end-to-end (against the real gmail_actions
-module) by tests/domains/assistant_decisions/test_cleanup_review.py.
+IC6(cleanup 승인→action)는 새 wiring이 필요 없다. assistant_decisions.
+cleanup.approve_cleanup_proposal이 이미 request_gmail_action을 직접 호출하고, 이는
+tests/domains/assistant_decisions/test_cleanup_review.py에서 실제 gmail_actions module을
+대상으로 end-to-end 검증되어 있다.
 """
 
 import uuid
@@ -131,7 +130,7 @@ async def test_move_requests_label_apply_command_and_rule_suggestion_via_dispatc
             ),
         )
 
-    # 1. Direct synchronous call — no dispatch needed for this half.
+    # 1. 직접 synchronous call — 이 절반에는 dispatch가 필요 없다.
     async with engine.connect() as connection:
         command_rows = (
             await connection.execute(
@@ -144,7 +143,7 @@ async def test_move_requests_label_apply_command_and_rule_suggestion_via_dispatc
     assert command_rows[0]["action_type"] == "label_apply"
     assert command_rows[0]["payload"]["add_label_ids"] == ["Maily/업무"]
 
-    # 2. Dispatcher half: label_correction_recorded -> create_rule_suggestions.
+    # 2. Dispatcher 절반: label_correction_recorded -> create_rule_suggestions.
     async with engine.begin() as connection:
         enqueued = await dispatch_pending_events(connection, consumers=ACTIVE_EVENT_CONSUMERS)
     async with engine.connect() as connection:

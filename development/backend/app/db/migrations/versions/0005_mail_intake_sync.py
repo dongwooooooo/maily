@@ -1,4 +1,5 @@
-"""mail_intake: gmail_sync_cursors, gmail_watch_registrations, gmail_notification_events, sync_runs
+"""mail_intake 테이블: gmail_sync_cursors, gmail_watch_registrations,
+gmail_notification_events, sync_runs
 
 Revision ID: 0005_mail_intake_sync
 Revises: 0004_mail_intake_snapshot
@@ -9,7 +10,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
+# Alembic이 사용하는 revision 식별자.
 revision = "0005_mail_intake_sync"
 down_revision = "0004_mail_intake_snapshot"
 branch_labels = None

@@ -3,9 +3,10 @@ from app.domains.mail_intake import service
 
 
 async def handle(payload: dict) -> None:
-    """job_type=process_notification, payload={email_address, history_id,
-    notification_id}. Triggered by the Pub/Sub webhook (POST
-    /intake/pubsub)."""
+    """job_type=process_notification, payload={email_address, history_id, notification_id}.
+
+    Pub/Sub webhook(POST /intake/pubsub)이 trigger한다.
+    """
     async with engine.begin() as connection:
         await service.process_notification(
             connection,

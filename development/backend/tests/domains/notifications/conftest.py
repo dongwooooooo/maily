@@ -74,7 +74,7 @@ async def seed_connected_account(
 
 
 async def seed_scope(*, notification_enabled: bool = True) -> tuple[uuid.UUID, uuid.UUID, uuid.UUID]:
-    """workspace + user + a connected account (with settings row)."""
+    """workspace + user + connected account(settings row 포함)를 반환한다."""
     workspace_id = await seed_workspace()
     user_id = await seed_user()
     account_id = await seed_connected_account(

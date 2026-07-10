@@ -1,4 +1,4 @@
-"""labels: service_labels, gmail_label_mappings, label_correction_signals
+"""labels 테이블: service_labels, gmail_label_mappings, label_correction_signals
 
 Revision ID: 0006_labels
 Revises: 0005_mail_intake_sync
@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
+# Alembic이 사용하는 revision 식별자.
 revision = "0006_labels"
 down_revision = "0005_mail_intake_sync"
 branch_labels = None

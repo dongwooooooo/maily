@@ -26,9 +26,9 @@ configure_logging()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Domain job handlers are registered here (server startup), not at
-    # module import time — importing app.main to build a TestClient
-    # shouldn't mutate the global job registry as a side effect.
+    # Domain job handler는 module import 시점이 아니라 여기(server startup)에서
+    # 등록한다. TestClient를 만들려고 app.main을 import하는 것만으로 global job
+    # registry가 side effect로 변경되면 안 된다.
     register_discovered_jobs()
     yield
 

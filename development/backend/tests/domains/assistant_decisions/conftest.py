@@ -27,7 +27,7 @@ def _test_jwt_secret(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture(autouse=True)
 def _fresh_fake_llm():
-    """Fresh FakeAssistantLLM per test — avoids fail_next_* state bleed."""
+    """test마다 fresh FakeAssistantLLM을 써서 fail_next_* state 오염을 피한다."""
     fake = fake_llm_module.FakeAssistantLLM()
     llm_module.set_llm(fake)
     yield fake
@@ -87,7 +87,7 @@ async def seed_source_settings(
 async def seed_scope(
     *, status: str = "connected", summary_enabled: bool = True
 ) -> tuple[uuid.UUID, uuid.UUID, uuid.UUID]:
-    """Returns (workspace_id, user_id, connected_account_id)."""
+    """(workspace_id, user_id, connected_account_id)를 반환한다."""
     workspace_id, user_id = await seed_workspace_and_user()
     account_id = await seed_connected_account(workspace_id, status=status)
     await seed_source_settings(account_id, summary_enabled=summary_enabled)

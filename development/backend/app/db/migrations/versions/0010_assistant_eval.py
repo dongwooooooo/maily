@@ -1,4 +1,4 @@
-"""assistant_decisions: summary_jobs, message_summaries, importance_jobs,
+"""assistant_decisions 테이블: summary_jobs, message_summaries, importance_jobs,
 message_importance_classifications
 
 Revision ID: 0010_assistant_eval
@@ -10,7 +10,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
+# Alembic이 사용하는 revision 식별자.
 revision = "0010_assistant_eval"
 down_revision = "0009_briefing_state"
 branch_labels = None

@@ -1,1 +1,1 @@
-"""Maily backend package."""
+"""Maily backend 패키지."""

@@ -114,7 +114,7 @@
         "type": "object"
       },
       "BriefingCard": {
-        "description": "Today-briefing / card list shape.\n\nDeliberately excludes any Gmail mutation action, AI judgement reason,\nor raw body field \u2014 briefing.md \"\uce74\ub4dc \uc751\ub2f5\uc5d0\ub294 Gmail mutation action,\nAI \ud310\ub2e8 \uc774\uc720, raw body\ub97c \ub123\uc9c0 \uc54a\ub294\ub2e4\" (\uac15\uc81c invariant). Tests assert\nfield *absence*, not null values, so no such field is declared here.",
+        "description": "today briefing / card list shape.\n\nGmail mutation action, AI judgement reason, raw body field\ub97c \uc758\ub3c4\uc801\uc73c\ub85c \uc81c\uc678\ud55c\ub2e4.\nbriefing.md \"\uce74\ub4dc \uc751\ub2f5\uc5d0\ub294 Gmail mutation action, AI \ud310\ub2e8 \uc774\uc720, raw body\ub97c \ub123\uc9c0 \uc54a\ub294\ub2e4\"\n(\uac15\uc81c invariant). test\ub294 null value\uac00 \uc544\ub2c8\ub77c field *absence*\ub97c assert\ud558\ubbc0\ub85c, \uadf8\ub7f0 field\ub97c\n\uc5ec\uae30 \uc120\uc5b8\ud558\uc9c0 \uc54a\ub294\ub2e4.",
         "properties": {
           "connected_account_id": {
             "format": "uuid",
@@ -862,7 +862,7 @@
         "type": "object"
       },
       "MessageDetail": {
-        "description": "GET /messages/{id} readonly view.\n\nNo mutation action field (mark_read/archive/label) and no AI reason\nfield by default \u2014 briefing.md \"Read API\" \u00a7negative / \u00a7\ube48\uc0c1\ud0dc.",
+        "description": "GET /messages/{id} readonly view.\n\nmutation action field(mark_read/archive/label)\uac00 \uc5c6\uace0 AI reason field\ub3c4 \uae30\ubcf8\uc73c\ub85c \uc5c6\ub2e4.\nbriefing.md \"Read API\" \u00a7negative / \u00a7\ube48\uc0c1\ud0dc \uae30\uc900\uc774\ub2e4.",
         "properties": {
           "connected_account_id": {
             "format": "uuid",
@@ -1199,7 +1199,7 @@
         "type": "object"
       },
       "RouteTarget": {
-        "description": "\"\uc5b4\ub290 \ud654\uba74 + \uc5b4\ub290 selected item\" \u2014 notifications.md \ub9e4\ud551\ud45c\uc758 \uacb0\uacfc shape.\n\n`screen` is always present (generic-landing-prohibition invariant \u2014\nnotifications.md \"route_target\uc774 \ube44\uba74(selected item \ubd80\uc7ac\ub294 \ud5c8\uc6a9, \ud654\uba74\n\ubd80\uc7ac\ub294 \ubd88\uac00) \ubc1c\ud589\uc744 \uac70\ubd80\ud55c\ub2e4\"). `item_id` may be None for screen-only\nnotifications (e.g. daily_briefing).",
+        "description": "\"\uc5b4\ub290 \ud654\uba74 + \uc5b4\ub290 selected item\" \u2014 notifications.md \ub9e4\ud551\ud45c\uc758 \uacb0\uacfc shape.\n\n`screen`\uc740 \ud56d\uc0c1 \uc874\uc7ac\ud55c\ub2e4(generic-landing-prohibition invariant \u2014\nnotifications.md \"route_target\uc774 \ube44\uba74(selected item \ubd80\uc7ac\ub294 \ud5c8\uc6a9, \ud654\uba74\n\ubd80\uc7ac\ub294 \ubd88\uac00) \ubc1c\ud589\uc744 \uac70\ubd80\ud55c\ub2e4\"). `item_id`\ub294 screen-only notification(\uc608: daily_briefing)\uc5d0\uc11c\nNone\uc77c \uc218 \uc788\ub2e4.",
         "properties": {
           "item_id": {
             "anyOf": [
@@ -1275,7 +1275,7 @@
         "type": "object"
       },
       "RulesView": {
-        "description": "GET /rules response shape \u2014 pending suggestions + active rules.",
+        "description": "GET /rules response shape \u2014 pending suggestion\uacfc active rule.",
         "properties": {
           "rules": {
             "items": {
@@ -2358,7 +2358,7 @@
     },
     "/intake/pubsub": {
       "post": {
-        "description": "Pub/Sub push webhook. Always acks with 200 once auth passes \u2014 even a\nduplicate or orphan (no matching active source) notification is a\nnormal outcome, not an error (mail_intake.md \"[\uba71\ub4f1]\"/\"[\ube48\uc0c1\ud0dc]\"), so\nPub/Sub doesn't retry-storm us.",
+        "description": "Pub/Sub push webhook.\n\nauth\uac00 \ud1b5\uacfc\ud558\uba74 \ud56d\uc0c1 200\uc73c\ub85c ack\ud55c\ub2e4. duplicate \ub610\ub294 orphan(matching active source \uc5c6\uc74c)\nnotification\ub3c4 error\uac00 \uc544\ub2c8\ub77c normal outcome\uc774\ubbc0\ub85c(mail_intake.md \"[\uba71\ub4f1]\"/\"[\ube48\uc0c1\ud0dc]\"),\nPub/Sub\uc774 retry storm\uc744 \ub9cc\ub4e4\uc9c0 \uc54a\ub294\ub2e4.",
         "operationId": "pubsub_webhook",
         "responses": {
           "200": {
@@ -2400,7 +2400,7 @@
     },
     "/intake/sources/{source_id}/sync": {
       "post": {
-        "description": "Manual resync trigger. Route is mounted under this router's /intake\nprefix (app/api/router.py), giving POST /intake/sources/{id}/sync \u2014 see\nthis domain's final report for why the literal path in\n_integration-contract.md \u00a73 (\"POST /sources/{id}/sync\", no /intake\nprefix) couldn't be used without splitting `router` into two exposed\nsymbols, which \u00a74's single-`router`-per-domain contract doesn't allow.",
+        "description": "manual resync trigger.\n\nroute\ub294 \uc774 router\uc758 /intake prefix(app/api/router.py) \uc544\ub798 mount\ub418\uc5b4\nPOST /intake/sources/{id}/sync\uac00 \ub41c\ub2e4. _integration-contract.md \u00a73\uc758 literal path\n(\"POST /sources/{id}/sync\", /intake prefix \uc5c6\uc74c)\ub97c \uc4f0\ub824\uba74 `router`\ub97c \ub450 exposed symbol\ub85c\n\ub098\ub220\uc57c \ud558\ub294\ub370, \u00a74\uc758 single-`router`-per-domain contract\uac00 \uc774\ub97c \ud5c8\uc6a9\ud558\uc9c0 \uc54a\ub294\ub2e4.\n\uc790\uc138\ud55c \uc774\uc720\ub294 \uc774 domain\uc758 final report \ucc38\uace0.",
         "operationId": "manual_sync",
         "parameters": [
           {

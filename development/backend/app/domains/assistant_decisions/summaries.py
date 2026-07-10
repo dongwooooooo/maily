@@ -1,11 +1,10 @@
 """Job: generate_summary — assistant_decisions.md "Job: generate_summary".
 
-G6 privacy contract (critical): the LLM payload built here is
-subject/sender/snippet/labels/excerpt only (service.build_summary_payload),
-never a raw message body or a freeform prompt string — enforced structurally
-by llm.SummaryInput's field set, not just by convention. summary_jobs and
-message_summaries have no body/prompt column (models.py) — there is nowhere
-to persist one even if a caller tried.
+G6 privacy contract(critical): 여기서 build하는 LLM payload는 subject/sender/snippet/
+labels/excerpt뿐이다(service.build_summary_payload). raw message body나 freeform prompt
+string은 절대 포함하지 않는다. 이는 convention만이 아니라 llm.SummaryInput의 field set으로
+구조적으로 강제된다. summary_jobs와 message_summaries에는 body/prompt column이 없으므로
+(models.py) caller가 시도해도 persist할 곳이 없다.
 """
 
 import uuid
@@ -23,9 +22,11 @@ logger = structlog.get_logger()
 
 
 async def run_generate_summary(connection: AsyncConnection, *, message_id: uuid.UUID) -> dict | None:
-    """Returns the upserted message_summaries row, or None if this account
-    has summary disabled — in which case NO summary_jobs row is created
-    either (assistant_decisions.md "job 자체를 만들지 않는다")."""
+    """upsert된 message_summaries row를 반환한다.
+
+    이 account의 summary가 disabled면 None을 반환하며, 이 경우 summary_jobs row도 만들지
+    않는다(assistant_decisions.md "job 자체를 만들지 않는다").
+    """
     message = await service.get_message_or_404(connection, message_id=message_id)
     scope = await service.resolve_message_scope_or_404(connection, message_id=message_id)
 

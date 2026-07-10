@@ -22,10 +22,12 @@ async def pubsub_webhook(
     request: Request,
     connection: AsyncConnection = Depends(get_db_connection),
 ) -> PubSubAckResponse:
-    """Pub/Sub push webhook. Always acks with 200 once auth passes — even a
-    duplicate or orphan (no matching active source) notification is a
-    normal outcome, not an error (mail_intake.md "[멱등]"/"[빈상태]"), so
-    Pub/Sub doesn't retry-storm us."""
+    """Pub/Sub push webhook.
+
+    auth가 통과하면 항상 200으로 ack한다. duplicate 또는 orphan(matching active source 없음)
+    notification도 error가 아니라 normal outcome이므로(mail_intake.md "[멱등]"/"[빈상태]"),
+    Pub/Sub이 retry storm을 만들지 않는다.
+    """
     if settings.pubsub_webhook_token:
         auth_header = request.headers.get("authorization", "")
         token = (
@@ -65,12 +67,13 @@ async def manual_sync(
     context: RequestContext = Depends(get_request_context),
     connection: AsyncConnection = Depends(get_db_connection),
 ) -> ManualSyncQueued:
-    """Manual resync trigger. Route is mounted under this router's /intake
-    prefix (app/api/router.py), giving POST /intake/sources/{id}/sync — see
-    this domain's final report for why the literal path in
-    _integration-contract.md §3 ("POST /sources/{id}/sync", no /intake
-    prefix) couldn't be used without splitting `router` into two exposed
-    symbols, which §4's single-`router`-per-domain contract doesn't allow.
+    """manual resync trigger.
+
+    route는 이 router의 /intake prefix(app/api/router.py) 아래 mount되어
+    POST /intake/sources/{id}/sync가 된다. _integration-contract.md §3의 literal path
+    ("POST /sources/{id}/sync", /intake prefix 없음)를 쓰려면 `router`를 두 exposed symbol로
+    나눠야 하는데, §4의 single-`router`-per-domain contract가 이를 허용하지 않는다.
+    자세한 이유는 이 domain의 final report 참고.
     """
     account = await mail_sources_repository.get_connected_account(
         connection, connected_account_id=source_id
@@ -88,9 +91,8 @@ async def manual_sync(
 
     now = datetime.now(timezone.utc)
     cursor = await repository.get_cursor(connection, connected_account_id=source_id)
-    # No cursor yet means this source has never completed a sync — a
-    # "delta" request has nothing to be relative to, so it's promoted to
-    # full regardless of what the caller asked for.
+    # 아직 cursor가 없다는 것은 이 source가 sync를 완료한 적이 없다는 뜻이다.
+    # "delta" request가 기준으로 삼을 대상이 없으므로 caller 요청과 무관하게 full로 promote한다.
     if body.run_type == "full" or cursor is None or cursor["last_history_id"] is None:
         job_type = "sync_full"
         payload = {"source_id": str(source_id), "reason": "manual"}

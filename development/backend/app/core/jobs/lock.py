@@ -13,12 +13,11 @@ async def acquire_lock(
     job_id: uuid.UUID,
     worker_id: str,
 ) -> bool:
-    """Claim a queued job for a worker.
+    """queued job을 worker가 claim한다.
 
-    Atomically transitions the job from queued -> running and sets
-    locked_by/locked_at, but only if no other worker already holds
-    the lock. Returns True if this call won the claim, False if the
-    job was already locked (or not found/queued).
+    다른 worker가 아직 lock을 잡지 않은 경우에만 job을 queued -> running으로
+    atomic하게 transition하고 locked_by/locked_at을 설정한다. 이 호출이 claim을 이기면
+    True, job이 이미 locked였거나 not found/queued 상태가 아니면 False를 반환한다.
     """
     stmt = (
         update(job_runs)

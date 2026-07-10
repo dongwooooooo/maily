@@ -78,10 +78,10 @@ async def test_reschedule_updates_pending() -> None:
             if r["message_id"] == message_id
         ]
 
-    assert first.id == second.id  # same reminder row updated, not a new one
+    assert first.id == second.id  # 같은 reminder row update, 새 row 아님
     assert second.remind_at == second_remind_at
     assert state["remind_later_at"] == second_remind_at
-    assert len(all_pending) == 1  # no duplicate pending row
+    assert len(all_pending) == 1  # pending row 중복 없음
 
 
 async def test_past_remind_at_rejected() -> None:

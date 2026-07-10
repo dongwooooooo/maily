@@ -10,8 +10,8 @@ from tests.domains.briefing.conftest import seed_message, seed_scope
 
 async def test_purge_source_removes_items_states_and_reminders() -> None:
     """PURGE_HANDLER(source_id) — content-bearing briefing_items/
-    briefing_item_states are purged on source disconnect; reminders
-    cascade via briefing_item_state_id (briefing.md "워크트리 격리 노트")."""
+    briefing_item_states는 source disconnect 시 purge된다. reminders는
+    briefing_item_state_id를 통해 cascade된다(briefing.md "워크트리 격리 노트")."""
     workspace_id, user_id, account_id = await seed_scope()
     message_id = await seed_message(account_id)
     async with engine.begin() as connection:

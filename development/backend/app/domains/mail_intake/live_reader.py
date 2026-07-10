@@ -1,11 +1,10 @@
-"""Live Gmail API reader — out of scope for Task 4/5 (Task 14).
+"""Live Gmail API reader — Task 4/5 범위 밖(Task 14).
 
-Wiring real Gmail HTTP calls requires: mail_sources' credential injection
-handle, the Gmail API client library, and OAuth refresh handling — none of
-that is built yet in this worktree. This class exists only so the file list
-required by docs/goals/backend-implementation-plan.md Task 4 is satisfied
-and so `GmailReaderPort`'s concrete production implementation has a name to
-import once Task 14 wires it in. Every method raises NotImplementedError.
+실제 Gmail HTTP call을 wiring하려면 mail_sources의 credential injection handle, Gmail API
+client library, OAuth refresh handling이 필요하다. 이 worktree에는 아직 어느 것도 build되지
+않았다. 이 class는 docs/goals/backend-implementation-plan.md Task 4가 요구하는 file list를
+만족하고, Task 14가 wiring한 뒤 `GmailReaderPort`의 concrete production implementation이
+import할 이름을 제공하기 위해서만 존재한다. 모든 method는 NotImplementedError를 raise한다.
 """
 
 import uuid

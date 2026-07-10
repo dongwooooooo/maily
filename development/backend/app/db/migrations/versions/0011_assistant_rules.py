@@ -4,19 +4,19 @@ Revision ID: 0011_assistant_rules
 Revises: 0010_assistant_eval
 Create Date: 2026-07-09
 
-`rule_suggestions` references `label_correction_signals` (labels, 0006) and
-`cleanup_proposals` references `gmail_action_commands` (gmail_actions,
-0007) — both already merged in this worktree, so those two FKs resolve
-locally. See 0010_assistant_eval.py's note re: down_revision placeholder —
-this file's down_revision stays `0010_assistant_eval` unchanged (only the
-chain's root placeholder needs coordinator repointing).
+`rule_suggestions`는 `label_correction_signals`(labels, 0006)를 reference하고
+`cleanup_proposals`는 `gmail_action_commands`(gmail_actions, 0007)를 reference한다.
+둘 다 이미 이 worktree에 merge되어 있으므로 두 FK는 local에서 resolve된다.
+down_revision placeholder에 대해서는 0010_assistant_eval.py의 note 참고. 이 file의
+down_revision은 `0010_assistant_eval` 그대로 유지한다(chain의 root placeholder만
+coordinator repointing이 필요).
 """
 
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
+# Alembic이 사용하는 revision 식별자.
 revision = "0011_assistant_rules"
 down_revision = "0010_assistant_eval"
 branch_labels = None
