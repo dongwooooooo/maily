@@ -5,11 +5,18 @@ from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from pydantic import BaseModel
 
+from fastapi.exceptions import RequestValidationError
+
 from app.api.deps import get_database_check, get_redis_check
 from app.api.router import api_router
+from app.api.schemas import ErrorResponse
 from app.core.config import settings
 from app.core.discovery import register_discovered_jobs
-from app.core.error_handlers import maily_error_handler, unhandled_exception_handler
+from app.core.error_handlers import (
+    maily_error_handler,
+    request_validation_error_handler,
+    unhandled_exception_handler,
+)
 from app.core.errors import MailyError
 from app.core.logging import RequestContextMiddleware, configure_logging
 
@@ -39,8 +46,17 @@ app = FastAPI(
     generate_unique_id_function=_operation_id_from_route_name,
 )
 app.add_middleware(RequestContextMiddleware)
-app.include_router(api_router)
+# 에러 봉투는 API 라우트 전체에 중앙 1곳에서 문서화한다 — 엔드포인트 26개에
+# responses=를 개별로 다는 대신 include 시점 일괄 부여 (/health,/ready 제외).
+app.include_router(
+    api_router,
+    responses={
+        422: {"model": ErrorResponse},
+        "default": {"model": ErrorResponse, "description": "Maily error envelope"},
+    },
+)
 app.add_exception_handler(MailyError, maily_error_handler)
+app.add_exception_handler(RequestValidationError, request_validation_error_handler)
 app.add_exception_handler(Exception, unhandled_exception_handler)
 
 
