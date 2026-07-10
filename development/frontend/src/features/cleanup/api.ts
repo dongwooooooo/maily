@@ -35,3 +35,19 @@ export async function undoActivity(activityId: string): Promise<void> {
   })
   if (error) throw toApiError(response.status, error)
 }
+
+export type RulesView = components['schemas']['RulesView']
+export type RuleSuggestion = components['schemas']['RuleSuggestion']
+
+export async function fetchRules(): Promise<RulesView> {
+  const { data, error, response } = await apiClient.GET('/rules')
+  if (error) throw toApiError(response.status, error)
+  return data
+}
+
+export async function approveRuleSuggestion(suggestionId: string): Promise<void> {
+  const { error, response } = await apiClient.POST('/rules/{suggestion_id}/approve', {
+    params: { path: { suggestion_id: suggestionId } },
+  })
+  if (error) throw toApiError(response.status, error)
+}
