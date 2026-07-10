@@ -197,3 +197,9 @@ PURGE_HANDLER = ...     # callable(source_id) 또는 None (Task 13)
 
 - `operationId` = 라우트 함수명 (`generate_unique_id_function`, `app/main.py`) — 도메인 전체에서 라우트 함수명 유일 필수. 충돌 시 함수명을 도메인 어휘로 구체화한다(예: `get_rules`, `get_cleanup_queue`).
 - 모든 2xx 응답에 response_model 필수 — `-> dict` 반환 금지.
+
+### openapi.json export/drift
+
+- `development/backend/openapi.json`은 커밋 대상 — 프론트 codegen이 Python 환경 없이 소비한다. diff 리뷰 = API 계약 변경 리뷰.
+- 갱신: `.venv/bin/python scripts/export_openapi.py`. 라우트·스키마를 바꾸고 export를 안 돌리면 `tests/api/test_openapi_export.py`가 실패한다.
+- 프론트 소비처: `development/frontend`의 `pnpm codegen:api`(openapi-typescript → `src/shared/api/schema.d.ts`).
