@@ -12,9 +12,15 @@ from app.domains.mail_sources import repository
 from app.domains.mail_sources.schemas import (
     ConnectGmailSourceInput,
     ConnectedSource,
+    DisconnectGmailSourceInput,
+    DisconnectResult,
     SourceSettingsResult,
 )
-from app.domains.mail_sources.service import connect_gmail_source, update_gmail_source_settings
+from app.domains.mail_sources.service import (
+    connect_gmail_source,
+    disconnect_gmail_source,
+    update_gmail_source_settings,
+)
 
 router = APIRouter()
 
@@ -88,4 +94,17 @@ async def patch_source_settings(
     changes = body.model_dump(exclude_unset=True)
     return await update_gmail_source_settings(
         connection, connected_account_id=source_id, changes=changes
+    )
+
+
+@router.delete("/{source_id}", response_model=DisconnectResult)
+async def disconnect_source(
+    source_id: uuid.UUID,
+    context: RequestContext = Depends(get_request_context),
+    connection: AsyncConnection = Depends(get_db_connection),
+) -> DisconnectResult:
+    await _get_owned_account(connection, source_id=source_id, workspace_id=context.workspace_id)
+    return await disconnect_gmail_source(
+        connection,
+        DisconnectGmailSourceInput(workspace_id=context.workspace_id, connected_account_id=source_id),
     )

@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.domains.mail_sources.models import (
@@ -153,6 +153,43 @@ async def update_connected_account(
         update(connected_gmail_accounts)
         .where(connected_gmail_accounts.c.id == account_id)
         .values(display_name=display_name, status=status, version=version)
+    )
+
+
+async def mark_account_status(
+    connection: AsyncConnection,
+    *,
+    account_id: uuid.UUID,
+    status: str,
+    version: int,
+    disconnected_at: datetime | None = None,
+) -> None:
+    """Status-only transition (disconnecting/disconnected) — unlike
+    update_connected_account, never touches display_name."""
+    values = {"status": status, "version": version}
+    if disconnected_at is not None:
+        values["disconnected_at"] = disconnected_at
+    await connection.execute(
+        update(connected_gmail_accounts).where(connected_gmail_accounts.c.id == account_id).values(**values)
+    )
+
+
+async def revoke_credential(connection: AsyncConnection, *, connected_account_id: uuid.UUID, revoked_at: datetime) -> None:
+    await connection.execute(
+        update(gmail_oauth_credentials)
+        .where(gmail_oauth_credentials.c.connected_account_id == connected_account_id)
+        .values(revoked_at=revoked_at)
+    )
+
+
+async def delete_credential(connection: AsyncConnection, *, connected_account_id: uuid.UUID) -> None:
+    """Purge-time (not disconnect-time) full removal of the ◆ content-bearing
+    ciphertext row — disconnect only sets revoked_at (fast, synchronous
+    marker); this is the async purge job's final cleanup."""
+    await connection.execute(
+        delete(gmail_oauth_credentials).where(
+            gmail_oauth_credentials.c.connected_account_id == connected_account_id
+        )
     )
 
 

@@ -7,6 +7,7 @@ from app.domains.mail_intake.jobs import (
     sync_delta,
     sync_full,
 )
+from app.domains.mail_intake.purge import purge_source
 from app.domains.mail_intake.router import router as router
 
 JOB_HANDLERS: dict = {
@@ -39,4 +40,4 @@ EVENT_CONSUMERS: dict = {
     # sync_delta job alongside process_notification's own correct one.
 }
 
-PURGE_HANDLER = None
+PURGE_HANDLER = purge_source

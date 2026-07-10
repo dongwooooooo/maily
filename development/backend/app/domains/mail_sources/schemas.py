@@ -32,3 +32,13 @@ class SourceSettingsResult(BaseModel):
     summary_enabled: bool
     notification_enabled: bool
     paused: bool
+
+
+class DisconnectGmailSourceInput(BaseModel):
+    workspace_id: uuid.UUID
+    connected_account_id: uuid.UUID
+
+
+class DisconnectResult(BaseModel):
+    connected_account_id: uuid.UUID
+    status: str

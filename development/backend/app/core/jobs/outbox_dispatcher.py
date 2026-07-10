@@ -52,6 +52,7 @@ _REQUIRED_PAYLOAD_KEYS: dict[str, set[str]] = {
     "classify_importance": {"message_id"},
     "execute_action": {"command_id"},
     "reconcile_action": {"message_id"},
+    "purge_disconnected_source": {"source_id"},
 }
 
 # emit_notification's job payload is a wrapper — {"trigger": event_type,
