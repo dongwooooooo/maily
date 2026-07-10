@@ -5,6 +5,7 @@
 
 import { apiClient } from '@/shared/api/client'
 import { toApiError } from '@/shared/api/errors'
+
 import type { components } from '@/shared/api/schema'
 
 export type AccountBriefingGroup = components['schemas']['AccountBriefingGroup']
@@ -28,6 +29,23 @@ export async function fetchMessageDetail(messageId: string): Promise<MessageDeta
 export async function markItemSeen(briefingItemId: string): Promise<void> {
   const { error, response } = await apiClient.POST('/briefing/items/{briefing_item_id}/seen', {
     params: { path: { briefing_item_id: briefingItemId } },
+  })
+  if (error) throw toApiError(response.status, error)
+}
+
+export async function moveMessageToLabel(
+  messageId: string,
+  labelId: string,
+  idempotencyKey: string,
+): Promise<void> {
+  // 키는 호출부가 액션 단위로 보관한다 — 같은 이동의 재시도는 같은 키를
+  // 재사용해야 응답 유실 후 재시도가 중복 적용되지 않는다(README 계약).
+  const { error, response } = await apiClient.POST('/messages/{message_id}/move', {
+    params: {
+      path: { message_id: messageId },
+      header: { 'Idempotency-Key': idempotencyKey },
+    },
+    body: { label_id: labelId },
   })
   if (error) throw toApiError(response.status, error)
 }
