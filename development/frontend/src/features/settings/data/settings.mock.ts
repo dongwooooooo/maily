@@ -1,4 +1,4 @@
-import type { AccountKind } from '@/features/briefing/data/briefing.mock'
+import type { AccountKind } from '@/features/briefing/types'
 
 export const serviceAccount = {
   name: 'dongwoo',
@@ -37,9 +37,24 @@ export const connectedAccounts: ConnectedAccount[] = [
     headAction: '이름 변경',
     headActionVariant: 't3',
     toggles: [
-      { key: 'ai-summary', label: 'AI 요약', hint: '메일 내용을 처리해 짧은 요약을 만듭니다', checked: true },
-      { key: 'briefing', label: '브리핑 포함', hint: '오늘 브리핑과 우선순위에 이 계정을 포함합니다', checked: true },
-      { key: 'notify', label: '브라우저 알림', hint: '이 계정의 중요 메일을 알림으로 보냅니다', checked: true },
+      {
+        key: 'ai-summary',
+        label: 'AI 요약',
+        hint: '메일 내용을 처리해 짧은 요약을 만듭니다',
+        checked: true,
+      },
+      {
+        key: 'briefing',
+        label: '브리핑 포함',
+        hint: '오늘 브리핑과 우선순위에 이 계정을 포함합니다',
+        checked: true,
+      },
+      {
+        key: 'notify',
+        label: '브라우저 알림',
+        hint: '이 계정의 중요 메일을 알림으로 보냅니다',
+        checked: true,
+      },
     ],
   },
   {
@@ -52,9 +67,24 @@ export const connectedAccounts: ConnectedAccount[] = [
     headAction: '이름 변경',
     headActionVariant: 't3',
     toggles: [
-      { key: 'ai-summary', label: 'AI 요약', hint: '메일 내용을 처리해 짧은 요약을 만듭니다', checked: true },
-      { key: 'briefing', label: '브리핑 포함', hint: '오늘 브리핑과 우선순위에 이 계정을 포함합니다', checked: true },
-      { key: 'notify', label: '브라우저 알림', hint: '이 계정의 중요 메일을 알림으로 보냅니다', checked: false },
+      {
+        key: 'ai-summary',
+        label: 'AI 요약',
+        hint: '메일 내용을 처리해 짧은 요약을 만듭니다',
+        checked: true,
+      },
+      {
+        key: 'briefing',
+        label: '브리핑 포함',
+        hint: '오늘 브리핑과 우선순위에 이 계정을 포함합니다',
+        checked: true,
+      },
+      {
+        key: 'notify',
+        label: '브라우저 알림',
+        hint: '이 계정의 중요 메일을 알림으로 보냅니다',
+        checked: false,
+      },
     ],
   },
   {
@@ -73,8 +103,18 @@ export const connectedAccounts: ConnectedAccount[] = [
         hint: '요약이 꺼져 있습니다. 카드에는 메타데이터만 표시됩니다',
         checked: false,
       },
-      { key: 'briefing', label: '브리핑 포함', hint: '오늘 브리핑과 우선순위에 이 계정을 포함합니다', checked: true },
-      { key: 'notify', label: '브라우저 알림', hint: '이 계정의 중요 메일을 알림으로 보냅니다', checked: false },
+      {
+        key: 'briefing',
+        label: '브리핑 포함',
+        hint: '오늘 브리핑과 우선순위에 이 계정을 포함합니다',
+        checked: true,
+      },
+      {
+        key: 'notify',
+        label: '브라우저 알림',
+        hint: '이 계정의 중요 메일을 알림으로 보냅니다',
+        checked: false,
+      },
     ],
   },
 ]

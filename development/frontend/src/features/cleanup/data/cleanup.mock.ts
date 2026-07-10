@@ -1,4 +1,4 @@
-import type { AccountKind } from '@/features/briefing/data/briefing.mock'
+import type { AccountKind } from '@/features/briefing/types'
 
 export interface Proposal {
   id: string

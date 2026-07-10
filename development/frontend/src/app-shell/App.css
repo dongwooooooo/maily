@@ -1296,6 +1296,11 @@ details.section[open] .section-chevron {
   color: var(--danger);
   font-size: 12px;
 }
+.list-error {
+  margin: 24px;
+  color: var(--danger);
+  font-size: 13px;
+}
 
 /* ── 02 첫 Gmail 적용 확인 — 단독 진입 확인 화면 ──────────────── */
 .apply-stage {

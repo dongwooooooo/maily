@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import type { AccountKind } from '@/features/briefing/data/briefing.mock'
+import type { AccountKind } from '@/features/briefing/types'
 import {
   addLabelCopy,
   labelGroups,
@@ -36,7 +36,10 @@ function TimelineList({ group }: { group: TimelineGroup }) {
       <div className="tl-list">
         {group.items.map((item) => (
           <button key={item.id} className="tl-row" type="button">
-            <span className={accDotClassName(item.accountKind)} title={accDotTitle(item.accountKind)} />
+            <span
+              className={accDotClassName(item.accountKind)}
+              title={accDotTitle(item.accountKind)}
+            />
             <span className="tl-title">{item.title}</span>
             <span className="tl-state">{item.state}</span>
           </button>
@@ -49,7 +52,10 @@ function TimelineList({ group }: { group: TimelineGroup }) {
 /** Center pane: 보관함 — 예정 타임라인 / 라벨 탭, sliding indicator — ported from 07-storage.html. */
 function ArchiveView() {
   const [activeTab, setActiveTab] = useState<ArchiveTab>('upcoming')
-  const tabRefs = useRef<Record<ArchiveTab, HTMLButtonElement | null>>({ upcoming: null, labels: null })
+  const tabRefs = useRef<Record<ArchiveTab, HTMLButtonElement | null>>({
+    upcoming: null,
+    labels: null,
+  })
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 })
 
   useEffect(() => {
