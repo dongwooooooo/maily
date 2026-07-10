@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import '../index.css'
 import '../app-shell/App.css'
 
+import SessionGuard from '@/features/auth/SessionGuard'
+
 export const metadata: Metadata = {
   title: 'Maily',
   description: '여러 Gmail 계정의 중요한 메일을 선별해 브리핑하는 웹 서비스',
@@ -28,7 +30,9 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <SessionGuard>{children}</SessionGuard>
+      </body>
     </html>
   )
 }

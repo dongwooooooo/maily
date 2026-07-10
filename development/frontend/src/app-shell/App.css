@@ -1282,6 +1282,20 @@ details.section[open] .section-chevron {
   color: var(--muted);
   font-size: 12px;
 }
+/* GIS 공식 버튼이 iframe으로 주입되는 자리 — .google-btn(자체 버튼)은
+   id_token 획득이 불가해 사용하지 않는다 (useGoogleLogin.ts 참조). */
+.google-btn-slot {
+  margin-top: 32px;
+  min-height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.login-error {
+  margin-top: 12px;
+  color: var(--danger);
+  font-size: 12px;
+}
 
 /* ── 02 첫 Gmail 적용 확인 — 단독 진입 확인 화면 ──────────────── */
 .apply-stage {
