@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { detail } from '@/features/briefing/data/briefing.mock'
+import type { DetailBody } from '@/features/briefing/types'
 import { addLabelCopy, labelGroups } from '@/features/archive/data/archive.mock'
 
 interface DetailPaneProps {
+  detail: DetailBody
   onMarkRead: () => void
 }
 
@@ -48,7 +49,7 @@ function ArchiveIcon() {
 }
 
 /** Right pane: detail header (account + primary actions), summary tint box, serif original body. */
-function DetailPane({ onMarkRead }: DetailPaneProps) {
+function DetailPane({ detail, onMarkRead }: DetailPaneProps) {
   const [overlayView, setOverlayView] = useState<OverlayView>('none')
   const [selectedLabel, setSelectedLabel] = useState(labelGroups[0]?.heading ?? '')
   const [ruleBannerShown, setRuleBannerShown] = useState(false)
@@ -101,12 +102,18 @@ function DetailPane({ onMarkRead }: DetailPaneProps) {
           <div className="message-title-row">
             <h2 className="detail-title">{detail.title}</h2>
             <div className="detail-actions-top" aria-label="주요 처리" ref={actionsRef}>
-              <button className="icon-action" type="button" aria-label="Gmail에서 열기">
+              <a
+                className="icon-action"
+                href={detail.gmailUrl}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Gmail에서 열기"
+              >
                 <svg className="button-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M5 19 19 5"></path>
                   <path d="M11 5h8v8"></path>
                 </svg>
-              </button>
+              </a>
               <button
                 className="icon-action"
                 type="button"

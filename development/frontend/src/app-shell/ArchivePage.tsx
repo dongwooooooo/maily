@@ -6,6 +6,7 @@ import Sidebar from '@/features/navigation/components/Sidebar'
 import Topbar from '@/features/navigation/components/Topbar'
 import Toast from '@/shared/ui/Toast'
 import { useAutoHideToast } from '@/shared/hooks/useAutoHideToast'
+import { storageDetail } from '@/features/archive/data/archive.mock'
 
 /** 07 storage "보관함" — editorial 3-pane layout, ported from 07-storage.html. */
 function ArchivePage() {
@@ -17,7 +18,7 @@ function ArchivePage() {
         <Sidebar />
         <Topbar />
         <ArchiveView />
-        <DetailPane onMarkRead={showToast} />
+        <DetailPane detail={storageDetail} onMarkRead={showToast} />
       </div>
       <Toast show={toastShown} onUndo={hideToast} onClose={hideToast} />
     </>
